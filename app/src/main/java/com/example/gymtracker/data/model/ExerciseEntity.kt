@@ -18,3 +18,11 @@ fun ExerciseEntity.toExternalModel() = Exercise(
     name = name,
     type = ExerciseType.valueOf(type)
 )
+
+fun List<ExerciseEntity>.toExternalModel() = map(ExerciseEntity::toExternalModel)
+
+fun Exercise.asEntity() = ExerciseEntity(
+    id = id,
+    name = name,
+    type = type.name
+)

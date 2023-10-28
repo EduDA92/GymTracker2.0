@@ -10,11 +10,25 @@ data class WorkoutEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val name: String,
-    val date: LocalDate
+    val date: LocalDate,
+    val duration: Long,
+    val isCompleted: Boolean
 )
 
 fun WorkoutEntity.toExternalModel() = Workout(
     id = id,
     name = name,
-    date = date
+    date = date,
+    duration = duration,
+    isCompleted = isCompleted
+)
+
+fun List<WorkoutEntity>.toExernalModel() = map(WorkoutEntity::toExternalModel)
+
+fun Workout.asEntity() = WorkoutEntity(
+    id = id,
+    name = name,
+    date = date,
+    duration = duration,
+    isCompleted = isCompleted
 )

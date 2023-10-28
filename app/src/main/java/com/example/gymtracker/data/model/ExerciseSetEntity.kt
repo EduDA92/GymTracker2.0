@@ -10,7 +10,7 @@ import java.time.LocalDate
 // There is a relationship 1:N between Exercise and Set
 
 @Entity(
-    tableName = "set",
+    tableName = "exerciseSet",
     foreignKeys = [
         ForeignKey(
             entity = ExerciseEntity::class,
@@ -27,7 +27,8 @@ data class ExerciseSetEntity(
     val exerciseId: Long,
     val reps: Int,
     val weight: Float,
-    val date: LocalDate
+    val date: LocalDate,
+    val isCompleted: Boolean
 )
 
 fun ExerciseSetEntity.toExternalModel() = ExerciseSet(
@@ -35,5 +36,17 @@ fun ExerciseSetEntity.toExternalModel() = ExerciseSet(
     exerciseId = exerciseId,
     reps = reps,
     weight = weight,
-    date = date
+    date = date,
+    isCompleted = isCompleted
+)
+
+fun List<ExerciseSetEntity>.toExternalModel() = map(ExerciseSetEntity::toExternalModel)
+
+fun ExerciseSet.asEntity() = ExerciseSetEntity(
+    id = id,
+    exerciseId = exerciseId,
+    reps = reps,
+    weight = weight,
+    date = date,
+    isCompleted = isCompleted
 )
