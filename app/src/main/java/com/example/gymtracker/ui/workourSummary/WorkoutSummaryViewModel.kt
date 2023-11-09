@@ -53,6 +53,7 @@ class WorkoutSummaryViewModel @Inject constructor(
 
                 WorkoutSummaryUiState.Success(
                     WorkoutSummary(
+                        workoutAndExercises.workoutId,
                         workoutAndExercises.workoutName,
                         workoutAndExercises.workoutDate,
                         exerciseSummaryList
@@ -65,7 +66,7 @@ class WorkoutSummaryViewModel @Inject constructor(
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(),
-        WorkoutSummaryUiState.EmptyData
+        WorkoutSummaryUiState.Loading
     )
 
     fun prevDate() {
@@ -85,13 +86,14 @@ class WorkoutSummaryViewModel @Inject constructor(
 sealed interface WorkoutSummaryUiState {
     data class Success(val workoutSummary: WorkoutSummary) : WorkoutSummaryUiState
     object EmptyData : WorkoutSummaryUiState
-
+    object Loading: WorkoutSummaryUiState
 }
 
 data class WorkoutSummary(
+    val workoutId: Long,
     val workoutName: String,
     val workoutDate: LocalDate,
-    val workoutSummary: List<ExerciseSummary>
+    val exercisesSummary: List<ExerciseSummary>
 )
 
 data class ExerciseSummary(

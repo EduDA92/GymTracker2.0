@@ -3,4 +3,8 @@
     <string name="prev_date_icon_sr">Previous date</string>
     <string name="next_date_icon_sr">Next date</string>
     <string name="today_sr">Today</string>
+    <string name="loading_data_sr">Loading data…</string>
+    <string name="create_workout_button_sr">Create workout</string>
+    <string name="no_workout_data_sr">You haven\'t exercised today yet</string>
+    <string name="card_options_button_sr">card options button</string>
 </resources>

@@ -34,6 +34,7 @@ class WorkoutSummaryViewModelTest {
         viewModel = WorkoutSummaryViewModel(repository)
     }
 
+    /* When there is workout data for the current date the state should be WorkoutSummaryUiState.Success*/
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun workoutSummaryViewModel_queryingDateWithWorkout_returnsSuccessState() = runTest {
@@ -43,7 +44,7 @@ class WorkoutSummaryViewModelTest {
         /* initial state */
         var currentState = viewModel.workoutSummaryUiState.value
 
-        assertIs<WorkoutSummaryUiState.EmptyData>(currentState)
+        assertIs<WorkoutSummaryUiState.Loading>(currentState)
 
         /* Emitting a valid workout so state should be Success */
         repository.emitWorkoutAndExercises(fullWorkout)
@@ -55,6 +56,8 @@ class WorkoutSummaryViewModelTest {
         collectJob.cancel()
     }
 
+    /* When there is no workout data for the current date the state should be WorkoutSummaryUiState.EmptyData*/
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun workoutSummaryViewModel_queryingDateWithoutWorkout_returnsEmptyState() = runTest {
 
@@ -63,7 +66,7 @@ class WorkoutSummaryViewModelTest {
         /* Checking initial state */
         var currentState = viewModel.workoutSummaryUiState.value
 
-        assertIs<WorkoutSummaryUiState.EmptyData>(currentState)
+        assertIs<WorkoutSummaryUiState.Loading>(currentState)
 
         /* state for a null workout should be emptyState*/
         repository.emitWorkoutAndExercises(null)
@@ -76,6 +79,8 @@ class WorkoutSummaryViewModelTest {
 
     }
 
+    /* Ensuring that the topSet returned inside the state is correct */
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun workoutSummaryViewModel_workoutSummaryUiStateSuccessValue_returnsTopSet() = runTest {
 
@@ -89,7 +94,7 @@ class WorkoutSummaryViewModelTest {
 
         val currentState = viewModel.workoutSummaryUiState.value as WorkoutSummaryUiState.Success
 
-        assertEquals(topSet, currentState.workoutSummary.workoutSummary[0].topSet)
+        assertEquals(topSet, currentState.workoutSummary.exercisesSummary[0].topSet)
 
         collectJob.cancel()
     }

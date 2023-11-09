@@ -72,6 +72,9 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 
+    //Immutable lists
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6")
+
     //Room
     implementation("androidx.room:room-runtime:$room_version")
     annotationProcessor("androidx.room:room-compiler:$room_version")
