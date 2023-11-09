@@ -1,11 +1,11 @@
-package com.example.gymtracker.data.fakes
+package com.example.gymtracker.testdoubles.dao
 
 import com.example.gymtracker.data.dao.ExerciseSetDao
 import com.example.gymtracker.data.model.ExerciseSetEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 
-class FakeExerciseSetDao(exerciseSetList: List<ExerciseSetEntity>): ExerciseSetDao {
+class TestExerciseSetDao(exerciseSetList: List<ExerciseSetEntity>): ExerciseSetDao {
 
     private val _exerciseSetList = exerciseSetList.toMutableList()
     private val exercisesStream = MutableStateFlow(_exerciseSetList)

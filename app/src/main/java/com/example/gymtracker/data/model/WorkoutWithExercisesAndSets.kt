@@ -30,7 +30,5 @@ fun WorkoutWithExercisesAndSets.toExternalModel() = WorkoutAndExercises(
     workoutDate = workout.date,
     workoutDuration = workout.duration,
     workoutCompleted = workout.isCompleted,
-    exercisesAndSets = exerciseWithSets.map {
-        it.toExternalModel()
-    }
+    exercisesAndSets = exerciseWithSets.toExternalModel()
 )

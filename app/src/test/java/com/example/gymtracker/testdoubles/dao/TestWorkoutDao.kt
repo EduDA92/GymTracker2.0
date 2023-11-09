@@ -1,4 +1,4 @@
-package com.example.gymtracker.data.fakes
+package com.example.gymtracker.testdoubles.dao
 
 import com.example.gymtracker.data.dao.WorkoutDao
 import com.example.gymtracker.data.model.WorkoutEntity
@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import java.time.LocalDate
 
-class FakeWorkoutDao(workouts: List<WorkoutEntity>, fullWorkout: WorkoutWithExercisesAndSets): WorkoutDao {
+class TestWorkoutDao(workouts: List<WorkoutEntity>, fullWorkout: WorkoutWithExercisesAndSets): WorkoutDao {
 
     private val _workouts = workouts.toMutableList()
     private val workoutsStream = MutableStateFlow(_workouts.toList())

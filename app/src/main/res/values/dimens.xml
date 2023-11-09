@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="small_dp">4dp</dimen>
+    <dimen name="medium_dp">8dp</dimen>
+    <dimen name="large_db">16dp</dimen>
+</resources>

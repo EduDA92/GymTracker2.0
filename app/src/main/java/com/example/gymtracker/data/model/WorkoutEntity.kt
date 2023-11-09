@@ -23,7 +23,7 @@ fun WorkoutEntity.toExternalModel() = Workout(
     isCompleted = isCompleted
 )
 
-fun List<WorkoutEntity>.toExernalModel() = map(WorkoutEntity::toExternalModel)
+fun List<WorkoutEntity>.toExternalModel() = map(WorkoutEntity::toExternalModel)
 
 fun Workout.asEntity() = WorkoutEntity(
     id = id,

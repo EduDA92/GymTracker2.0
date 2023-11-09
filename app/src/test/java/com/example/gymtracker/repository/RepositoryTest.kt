@@ -1,36 +1,47 @@
-package com.example.gymtracker.data.repository
+package com.example.gymtracker.repository
 
-import com.example.gymtracker.data.fakes.FakeExerciseDao
-import com.example.gymtracker.data.fakes.FakeExerciseSetDao
-import com.example.gymtracker.data.fakes.FakeWorkoutDao
+import com.example.gymtracker.testdoubles.dao.TestExerciseDao
+import com.example.gymtracker.testdoubles.dao.TestExerciseSetDao
+import com.example.gymtracker.testdoubles.dao.TestWorkoutDao
 import com.example.gymtracker.data.model.ExerciseEntity
 import com.example.gymtracker.data.model.ExerciseSetEntity
 import com.example.gymtracker.data.model.ExerciseWithSets
 import com.example.gymtracker.data.model.WorkoutEntity
 import com.example.gymtracker.data.model.WorkoutWithExercisesAndSets
 import com.example.gymtracker.data.model.toExternalModel
+import com.example.gymtracker.data.repository.DefaultExerciseRepository
+import com.example.gymtracker.data.repository.DefaultExerciseSetRepository
+import com.example.gymtracker.data.repository.DefaultWorkoutRepository
 import com.example.gymtracker.ui.model.ExerciseType
+import com.example.gymtracker.utils.MainDispatcherRule
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.TestScope
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import java.time.LocalDate
 
 class RepositoryTest {
 
-    private lateinit var workoutDataSource: FakeWorkoutDao
-    private lateinit var exerciseDataSource: FakeExerciseDao
-    private lateinit var exerciseSetDatasource: FakeExerciseSetDao
+    @get:Rule
+    val mainDispatcherRule = MainDispatcherRule()
+
+    private lateinit var workoutDataSource: TestWorkoutDao
+    private lateinit var exerciseDataSource: TestExerciseDao
+    private lateinit var exerciseSetDatasource: TestExerciseSetDao
     private lateinit var workoutRepository: DefaultWorkoutRepository
     private lateinit var exerciseRepository: DefaultExerciseRepository
     private lateinit var exerciseSetRepository: DefaultExerciseSetRepository
 
     @Before
     fun setup(){
-        workoutDataSource = FakeWorkoutDao(listOf(testWorkoutEntity), testFullWorkout)
-        exerciseDataSource = FakeExerciseDao(listOf(testExerciseEntity))
-        exerciseSetDatasource = FakeExerciseSetDao(listOf(testExerciseSet))
+        workoutDataSource = TestWorkoutDao(listOf(testWorkoutEntity), testFullWorkout)
+        exerciseDataSource = TestExerciseDao(listOf(testExerciseEntity))
+        exerciseSetDatasource = TestExerciseSetDao(listOf(testExerciseSet))
         workoutRepository = DefaultWorkoutRepository(workoutDataSource)
         exerciseRepository = DefaultExerciseRepository(exerciseDataSource)
         exerciseSetRepository = DefaultExerciseSetRepository(exerciseSetDatasource)

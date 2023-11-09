@@ -3,6 +3,8 @@ package com.example.gymtracker.data.model
 import androidx.room.Embedded
 import androidx.room.Relation
 import com.example.gymtracker.ui.model.ExerciseAndSets
+import com.example.gymtracker.ui.model.ExerciseSet
+import com.example.gymtracker.ui.model.ExerciseType
 
 data class ExerciseWithSets(
 
@@ -16,11 +18,11 @@ data class ExerciseWithSets(
     val sets: List<ExerciseSetEntity>
 )
 
+fun List<ExerciseWithSets>.toExternalModel() = map(ExerciseWithSets::toExternalModel)
+
 fun ExerciseWithSets.toExternalModel() = ExerciseAndSets(
     exerciseId = exercise.id,
     exerciseName = exercise.name,
-    exerciseType = exercise.type,
-    sets = sets.map {
-        it.toExternalModel()
-    }
+    exerciseType = ExerciseType.valueOf(exercise.type),
+    sets = sets.toExternalModel()
 )

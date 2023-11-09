@@ -10,7 +10,7 @@ interface WorkoutRepository {
 
     fun observeWorkouts(): Flow<List<Workout>>
 
-    fun observeFullWorkout(workoutDate: LocalDate): Flow<WorkoutAndExercises>
+    fun observeFullWorkout(workoutDate: LocalDate): Flow<WorkoutAndExercises?>
 
     suspend fun upsertWorkout(workout: Workout): Long
 

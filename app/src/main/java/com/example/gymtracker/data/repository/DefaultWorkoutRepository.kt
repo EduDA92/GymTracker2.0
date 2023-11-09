@@ -3,7 +3,6 @@ package com.example.gymtracker.data.repository
 import com.example.gymtracker.data.dao.WorkoutDao
 import com.example.gymtracker.data.model.WorkoutExerciseCrossRef
 import com.example.gymtracker.data.model.asEntity
-import com.example.gymtracker.data.model.toExernalModel
 import com.example.gymtracker.data.model.toExternalModel
 import com.example.gymtracker.ui.model.Workout
 import com.example.gymtracker.ui.model.WorkoutAndExercises
@@ -17,12 +16,12 @@ class DefaultWorkoutRepository @Inject constructor(private val workoutDao: Worko
 
     override fun observeWorkouts(): Flow<List<Workout>> =
         workoutDao.observeWorkouts().map {
-            it.toExernalModel()
+            it.toExternalModel()
         }
 
-    override fun observeFullWorkout(workoutDate: LocalDate): Flow<WorkoutAndExercises> =
+    override fun observeFullWorkout(workoutDate: LocalDate): Flow<WorkoutAndExercises?> =
         workoutDao.observeFullWorkout(workoutDate).map {
-            it.toExternalModel()
+            it?.toExternalModel()
         }
 
     override suspend fun upsertWorkout(workout: Workout): Long =
