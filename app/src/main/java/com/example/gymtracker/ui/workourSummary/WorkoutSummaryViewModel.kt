@@ -3,6 +3,7 @@ package com.example.gymtracker.ui.workourSummary
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gymtracker.data.repository.WorkoutRepository
+import com.example.gymtracker.ui.model.ExerciseType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,11 +33,38 @@ class WorkoutSummaryViewModel @Inject constructor(
     @OptIn(ExperimentalCoroutinesApi::class)
     val workoutSummaryUiState: StateFlow<WorkoutSummaryUiState> = _date.flatMapLatest { date ->
         workoutRepository.observeFullWorkout(date).map { workoutAndExercises ->
+
+            var totalRepsVolume = 0
+            var totalWeight = 0f
+
             if (workoutAndExercises != null) {
 
                 val exerciseSummaryList = mutableListOf<ExerciseSummary>()
+                val workoutExerciseDistribution = mutableMapOf<ExerciseType, Int>()
+
 
                 workoutAndExercises.exercisesAndSets.forEach { exerciseAndSets ->
+
+                    /* Check if the exercise type exist already inside the map and increase the value of its key
+                    * or if not exist create a new entry in the map */
+                    if (workoutExerciseDistribution.containsKey(exerciseAndSets.exerciseType)) {
+
+                        var previousValue =
+                            workoutExerciseDistribution[exerciseAndSets.exerciseType]
+                        previousValue?.let {
+                            workoutExerciseDistribution[exerciseAndSets.exerciseType] = it + 1
+                        }
+
+                    } else {
+
+                        workoutExerciseDistribution[exerciseAndSets.exerciseType] = 1
+
+                    }
+
+                    exerciseAndSets.sets.forEach { exercise ->
+                        totalRepsVolume += exercise.reps
+                        totalWeight += totalWeight
+                    }
 
                     exerciseSummaryList.add(
                         ExerciseSummary(
@@ -53,10 +81,13 @@ class WorkoutSummaryViewModel @Inject constructor(
 
                 WorkoutSummaryUiState.Success(
                     WorkoutSummary(
-                        workoutAndExercises.workoutId,
-                        workoutAndExercises.workoutName,
-                        workoutAndExercises.workoutDate,
-                        exerciseSummaryList
+                        workoutId = workoutAndExercises.workoutId,
+                        workoutName = workoutAndExercises.workoutName,
+                        workoutDate = workoutAndExercises.workoutDate,
+                        workoutTotalWeightVolume = totalWeight,
+                        workoutTotalRepsVolume = totalRepsVolume,
+                        workoutExerciseDistribution = workoutExerciseDistribution,
+                        exercisesSummary = exerciseSummaryList
                     )
                 )
             } else {
@@ -86,13 +117,16 @@ class WorkoutSummaryViewModel @Inject constructor(
 sealed interface WorkoutSummaryUiState {
     data class Success(val workoutSummary: WorkoutSummary) : WorkoutSummaryUiState
     object EmptyData : WorkoutSummaryUiState
-    object Loading: WorkoutSummaryUiState
+    object Loading : WorkoutSummaryUiState
 }
 
 data class WorkoutSummary(
     val workoutId: Long,
     val workoutName: String,
     val workoutDate: LocalDate,
+    val workoutTotalWeightVolume: Float,
+    val workoutTotalRepsVolume: Int,
+    val workoutExerciseDistribution: Map<ExerciseType, Int>,
     val exercisesSummary: List<ExerciseSummary>
 )
 

@@ -99,8 +99,92 @@ class WorkoutSummaryViewModelTest {
         collectJob.cancel()
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun workoutSummaryViewModel_workoutSummaryUiStateSuccessValue_returnsCorrectExerciseTypeDistribution() = runTest {
+
+        val exerciseDistribution = mutableMapOf<ExerciseType, Int>(
+            ExerciseType.Legs to 2,
+            ExerciseType.Chest to 1
+        )
+
+        val collectJob = launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.workoutSummaryUiState.collect() }
+
+        /* emit fake full workout and check that the given exerciseDistribution from the viewmodel matches the correct exerciseDistribution */
+        repository.emitWorkoutAndExercises(fullWorkout)
+
+        val currentState = viewModel.workoutSummaryUiState.value as WorkoutSummaryUiState.Success
+
+        assertEquals(exerciseDistribution, currentState.workoutSummary.workoutExerciseDistribution)
+
+        collectJob.cancel()
+
+    }
+
 
     private val exerciseAndSets = listOf(
+        ExerciseAndSets(
+            exerciseId = 1,
+            exerciseName = "DeadLift",
+            exerciseType = ExerciseType.Legs,
+            sets = listOf(
+                ExerciseSet(
+                    id = 1,
+                    exerciseId = 1,
+                    reps = 10,
+                    weight = 80.5f,
+                    date = LocalDate.now(),
+                    isCompleted = true
+                ),
+                ExerciseSet(
+                    id = 2,
+                    exerciseId = 1,
+                    reps = 8,
+                    weight = 88.5f,
+                    date = LocalDate.now(),
+                    isCompleted = true
+                ),
+                ExerciseSet(
+                    id = 3,
+                    exerciseId = 1,
+                    reps = 4,
+                    weight = 90.5f,
+                    date = LocalDate.now(),
+                    isCompleted = true
+                )
+            )
+        ),
+        ExerciseAndSets(
+            exerciseId = 2,
+            exerciseName = "BenchPress",
+            exerciseType = ExerciseType.Chest,
+            sets = listOf(
+                ExerciseSet(
+                    id = 4,
+                    exerciseId = 2,
+                    reps = 10,
+                    weight = 80.5f,
+                    date = LocalDate.now(),
+                    isCompleted = true
+                ),
+                ExerciseSet(
+                    id = 5,
+                    exerciseId = 2,
+                    reps = 8,
+                    weight = 88.5f,
+                    date = LocalDate.now(),
+                    isCompleted = true
+                ),
+                ExerciseSet(
+                    id = 6,
+                    exerciseId = 2,
+                    reps = 4,
+                    weight = 90.5f,
+                    date = LocalDate.now(),
+                    isCompleted = true
+                )
+            )
+        ),
         ExerciseAndSets(
             exerciseId = 1,
             exerciseName = "DeadLift",

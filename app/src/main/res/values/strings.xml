@@ -7,4 +7,14 @@
     <string name="create_workout_button_sr">Create workout</string>
     <string name="no_workout_data_sr">You haven\'t exercised today yet</string>
     <string name="card_options_button_sr">card options button</string>
+    <string name="top_set_pair_sr">%1$.1f kg x %2$d</string>
+    <string name="card_title_exercise_sr">Exercise</string>
+    <string name="card_title_sets_sr">Sets</string>
+    <string name="card_title_top_set_sr">Top Set</string>
+    <string name="workout_screen_today_workout_sr">Today\'s Workout</string>
+    <string name="workout_screen_today_statistics_sr">Today\'s statistics</string>
+    <string name="total_reps_weight_card_reps_title_sr">Reps volume:</string>
+    <string name="total_reps_weight_card_reps_volume_sr">%1$d reps</string>
+    <string name="total_reps_weight_card_weight_title_sr">Weight volume:</string>
+    <string name="total_reps_weight_card_weight_volume_sr">%1$.1f Kg</string>
 </resources>

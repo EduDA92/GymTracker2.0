@@ -72,6 +72,9 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 
+    // COmpose animation
+    implementation("androidx.compose.animation:animation:1.5.4")
+
     //Immutable lists
     implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.6")
 
