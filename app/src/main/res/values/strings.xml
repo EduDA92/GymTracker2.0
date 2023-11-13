@@ -17,4 +17,6 @@
     <string name="total_reps_weight_card_reps_volume_sr">%1$d reps</string>
     <string name="total_reps_weight_card_weight_title_sr">Weight volume:</string>
     <string name="total_reps_weight_card_weight_volume_sr">%1$.1f Kg</string>
+    <string name="exercise_distribution_card_empty_data_sr">Empty Workout</string>
+    <string name="card_edit_workout_button_sr">Edit Workout</string>
 </resources>

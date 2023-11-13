@@ -1,15 +1,16 @@
-package com.example.gymtracker.data.dao.ui
+package com.example.gymtracker.ui
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
-import com.example.gymtracker.data.dao.utils.onNodeWithStringId
+import com.example.gymtracker.utils.onNodeWithStringId
 import com.example.gymtracker.ui.workourSummary.WorkoutSummaryScreen
 import com.example.gymtracker.ui.workourSummary.WorkoutSummaryUiState
 import com.example.gymtracker.R
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.workourSummary.ExerciseSummary
 import com.example.gymtracker.ui.workourSummary.WorkoutSummary
+import com.example.gymtracker.ui.workourSummary.WorkoutSummaryRoute
 import org.junit.Rule
 import org.junit.Test
 import java.time.LocalDate
@@ -18,6 +19,7 @@ class WorkoutSummaryScreenTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+
 
     @Test
     fun workoutSummaryScreen_whenLoadingData_showsLoading() {

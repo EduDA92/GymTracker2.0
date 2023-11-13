@@ -1,4 +1,4 @@
-package com.example.gymtracker.data.dao.utils
+package com.example.gymtracker.utils
 
 import androidx.activity.ComponentActivity
 import androidx.annotation.StringRes

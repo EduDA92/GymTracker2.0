@@ -16,7 +16,8 @@ android {
         versionCode = 1
         versionName = "1.0"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        /*testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"*/
+        testInstrumentationRunner = "com.example.gymtracker.utils.CustomTestRunner"
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -53,6 +54,7 @@ android {
 
 dependencies {
     val room_version = "2.6.0"
+    val nav_version = "2.7.5"
 
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
@@ -72,6 +74,10 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation ("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
 
+    // Navigation
+    implementation("androidx.navigation:navigation-compose:$nav_version")
+    androidTestImplementation ("androidx.navigation:navigation-testing:$nav_version")
+
     // COmpose animation
     implementation("androidx.compose.animation:animation:1.5.4")
 
@@ -80,7 +86,6 @@ dependencies {
 
     //Room
     implementation("androidx.room:room-runtime:$room_version")
-    annotationProcessor("androidx.room:room-compiler:$room_version")
     ksp("androidx.room:room-compiler:$room_version")
     implementation("androidx.room:room-ktx:$room_version")
     testImplementation("androidx.room:room-testing:$room_version")
@@ -89,6 +94,8 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.48.1")
     ksp("com.google.dagger:hilt-android-compiler:2.48.1")
     implementation ("androidx.hilt:hilt-navigation-compose:1.1.0")
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.48.1")
+    kspAndroidTest("com.google.dagger:hilt-android-compiler:2.48.1")
 
     //Coroutines test
     testImplementation ("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")

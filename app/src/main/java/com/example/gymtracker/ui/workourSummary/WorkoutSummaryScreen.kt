@@ -31,10 +31,12 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -59,12 +61,14 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun WorkoutSummaryRoute(
     modifier: Modifier = Modifier,
+    navigateToWorkout: (Long) -> Unit = {},
     viewModel: WorkoutSummaryViewModel = hiltViewModel()
 ) {
 
@@ -76,7 +80,9 @@ fun WorkoutSummaryRoute(
         workoutSummaryUiState = workoutSummaryUiState,
         date = date,
         onNextDate = viewModel::nextDate,
-        onPrevDate = viewModel::prevDate
+        onPrevDate = viewModel::prevDate,
+        navigateToWorkout = navigateToWorkout,
+        createWorkout = viewModel::createWorkout
     )
 
 }
@@ -87,7 +93,9 @@ fun WorkoutSummaryScreen(
     workoutSummaryUiState: WorkoutSummaryUiState,
     date: LocalDate,
     onNextDate: () -> Unit = {},
-    onPrevDate: () -> Unit = {}
+    onPrevDate: () -> Unit = {},
+    navigateToWorkout: (Long) -> Unit = {},
+    createWorkout: suspend () -> Long = { 0 }
 ) {
 
     Column(
@@ -96,7 +104,7 @@ fun WorkoutSummaryScreen(
     ) {
 
         CurrentDateBar(
-            modifier = Modifier,
+            modifier = Modifier.fillMaxWidth(),
             date = date,
             onNextDate = onNextDate,
             onPrevDate = onPrevDate
@@ -106,8 +114,8 @@ fun WorkoutSummaryScreen(
             targetState = workoutSummaryUiState,
             transitionSpec = {
                 fadeIn(
-                    animationSpec = tween(3000)
-                ) togetherWith fadeOut(animationSpec = tween(3000))
+                    animationSpec = tween(1500)
+                ) togetherWith fadeOut(animationSpec = tween(1500))
             },
             label = "",
             modifier = Modifier
@@ -118,6 +126,10 @@ fun WorkoutSummaryScreen(
 
                     EmptyState(
                         modifier = Modifier
+                            .fillMaxSize()
+                            .wrapContentHeight(Alignment.CenterVertically),
+                        onCreateWorkoutButton = navigateToWorkout,
+                        createWorkout = createWorkout
                     )
 
                 }
@@ -142,10 +154,12 @@ fun WorkoutSummaryScreen(
 
 
                         WorkoutSummaryCard(
-                            modifier = Modifier,
+                            modifier = Modifier.fillMaxWidth(),
+                            workoutId = workoutSummaryUiState.workoutSummary.workoutId,
                             workoutName = workoutSummaryUiState.workoutSummary.workoutName,
                             workoutDate = workoutSummaryUiState.workoutSummary.workoutDate,
-                            exerciseSummary = workoutSummaryUiState.workoutSummary.exercisesSummary.toImmutableList()
+                            exerciseSummary = workoutSummaryUiState.workoutSummary.exercisesSummary.toImmutableList(),
+                            onEditWorkoutButton = navigateToWorkout
                         )
 
                         Spacer(modifier = Modifier.size(dimensionResource(id = R.dimen.medium_dp)))
@@ -177,6 +191,7 @@ fun WorkoutSummaryScreen(
                                 data = workoutSummaryUiState.workoutSummary.workoutExerciseDistribution.toImmutableMap()
                             )
                         }
+
                     }
 
                 }
@@ -184,6 +199,8 @@ fun WorkoutSummaryScreen(
                 WorkoutSummaryUiState.Loading -> {
                     LoadingState(
                         modifier = Modifier
+                            .fillMaxSize()
+                            .wrapContentHeight(Alignment.CenterVertically)
                     )
                 }
             }
@@ -195,16 +212,16 @@ fun WorkoutSummaryScreen(
 @Composable
 fun WorkoutSummaryCard(
     modifier: Modifier = Modifier,
+    workoutId: Long,
     workoutName: String,
     workoutDate: LocalDate,
     exerciseSummary: ImmutableList<ExerciseSummary>,
     onOptionsButton: (Long) -> Unit = {},
+    onEditWorkoutButton: (Long) -> Unit = {}
 ) {
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(dimensionResource(id = R.dimen.medium_dp)),
+        modifier = modifier.padding(dimensionResource(id = R.dimen.medium_dp)),
         elevation = CardDefaults.cardElevation(
             defaultElevation = dimensionResource(id = R.dimen.small_dp)
         )
@@ -291,6 +308,18 @@ fun WorkoutSummaryCard(
             }
         }
 
+        OutlinedButton(
+            onClick = { onEditWorkoutButton(workoutId) },
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentWidth(Alignment.CenterHorizontally)
+                .padding(dimensionResource(id = R.dimen.medium_dp))
+        ) {
+
+            Text(stringResource(R.string.card_edit_workout_button_sr))
+
+        }
+
 
     }
 
@@ -346,67 +375,77 @@ fun ExerciseDistributionCard(
             defaultElevation = dimensionResource(id = R.dimen.small_dp)
         )
     ) {
+        if (data.isNotEmpty()) {
+            Canvas(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(dimensionResource(id = R.dimen.medium_dp))
+            ) {
 
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(dimensionResource(id = R.dimen.medium_dp))
-        ) {
 
+                /* The Space for each bar is the total space divided by the number of exerciseTypes inside the map
+                * each bar has a top and bottom padding so the bar height is the maxBarSpace minus two times the padding
+                *
+                * The height or amplitude of each bar is a percentage of the max value, meaning the maxValue will have the
+                * maxHeight and so on.*/
 
-            /* The Space for each bar is the total space divided by the number of exerciseTypes inside the map
-            * each bar has a top and bottom padding so the bar height is the maxBarSpace minus two times the padding
-            *
-            * The height or amplitude of each bar is a percentage of the max value, meaning the maxValue will have the
-            * maxHeight and so on.*/
+                /* Bar Parameters */
+                val padding = 12f
+                val maxBarWidth = size.width.minus(padding.times(2)).div(1.5f)
+                val maxBarSpace = size.height.div(data.size)
+                val maxBarHeight = maxBarSpace.minus(padding.times(2))
+                val maxValue = data.maxOf { it.value }
+                val invMaxValue = 1f / maxValue
 
-            /* Bar Parameters */
-            val padding = 12f
-            val maxBarWidth = size.width.minus(padding.times(2)).div(1.5f)
-            val maxBarSpace = size.height.div(data.size)
-            val maxBarHeight = maxBarSpace.minus(padding.times(2))
-            val maxValue = data.maxOf { it.value }
-            val invMaxValue = 1f / maxValue
+                /* Multiply by this to get the % of the max width for each bar */
+                val barWidthScaleFactor = invMaxValue * maxBarWidth
 
-            /* Multiply by this to get the % of the max width for each bar */
-            val barWidthScaleFactor = invMaxValue * maxBarWidth
+                val textStyle = TextStyle(
+                    fontSize = 12.sp,
+                    color = Color.Gray
+                )
 
-            val textStyle = TextStyle(
-                fontSize = 12.sp,
-                color = Color.Gray
+                var prevY = padding
+                /* The position of the first text will be the padding plus half of the bar height and
+                * in order to center the text subtract the height approx height of the font */
+                var prevTextY = padding.plus(maxBarHeight.div(2)).minus(10.sp.toPx())
+
+                data.forEach { (exerciseType, numberOfExercises) ->
+
+                    drawRect(
+                        color = color,
+                        topLeft = Offset(x = 0f, y = prevY),
+                        size = Size(
+                            width = numberOfExercises.times(barWidthScaleFactor),
+                            height = maxBarHeight
+                        )
+                    )
+
+                    drawText(
+                        textMeasurer = textMeasurer,
+                        text = exerciseType.name,
+                        style = textStyle,
+                        topLeft = Offset(
+                            x = numberOfExercises.times(barWidthScaleFactor).plus(padding),
+                            y = prevTextY
+                        )
+                    )
+
+                    prevY += maxBarSpace
+                    prevTextY += maxBarSpace
+                }
+            }
+        } else {
+
+            Text(
+                stringResource(R.string.exercise_distribution_card_empty_data_sr),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .wrapContentHeight(Alignment.CenterVertically)
+                    .wrapContentWidth(Alignment.CenterHorizontally)
             )
 
-            var prevY = padding
-            /* The position of the first text will be the padding plus half of the bar height and
-            * in order to center the text subtract the height approx height of the font */
-            var prevTextY = padding.plus(maxBarHeight.div(2)).minus(10.sp.toPx())
-
-            data.forEach { (exerciseType, numberOfExercises) ->
-
-                drawRect(
-                    color = color,
-                    topLeft = Offset(x = 0f, y = prevY),
-                    size = Size(
-                        width = numberOfExercises.times(barWidthScaleFactor),
-                        height = maxBarHeight
-                    )
-                )
-
-                drawText(
-                    textMeasurer = textMeasurer,
-                    text = exerciseType.name,
-                    style = textStyle,
-                    topLeft = Offset(
-                        x = numberOfExercises.times(barWidthScaleFactor).plus(padding),
-                        y = prevTextY
-                    )
-                )
-
-                prevY += maxBarSpace
-                prevTextY += maxBarSpace
-            }
         }
-
     }
 
 }
@@ -485,9 +524,7 @@ fun LoadingState(
 ) {
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .wrapContentHeight(Alignment.CenterVertically),
+        modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -506,12 +543,14 @@ fun LoadingState(
 @Composable
 fun EmptyState(
     modifier: Modifier = Modifier,
-    onCreateWorkoutButton: () -> Unit = {}
+    onCreateWorkoutButton: (Long) -> Unit = {},
+    createWorkout: suspend () -> Long
 ) {
+
+    val scope = rememberCoroutineScope()
+
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .wrapContentHeight(Alignment.CenterVertically),
+        modifier = modifier,
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -521,7 +560,11 @@ fun EmptyState(
             modifier = Modifier.padding(dimensionResource(id = R.dimen.medium_dp))
         )
 
-        Button(onClick = onCreateWorkoutButton) {
+        Button(onClick = {
+            scope.launch {
+                onCreateWorkoutButton(createWorkout())
+            }
+        }) {
             Text(text = stringResource(id = R.string.create_workout_button_sr))
         }
 
@@ -537,7 +580,7 @@ fun CurrentDateBar(
 ) {
 
     Surface(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier,
         shadowElevation = dimensionResource(id = R.dimen.small_dp)
     ) {
 
@@ -604,11 +647,11 @@ fun WorkoutSummaryPreview() {
             workoutDate = LocalDate.now(),
             workoutTotalWeightVolume = 300000.68f,
             workoutTotalRepsVolume = 10000,
-            workoutExerciseDistribution = mutableMapOf(
+            workoutExerciseDistribution = emptyMap()/*mutableMapOf(
                 ExerciseType.Arms to 2,
                 ExerciseType.Chest to 3,
                 ExerciseType.Shoulders to 2
-            ),
+            )*/,
             exercisesSummary = listOf(
                 ExerciseSummary(
                     name = "Squat",
@@ -648,7 +691,7 @@ fun WorkoutSummaryPreview() {
         WorkoutSummaryScreen(
             modifier = Modifier.fillMaxSize(),
             workoutSummary,
-            LocalDate.now()
+            LocalDate.now(),
         )
     }
 }
