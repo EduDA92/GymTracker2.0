@@ -12,6 +12,7 @@ interface WorkoutRepository {
 
     fun observeFullWorkout(workoutDate: LocalDate): Flow<WorkoutAndExercises?>
 
+    fun observeFullWorkoutFromId(workoutId: Long): Flow<WorkoutAndExercises>
     suspend fun upsertWorkout(workout: Workout): Long
 
     suspend fun deleteWorkout(workoutId: Long)
@@ -21,5 +22,7 @@ interface WorkoutRepository {
     suspend fun updateCompleteWorkout(workoutId: Long, isWorkoutCompleted: Boolean)
 
     suspend fun updateWorkoutDuration(workoutId: Long, workoutDuration: Long)
+
+    suspend fun updateWorkoutName(workoutId: Long, workoutName: String)
 
 }

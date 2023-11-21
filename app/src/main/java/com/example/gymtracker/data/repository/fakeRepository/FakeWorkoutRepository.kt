@@ -19,6 +19,10 @@ class FakeWorkoutRepository@Inject constructor(): WorkoutRepository {
         emit(null)
     }
 
+    override fun observeFullWorkoutFromId(workoutId: Long): Flow<WorkoutAndExercises> = flow{
+    }
+
+
     override suspend fun upsertWorkout(workout: Workout): Long {
         return 1
     }
@@ -37,5 +41,9 @@ class FakeWorkoutRepository@Inject constructor(): WorkoutRepository {
 
     override suspend fun updateWorkoutDuration(workoutId: Long, workoutDuration: Long) {
         /* TODO to be implemented */
+    }
+
+    override suspend fun updateWorkoutName(workoutId: Long, workoutName: String) {
+        /*TODO("Not yet implemented")*/
     }
 }

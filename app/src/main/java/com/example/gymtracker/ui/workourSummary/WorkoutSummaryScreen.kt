@@ -35,13 +35,14 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -53,7 +54,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.gymtracker.R
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.theme.GymTrackerTheme
@@ -61,7 +64,8 @@ import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -74,6 +78,21 @@ fun WorkoutSummaryRoute(
 
     val workoutSummaryUiState by viewModel.workoutSummaryUiState.collectAsStateWithLifecycle()
     val date by viewModel.date.collectAsStateWithLifecycle()
+
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    /* This LaunchedEffect will handle the navigation when creating a new workout, when a new workout is created
+    * the app will automatically navigate to the newly created workout diary */
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            withContext(Dispatchers.Main.immediate) {
+                viewModel.createdWorkoutEventFlow.collect {
+                    navigateToWorkout(it)
+                }
+            }
+        }
+    }
+
 
     WorkoutSummaryScreen(
         modifier = modifier.fillMaxSize(),
@@ -95,7 +114,7 @@ fun WorkoutSummaryScreen(
     onNextDate: () -> Unit = {},
     onPrevDate: () -> Unit = {},
     navigateToWorkout: (Long) -> Unit = {},
-    createWorkout: suspend () -> Long = { 0 }
+    createWorkout: () -> Unit = {}
 ) {
 
     Column(
@@ -128,8 +147,7 @@ fun WorkoutSummaryScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .wrapContentHeight(Alignment.CenterVertically),
-                        onCreateWorkoutButton = navigateToWorkout,
-                        createWorkout = createWorkout
+                        onCreateWorkoutButton = createWorkout,
                     )
 
                 }
@@ -543,11 +561,8 @@ fun LoadingState(
 @Composable
 fun EmptyState(
     modifier: Modifier = Modifier,
-    onCreateWorkoutButton: (Long) -> Unit = {},
-    createWorkout: suspend () -> Long
+    onCreateWorkoutButton: () -> Unit = {}
 ) {
-
-    val scope = rememberCoroutineScope()
 
     Column(
         modifier = modifier,
@@ -560,11 +575,7 @@ fun EmptyState(
             modifier = Modifier.padding(dimensionResource(id = R.dimen.medium_dp))
         )
 
-        Button(onClick = {
-            scope.launch {
-                onCreateWorkoutButton(createWorkout())
-            }
-        }) {
+        Button(onClick = { onCreateWorkoutButton() }) {
             Text(text = stringResource(id = R.string.create_workout_button_sr))
         }
 
@@ -647,11 +658,12 @@ fun WorkoutSummaryPreview() {
             workoutDate = LocalDate.now(),
             workoutTotalWeightVolume = 300000.68f,
             workoutTotalRepsVolume = 10000,
-            workoutExerciseDistribution = emptyMap()/*mutableMapOf(
+            workoutExerciseDistribution = mutableMapOf(
                 ExerciseType.Arms to 2,
                 ExerciseType.Chest to 3,
-                ExerciseType.Shoulders to 2
-            )*/,
+                ExerciseType.Shoulders to 2,
+                ExerciseType.FullBody to 4
+            ),
             exercisesSummary = listOf(
                 ExerciseSummary(
                     name = "Squat",

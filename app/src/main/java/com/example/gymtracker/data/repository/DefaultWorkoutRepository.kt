@@ -12,7 +12,8 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 
-class DefaultWorkoutRepository @Inject constructor(private val workoutDao: WorkoutDao): WorkoutRepository {
+class DefaultWorkoutRepository @Inject constructor(private val workoutDao: WorkoutDao) :
+    WorkoutRepository {
 
     override fun observeWorkouts(): Flow<List<Workout>> =
         workoutDao.observeWorkouts().map {
@@ -22,6 +23,11 @@ class DefaultWorkoutRepository @Inject constructor(private val workoutDao: Worko
     override fun observeFullWorkout(workoutDate: LocalDate): Flow<WorkoutAndExercises?> =
         workoutDao.observeFullWorkout(workoutDate).map {
             it?.toExternalModel()
+        }
+
+    override fun observeFullWorkoutFromId(workoutId: Long): Flow<WorkoutAndExercises> =
+        workoutDao.observeFullWorkoutFromId(workoutId).map {
+            it.toExternalModel()
         }
 
     override suspend fun upsertWorkout(workout: Workout): Long =
@@ -38,4 +44,7 @@ class DefaultWorkoutRepository @Inject constructor(private val workoutDao: Worko
 
     override suspend fun updateWorkoutDuration(workoutId: Long, workoutDuration: Long) =
         workoutDao.updateWorkoutDuration(workoutId, workoutDuration)
+
+    override suspend fun updateWorkoutName(workoutId: Long, workoutName: String) =
+        workoutDao.updateWorkoutName(workoutId, workoutName)
 }

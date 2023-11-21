@@ -1,18 +1,10 @@
 package com.example.gymtracker
 
-import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
-import com.example.gymtracker.GymTrackerNavHost
-import com.example.gymtracker.MainActivity
 import com.example.gymtracker.ui.workourSummary.navigation.workoutScreenSummaryRoute
 import com.example.gymtracker.utils.assertCurrentRouteName
 import com.example.gymtracker.utils.onNodeWithStringId
@@ -48,16 +40,17 @@ class NavigationTest {
     }
 
     @Test
-    fun GymTrackerNavHost_verifyStartDestination() {
+    fun gymTrackerNavHost_verifyStartDestination() {
         navController.assertCurrentRouteName(workoutScreenSummaryRoute)
     }
 
     @Test
-    fun GymTrackerNavHost_clickCreateWorkout_navigateToWorkoutDiaryScreen() {
+    fun gymTrackerNavHost_clickCreateWorkout_navigateToWorkoutDiaryScreen() {
 
         composeTestRule.onNodeWithStringId(R.string.create_workout_button_sr).performClick()
 
         navController.assertCurrentRouteName("workoutDiaryRoute/{workoutId}")
+
     }
 
 }

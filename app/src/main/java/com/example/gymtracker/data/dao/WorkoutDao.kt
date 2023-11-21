@@ -16,10 +16,13 @@ interface WorkoutDao {
     @Query("SELECT * FROM workout")
     fun observeWorkouts(): Flow<List<WorkoutEntity>>
 
-    /*  querying an empty table emits a null value. */
     @Transaction
     @Query("SELECT * FROM workout WHERE workout.date LIKE :workoutDate")
     fun observeFullWorkout(workoutDate: LocalDate): Flow<WorkoutWithExercisesAndSets?>
+
+    @Transaction
+    @Query("SELECT * FROM workout WHERE workout.id LIKE :workoutId")
+    fun observeFullWorkoutFromId(workoutId: Long): Flow<WorkoutWithExercisesAndSets>
 
     @Upsert
     suspend fun upsertWorkout(workout: WorkoutEntity): Long
@@ -32,6 +35,9 @@ interface WorkoutDao {
 
     @Query("Update workout SET duration = :workoutDuration WHERE workout.id = :workoutId")
     suspend fun updateWorkoutDuration(workoutId: Long, workoutDuration: Long)
+
+    @Query("Update workout Set name =:workoutName WHERE workout.id = :workoutId")
+    suspend fun updateWorkoutName(workoutId: Long, workoutName: String)
 
     @Upsert
     suspend fun upsertWorkoutExerciseCrossRef(workoutExerciseCrossRef: WorkoutExerciseCrossRef)

@@ -12,6 +12,7 @@ import java.time.LocalDate
 class TestWorkoutRepository : WorkoutRepository {
 
     private val workoutAndExercisesFlow = MutableSharedFlow<WorkoutAndExercises?>()
+    private val workoutAndExercisesFromIdFlow = MutableSharedFlow<WorkoutAndExercises>()
 
     override fun observeWorkouts(): Flow<List<Workout>> = flow {
         emit(emptyList())
@@ -20,9 +21,15 @@ class TestWorkoutRepository : WorkoutRepository {
     override fun observeFullWorkout(workoutDate: LocalDate): Flow<WorkoutAndExercises?> =
         workoutAndExercisesFlow
 
+    override fun observeFullWorkoutFromId(workoutId: Long): Flow<WorkoutAndExercises>  =
+        workoutAndExercisesFromIdFlow
+
     /* Helper method to control the workout returned by the observeFullWorkout */
     suspend fun emitWorkoutAndExercises(workoutAndExercises: WorkoutAndExercises?) =
         workoutAndExercisesFlow.emit(workoutAndExercises)
+
+    suspend fun emitWorkoutAndExercisesFromId(workoutAndExercises: WorkoutAndExercises) =
+        workoutAndExercisesFromIdFlow.emit(workoutAndExercises)
 
     override suspend fun upsertWorkout(workout: Workout): Long {
         return 0
@@ -44,4 +51,7 @@ class TestWorkoutRepository : WorkoutRepository {
         /* nothing here */
     }
 
+    override suspend fun updateWorkoutName(workoutId: Long, workoutName: String) {
+        /*TODO("Not yet implemented")*/
+    }
 }

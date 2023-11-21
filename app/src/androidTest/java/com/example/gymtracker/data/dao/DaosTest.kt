@@ -26,7 +26,7 @@ class DaosTest {
     private lateinit var exerciseSetDao: ExerciseSetDao
 
     @Before
-    fun createDb(){
+    fun createDb() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         db = Room.inMemoryDatabaseBuilder(
             context,
@@ -75,12 +75,22 @@ class DaosTest {
     }
 
     @Test
+    fun workoutDao_updateName_updatesCorrectly() = runTest {
+        workoutDao.upsertWorkout(testWorkoutEntity)
+
+        workoutDao.updateWorkoutName(testWorkoutEntity.id, "testName")
+
+        val workouts = workoutDao.observeWorkouts().first()
+
+        assertEquals(testWorkoutEntity.copy(name = "testName"), workouts[0])
+    }
+
+    @Test
     fun workoutDao_ObserveFullWorkout_ReturnsCorrectWorkout() = runTest {
         workoutDao.upsertWorkout(testWorkoutEntity)
         exerciseDao.upsertExercise(testExerciseEntity)
         workoutDao.upsertWorkoutExerciseCrossRef(crossRef)
         exerciseSetDao.upsertExerciseSet(testExerciseSet)
-        exerciseSetDao.upsertExerciseSet(testExerciseSet.copy(id = 2, date = LocalDate.now().plusDays(2)))
 
         // first check for incorrect day
         var fullWorkoutInfo = workoutDao.observeFullWorkout(LocalDate.now().plusDays(2)).first()
@@ -93,7 +103,22 @@ class DaosTest {
     }
 
     @Test
-    fun exerciseDao_UpsertAndDeleteExercise_WorksCorrectly() = runTest{
+    fun workoutDao_observeFullWorkoutWithId_returntsCorrectWorkout() = runTest {
+        workoutDao.upsertWorkout(testWorkoutEntity)
+        exerciseDao.upsertExercise(testExerciseEntity)
+        workoutDao.upsertWorkoutExerciseCrossRef(crossRef)
+        exerciseSetDao.upsertExerciseSet(testExerciseSet)
+
+        // First check for non existent workout
+        var fullWorkoutInfo = workoutDao.observeFullWorkoutFromId(23).first()
+        assertEquals(null, fullWorkoutInfo)
+
+        fullWorkoutInfo = workoutDao.observeFullWorkoutFromId(1).first()
+        assertEquals(testFullWorkout, fullWorkoutInfo)
+    }
+
+    @Test
+    fun exerciseDao_UpsertAndDeleteExercise_WorksCorrectly() = runTest {
         exerciseDao.upsertExercise(testExerciseEntity)
 
         var exercises = exerciseDao.observeExercises().first()
@@ -141,7 +166,6 @@ class DaosTest {
     }
 
 
-
     private val testWorkoutEntity = WorkoutEntity(
         id = 1,
         name = "Push",
@@ -172,9 +196,11 @@ class DaosTest {
 
     private val testFullWorkout = WorkoutWithExercisesAndSets(
         workout = testWorkoutEntity,
-        exerciseWithSets = listOf(ExerciseWithSets(
-            exercise = testExerciseEntity,
-            sets = listOf(testExerciseSet, testExerciseSet.copy( id = 2, date = LocalDate.now().plusDays(2))),)
+        exerciseWithSets = listOf(
+            ExerciseWithSets(
+                exercise = testExerciseEntity,
+                sets = listOf(testExerciseSet)
+            )
         )
     )
 
