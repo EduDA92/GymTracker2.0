@@ -1,5 +1,6 @@
 package com.example.gymtracker.ui.workourSummary
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gymtracker.data.repository.WorkoutRepository
@@ -83,7 +84,7 @@ class WorkoutSummaryViewModel @Inject constructor(
                             sets = filteredSets.size,
                             topSet = Pair(
                                 first = filteredSets.maxByOrNull { it.weight }?.weight ?: 0f,
-                                second = filteredSets.maxByOrNull{ it.weight }?.reps ?: 0
+                                second = filteredSets.maxByOrNull { it.weight }?.reps ?: 0
                             )
                         )
                     )
@@ -123,12 +124,18 @@ class WorkoutSummaryViewModel @Inject constructor(
         }
     }
 
-     fun createWorkout(){
-         viewModelScope.launch {
-             createdWorkoutEventChannel.send(
-                 workoutRepository.upsertWorkout(Workout(date = date.value))
-             )
-         }
+    fun createWorkout() {
+        viewModelScope.launch {
+            createdWorkoutEventChannel.send(
+                workoutRepository.upsertWorkout(Workout(date = date.value))
+            )
+        }
+    }
+
+    fun deleteWorkout(workoutId: Long) {
+        viewModelScope.launch {
+            workoutRepository.deleteWorkout(workoutId)
+        }
     }
 
 }

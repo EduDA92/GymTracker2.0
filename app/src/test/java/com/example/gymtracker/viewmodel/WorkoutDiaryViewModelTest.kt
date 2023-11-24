@@ -6,6 +6,7 @@ import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.model.WorkoutAndExercises
+import com.example.gymtracker.ui.workoutDiary.WorkoutDiaryUiState
 import com.example.gymtracker.ui.workoutDiary.WorkoutDiaryViewModel
 import com.example.gymtracker.utils.MainDispatcherRule
 import kotlinx.coroutines.flow.collect
@@ -15,7 +16,9 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 import java.time.LocalDate
+import kotlin.test.assertEquals
 
 class WorkoutDiaryViewModelTest {
 
@@ -28,18 +31,26 @@ class WorkoutDiaryViewModelTest {
     @Before
     fun init() {
         repository = TestWorkoutRepository()
-        viewModel = WorkoutDiaryViewModel(repository, SavedStateHandle(mapOf("workoutId" to 1)))
+        viewModel = WorkoutDiaryViewModel(repository, SavedStateHandle(mapOf("workoutId" to 1L)))
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
-
+    @Test
     fun workoutDiaryViewModel_workoutDiaryUiStateValue_filtersSetsByDateAndDataIsCorrect() = runTest{
+
+        val filteredList = exerciseAndSets.map {
+             it.copy(
+                 sets = it.sets.filter { it.date == LocalDate.now() }
+             )
+        }
 
         val collectJob = launch(UnconfinedTestDispatcher(testScheduler)){viewModel.workoutDiaryUiState.collect()}
 
+        repository.emitWorkoutAndExercisesFromId(fullWorkout)
 
+        val state = viewModel.workoutDiaryUiState.value
 
-
+        assertEquals(filteredList, (state as WorkoutDiaryUiState.Success).diary.exercisesWithReps)
 
         collectJob.cancel()
     }

@@ -19,4 +19,7 @@
     <string name="total_reps_weight_card_weight_volume_sr">%1$.1f Kg</string>
     <string name="exercise_distribution_card_empty_data_sr">Empty Workout</string>
     <string name="card_edit_workout_button_sr">Edit Workout</string>
+    <string name="workout_title_edit_sr">Edit workout title button</string>
+    <string name="workout_title_edit_field_cd">Workout Title</string>
+    <string name="dropdown_menu_delete_workout_sr">Delete Workout</string>
 </resources>

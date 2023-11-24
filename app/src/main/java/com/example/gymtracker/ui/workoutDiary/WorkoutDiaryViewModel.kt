@@ -1,15 +1,20 @@
 package com.example.gymtracker.ui.workoutDiary
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gymtracker.data.repository.WorkoutRepository
 import com.example.gymtracker.ui.model.ExerciseAndSets
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
@@ -22,42 +27,50 @@ class WorkoutDiaryViewModel @Inject constructor(
 
 ) {
 
-    val workoutId: Long = savedStateHandle["workoutId"] ?: 0
+    val workoutId: Long = savedStateHandle["workoutId"] ?: 0L
 
-    val workoutDiaryUiState: StateFlow<WorkoutDiaryUiState> =
-        workoutRepository.observeFullWorkoutFromId(workoutId).map { workoutAndExercises ->
 
-            // Filter exercise sets that doesn't belong to the workout date
 
-            val exercisesWithReps = mutableListOf<ExerciseAndSets>()
+    private val _showEditWorkoutNameField = MutableStateFlow(false)
+    val showEditWorkoutNameField = _showEditWorkoutNameField.asStateFlow()
 
-            workoutAndExercises.exercisesAndSets.forEach { exerciseAndSets ->
+    val workoutDiaryUiState = workoutRepository.observeFullWorkoutFromId(workoutId).map{workoutAndExercises ->
 
-                exercisesWithReps.add(
-                    ExerciseAndSets(
-                        exerciseId = exerciseAndSets.exerciseId,
-                        exerciseName = exerciseAndSets.exerciseName,
-                        exerciseType = exerciseAndSets.exerciseType,
-                        sets = exerciseAndSets.sets.filter { it.date == workoutAndExercises.workoutDate }
-                    )
-                )
+        val exercisesWithReps = mutableListOf<ExerciseAndSets>()
 
-            }
+        workoutAndExercises.exercisesAndSets.forEach { exerciseAndSets ->
 
-            WorkoutDiaryUiState.Success(
-                WorkoutDiary(
-                    workoutId = workoutAndExercises.workoutId,
-                    workoutName = workoutAndExercises.workoutName,
-                    workoutDate = workoutAndExercises.workoutDate,
-                    exercisesWithReps = exercisesWithReps
+            exercisesWithReps.add(
+                ExerciseAndSets(
+                    exerciseId = exerciseAndSets.exerciseId,
+                    exerciseName = exerciseAndSets.exerciseName,
+                    exerciseType = exerciseAndSets.exerciseType,
+                    sets = exerciseAndSets.sets.filter { it.date == workoutAndExercises.workoutDate }
                 )
             )
 
-        }.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(),
-            WorkoutDiaryUiState.Loading
+        }
+
+        WorkoutDiaryUiState.Success(
+            WorkoutDiary(
+                workoutId = workoutAndExercises.workoutId,
+                workoutName = workoutAndExercises.workoutName,
+                workoutDate = workoutAndExercises.workoutDate,
+                exercisesWithReps = exercisesWithReps
+            )
         )
+
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        WorkoutDiaryUiState.Loading
+    )
+
+    fun updateShowEditWorkoutNameFieldState(){
+        _showEditWorkoutNameField.update {
+            !it
+        }
+    }
 
 
     fun updateWorkoutName(workoutName: String) {

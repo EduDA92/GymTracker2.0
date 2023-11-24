@@ -1,8 +1,11 @@
 package com.example.gymtracker.ui
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import com.example.gymtracker.utils.onNodeWithStringId
 import com.example.gymtracker.ui.workourSummary.WorkoutSummaryScreen
 import com.example.gymtracker.ui.workourSummary.WorkoutSummaryUiState
@@ -10,7 +13,7 @@ import com.example.gymtracker.R
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.workourSummary.ExerciseSummary
 import com.example.gymtracker.ui.workourSummary.WorkoutSummary
-import com.example.gymtracker.ui.workourSummary.WorkoutSummaryRoute
+import com.example.gymtracker.utils.onNodeWithContentDescription
 import org.junit.Rule
 import org.junit.Test
 import java.time.LocalDate
@@ -19,7 +22,6 @@ class WorkoutSummaryScreenTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
-
 
     @Test
     fun workoutSummaryScreen_whenLoadingData_showsLoading() {
@@ -54,6 +56,21 @@ class WorkoutSummaryScreenTest {
     }
 
     @Test
+    fun workoutSummaryScreen_whenOptionsButtonClick_showsMenu() {
+
+        composeTestRule.setContent {
+            WorkoutSummaryScreen(
+                workoutSummaryUiState = workoutSummary,
+                date = LocalDate.now()
+            )
+        }
+
+        composeTestRule.onNodeWithContentDescription(R.string.card_options_button_sr).performClick()
+        composeTestRule.onNodeWithStringId(R.string.dropdown_menu_delete_workout_sr).assertExists()
+
+    }
+
+    @Test
     fun workoutSummaryScreen_whenSuccess_showsData() {
 
         composeTestRule.setContent {
@@ -67,18 +84,22 @@ class WorkoutSummaryScreenTest {
 
         /* Check card titles */
         composeTestRule.onNodeWithStringId(R.string.workout_screen_today_workout_sr).assertExists()
-        composeTestRule.onNodeWithStringId(R.string.workout_screen_today_statistics_sr).assertExists()
+        composeTestRule.onNodeWithStringId(R.string.workout_screen_today_statistics_sr)
+            .assertExists()
 
         /* Check some main card text */
         composeTestRule.onNodeWithText("Push").assertExists()
-        composeTestRule.onNodeWithText(workoutSummary.workoutSummary.workoutDate.toString()).assertExists()
+        composeTestRule.onNodeWithText(workoutSummary.workoutSummary.workoutDate.toString())
+            .assertExists()
         composeTestRule.onNodeWithText("Squat").assertExists()
         composeTestRule.onNodeWithText("Deadlift").assertExists()
         composeTestRule.onNodeWithText("Lunge").assertExists()
 
         /* Total volume card  */
-        composeTestRule.onNodeWithStringId(R.string.total_reps_weight_card_reps_title_sr).assertExists()
-        composeTestRule.onNodeWithStringId(R.string.total_reps_weight_card_weight_title_sr).assertExists()
+        composeTestRule.onNodeWithStringId(R.string.total_reps_weight_card_reps_title_sr)
+            .assertExists()
+        composeTestRule.onNodeWithStringId(R.string.total_reps_weight_card_weight_title_sr)
+            .assertExists()
 
     }
 

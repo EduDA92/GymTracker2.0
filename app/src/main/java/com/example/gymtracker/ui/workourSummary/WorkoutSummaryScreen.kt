@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -26,8 +27,9 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +39,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -58,6 +63,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.gymtracker.R
+import com.example.gymtracker.ui.commonComposables.LoadingState
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.theme.GymTrackerTheme
 import kotlinx.collections.immutable.ImmutableList
@@ -83,7 +89,7 @@ fun WorkoutSummaryRoute(
 
     /* This LaunchedEffect will handle the navigation when creating a new workout, when a new workout is created
     * the app will automatically navigate to the newly created workout diary */
-    LaunchedEffect(lifecycleOwner) {
+    LaunchedEffect(lifecycleOwner.lifecycle) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             withContext(Dispatchers.Main.immediate) {
                 viewModel.createdWorkoutEventFlow.collect {
@@ -95,13 +101,14 @@ fun WorkoutSummaryRoute(
 
 
     WorkoutSummaryScreen(
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
         workoutSummaryUiState = workoutSummaryUiState,
         date = date,
         onNextDate = viewModel::nextDate,
         onPrevDate = viewModel::prevDate,
         navigateToWorkout = navigateToWorkout,
-        createWorkout = viewModel::createWorkout
+        createWorkout = viewModel::createWorkout,
+        deleteWorkout = viewModel::deleteWorkout
     )
 
 }
@@ -114,16 +121,16 @@ fun WorkoutSummaryScreen(
     onNextDate: () -> Unit = {},
     onPrevDate: () -> Unit = {},
     navigateToWorkout: (Long) -> Unit = {},
-    createWorkout: () -> Unit = {}
+    createWorkout: () -> Unit = {},
+    deleteWorkout: (Long) -> Unit = {}
 ) {
 
     Column(
-        modifier = modifier,
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
         CurrentDateBar(
-            modifier = Modifier.fillMaxWidth(),
             date = date,
             onNextDate = onNextDate,
             onPrevDate = onPrevDate
@@ -142,14 +149,11 @@ fun WorkoutSummaryScreen(
 
             when (workoutSummaryUiState) {
                 WorkoutSummaryUiState.EmptyData -> {
+                    EmptyState(onCreateWorkoutButton = createWorkout)
+                }
 
-                    EmptyState(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .wrapContentHeight(Alignment.CenterVertically),
-                        onCreateWorkoutButton = createWorkout,
-                    )
-
+                WorkoutSummaryUiState.Loading -> {
+                    LoadingState()
                 }
 
                 is WorkoutSummaryUiState.Success -> {
@@ -172,12 +176,12 @@ fun WorkoutSummaryScreen(
 
 
                         WorkoutSummaryCard(
-                            modifier = Modifier.fillMaxWidth(),
                             workoutId = workoutSummaryUiState.workoutSummary.workoutId,
                             workoutName = workoutSummaryUiState.workoutSummary.workoutName,
                             workoutDate = workoutSummaryUiState.workoutSummary.workoutDate,
                             exerciseSummary = workoutSummaryUiState.workoutSummary.exercisesSummary.toImmutableList(),
-                            onEditWorkoutButton = navigateToWorkout
+                            onEditWorkoutButton = navigateToWorkout,
+                            deleteWorkout = deleteWorkout
                         )
 
                         Spacer(modifier = Modifier.size(dimensionResource(id = R.dimen.medium_dp)))
@@ -214,13 +218,6 @@ fun WorkoutSummaryScreen(
 
                 }
 
-                WorkoutSummaryUiState.Loading -> {
-                    LoadingState(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .wrapContentHeight(Alignment.CenterVertically)
-                    )
-                }
             }
         }
 
@@ -234,9 +231,13 @@ fun WorkoutSummaryCard(
     workoutName: String,
     workoutDate: LocalDate,
     exerciseSummary: ImmutableList<ExerciseSummary>,
-    onOptionsButton: (Long) -> Unit = {},
-    onEditWorkoutButton: (Long) -> Unit = {}
+    onEditWorkoutButton: (Long) -> Unit = {},
+    deleteWorkout: (Long) -> Unit = {}
 ) {
+
+    var isDropdownMenuVisible by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     Card(
         modifier = modifier.padding(dimensionResource(id = R.dimen.medium_dp)),
@@ -267,16 +268,40 @@ fun WorkoutSummaryCard(
                 )
             }
 
-            IconButton(
-                onClick = { onOptionsButton },
+            /* This box contains the options button and the dropdown menu */
+            Box(
                 modifier = Modifier
                     .weight(1f)
                     .wrapContentWidth(Alignment.End)
             ) {
-                Icon(
-                    imageVector = Icons.Filled.MoreVert,
-                    contentDescription = stringResource(id = R.string.card_options_button_sr)
-                )
+
+                IconButton(
+                    onClick = { isDropdownMenuVisible = true },
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.MoreVert,
+                        contentDescription = stringResource(id = R.string.card_options_button_sr)
+                    )
+                }
+
+                /* Dropdown Menu for the options button */
+                DropdownMenu(
+                    expanded = isDropdownMenuVisible,
+                    onDismissRequest = { isDropdownMenuVisible = false }) {
+
+                    DropdownMenuItem(
+                        text = {
+                            Text(
+                                text = stringResource(id = R.string.dropdown_menu_delete_workout_sr),
+                                color = Color.Red
+                            )
+                        },
+                        onClick = {
+                            deleteWorkout(workoutId)
+                            isDropdownMenuVisible = false
+                        })
+
+                }
             }
         }
 
@@ -312,12 +337,33 @@ fun WorkoutSummaryCard(
             /* Exercise list */
             exerciseSummary.forEachIndexed { index, exercise ->
 
-                CardContentExerciseRow(
-                    exerciseName = exercise.name,
-                    sets = exercise.sets,
-                    topSet = exercise.topSet,
-                    modifier = Modifier
-                )
+                Row(
+                    modifier = modifier.padding(dimensionResource(id = R.dimen.medium_dp)),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Text(
+                        text = exercise.name,
+                        modifier = Modifier.weight(5f)
+                    )
+
+                    Text(
+                        text = exercise.sets.toString(),
+                        modifier = Modifier
+                            .weight(1f)
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                    )
+                    Text(
+                        text = stringResource(
+                            id = R.string.top_set_pair_sr,
+                            exercise.topSet.first,
+                            exercise.topSet.second
+                        ),
+                        modifier = Modifier
+                            .weight(3f)
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                    )
+                }
 
                 if (index < exerciseSummary.size - 1) {
                     Divider()
@@ -341,42 +387,8 @@ fun WorkoutSummaryCard(
 
     }
 
+
 }
-
-@Composable
-fun CardContentExerciseRow(
-    modifier: Modifier = Modifier,
-    exerciseName: String,
-    sets: Int,
-    topSet: Pair<Float, Int>
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(dimensionResource(id = R.dimen.medium_dp)),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-
-        Text(
-            text = exerciseName,
-            modifier = Modifier.weight(5f)
-        )
-
-        Text(
-            text = sets.toString(),
-            modifier = Modifier
-                .weight(1f)
-                .wrapContentWidth(Alignment.CenterHorizontally)
-        )
-        Text(
-            text = stringResource(id = R.string.top_set_pair_sr, topSet.first, topSet.second),
-            modifier = Modifier
-                .weight(3f)
-                .wrapContentWidth(Alignment.CenterHorizontally)
-        )
-    }
-}
-
 @Composable
 fun ExerciseDistributionCard(
     modifier: Modifier = Modifier,
@@ -482,7 +494,6 @@ fun TotalRepsVolumeCard(
         )
     ) {
 
-
         Text(
             text = stringResource(R.string.total_reps_weight_card_reps_title_sr),
             fontSize = 15.sp,
@@ -536,27 +547,6 @@ fun TotalRepsVolumeCard(
 
 }
 
-@Composable
-fun LoadingState(
-    modifier: Modifier = Modifier
-) {
-
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-
-        CircularProgressIndicator()
-
-        Text(
-            text = stringResource(id = R.string.loading_data_sr),
-            modifier = Modifier.padding(dimensionResource(id = R.dimen.medium_dp))
-        )
-
-    }
-
-}
 
 @Composable
 fun EmptyState(
@@ -565,7 +555,9 @@ fun EmptyState(
 ) {
 
     Column(
-        modifier = modifier,
+        modifier = modifier
+            .fillMaxSize()
+            .wrapContentHeight(Alignment.CenterVertically),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -667,8 +659,8 @@ fun WorkoutSummaryPreview() {
             exercisesSummary = listOf(
                 ExerciseSummary(
                     name = "Squat",
-                    sets = 300,
-                    topSet = Pair(100.75f, 10)
+                    sets = 999,
+                    topSet = Pair(999.75f, 100)
                 ),
                 ExerciseSummary(
                     name = "Deadlift",
@@ -701,7 +693,7 @@ fun WorkoutSummaryPreview() {
 
     GymTrackerTheme {
         WorkoutSummaryScreen(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier,
             workoutSummary,
             LocalDate.now(),
         )
