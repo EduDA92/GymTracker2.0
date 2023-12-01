@@ -284,7 +284,7 @@ fun WorkoutSummaryCard(
                     )
                 }
 
-                /* Dropdown Menu for the options button */
+                /* Dropdown Menu for the options button, this menu will anchor to the box parent composable */
                 DropdownMenu(
                     expanded = isDropdownMenuVisible,
                     onDismissRequest = { isDropdownMenuVisible = false }) {
@@ -377,7 +377,8 @@ fun WorkoutSummaryCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentWidth(Alignment.CenterHorizontally)
-                .padding(dimensionResource(id = R.dimen.medium_dp))
+                .padding(dimensionResource(id = R.dimen.medium_dp)),
+            shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp)),
         ) {
 
             Text(stringResource(R.string.card_edit_workout_button_sr))

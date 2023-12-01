@@ -41,4 +41,7 @@ interface WorkoutDao {
 
     @Upsert
     suspend fun upsertWorkoutExerciseCrossRef(workoutExerciseCrossRef: WorkoutExerciseCrossRef)
+
+    @Query("Delete FROM workoutexercisecrossref WHERE workoutId LIKE :workoutId AND exerciseId LIKE :exerciseId")
+    suspend fun deleteWorkoutExerciseCrossRef(workoutId: Long, exerciseId: Long)
 }

@@ -39,6 +39,9 @@ class DefaultWorkoutRepository @Inject constructor(private val workoutDao: Worko
     override suspend fun upsertWorkoutExerciseCrossRef(workoutExerciseCrossRef: WorkoutExerciseCrossRef) =
         workoutDao.upsertWorkoutExerciseCrossRef(workoutExerciseCrossRef)
 
+    override suspend fun deleteWorkoutExerciseCrossRef(workoutId: Long, exerciseId: Long) =
+        workoutDao.deleteWorkoutExerciseCrossRef(workoutId, exerciseId)
+
     override suspend fun updateCompleteWorkout(workoutId: Long, isWorkoutCompleted: Boolean) =
         workoutDao.updateCompleteWorkout(workoutId, isWorkoutCompleted)
 

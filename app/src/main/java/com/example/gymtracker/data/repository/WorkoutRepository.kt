@@ -19,6 +19,8 @@ interface WorkoutRepository {
 
     suspend fun upsertWorkoutExerciseCrossRef(workoutExerciseCrossRef: WorkoutExerciseCrossRef)
 
+    suspend fun deleteWorkoutExerciseCrossRef(workoutId: Long, exerciseId: Long)
+
     suspend fun updateCompleteWorkout(workoutId: Long, isWorkoutCompleted: Boolean)
 
     suspend fun updateWorkoutDuration(workoutId: Long, workoutDuration: Long)

@@ -18,7 +18,7 @@ import org.junit.Before
 import org.junit.Test
 import java.time.LocalDate
 
-class DaosTest {
+class WorkoutDaoTest {
 
     private lateinit var db: GymTrackerDatabase
     private lateinit var workoutDao: WorkoutDao
@@ -118,53 +118,23 @@ class DaosTest {
     }
 
     @Test
-    fun exerciseDao_UpsertAndDeleteExercise_WorksCorrectly() = runTest {
+    fun workoutDao_deleteWorkoutExerciseCrossRef_deletesCorrectly() = runTest{
+        workoutDao.upsertWorkout(testWorkoutEntity)
         exerciseDao.upsertExercise(testExerciseEntity)
-
-        var exercises = exerciseDao.observeExercises().first()
-
-        assertEquals(testExerciseEntity, exercises[0])
-
-        exerciseDao.deleteExercise(testExerciseEntity.id)
-
-        exercises = exerciseDao.observeExercises().first()
-
-        assertEquals(0, exercises.size)
-
-    }
-
-    @Test
-    fun exerciseSetDao_UpsertAndDeleteExerciseSet_WorksCorrectly() = runTest {
-
-        /*Insert Exercise otherwise because of the relation between exercise and set if there is no
-        * exercise in the db there will be foreign key error*/
-        exerciseDao.upsertExercise(testExerciseEntity)
+        workoutDao.upsertWorkoutExerciseCrossRef(crossRef)
         exerciseSetDao.upsertExerciseSet(testExerciseSet)
 
-        var exerciseSets = exerciseSetDao.observeExerciseSets().first()
+        // First check full workout info
+        var fullWorkoutInfo = workoutDao.observeFullWorkoutFromId(1).first()
+        assertEquals(testFullWorkout, fullWorkoutInfo)
 
-        assertEquals(testExerciseSet, exerciseSets[0])
+        // If the crossref is deleted the fullworkoutinfo must only return workout info with empty exercise list
+        workoutDao.deleteWorkoutExerciseCrossRef(1,1)
 
-        exerciseSetDao.deleteExerciseSet(testExerciseSet.id)
-
-        exerciseSets = exerciseSetDao.observeExerciseSets().first()
-
-        assertEquals(0, exerciseSets.size)
+        fullWorkoutInfo = workoutDao.observeFullWorkoutFromId(1).first()
+        assertEquals(testFullWorkout.copy(exerciseWithSets = emptyList()), fullWorkoutInfo)
 
     }
-
-    @Test
-    fun exerciseSetDao_UpdateIsComplete_UpdatesCorrectly() = runTest {
-        exerciseDao.upsertExercise(testExerciseEntity)
-        exerciseSetDao.upsertExerciseSet(testExerciseSet)
-
-        exerciseSetDao.updateCompleteExerciseSet(testExerciseSet.id, true)
-
-        val exerciseSets = exerciseSetDao.observeExerciseSets().first()
-
-        assertEquals(testExerciseSet.copy(isCompleted = true), exerciseSets[0])
-    }
-
 
     private val testWorkoutEntity = WorkoutEntity(
         id = 1,

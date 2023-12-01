@@ -4,6 +4,7 @@ import com.example.gymtracker.data.dao.ExerciseSetDao
 import com.example.gymtracker.data.model.ExerciseSetEntity
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import java.time.LocalDate
 
 class TestExerciseSetDao(exerciseSetList: List<ExerciseSetEntity>): ExerciseSetDao {
 
@@ -29,6 +30,22 @@ class TestExerciseSetDao(exerciseSetList: List<ExerciseSetEntity>): ExerciseSetD
         exerciseSetId: Long,
         isExerciseSetCompleted: Boolean
     ) {
+        /* No-op */
+    }
+
+    override suspend fun updateExerciseSetData(
+        exerciseSetId: Long,
+        setReps: Int,
+        setWeight: Float
+    ) {
+        /* No-op */
+    }
+
+    override suspend fun getExerciseSetIdList(exerciseId: Long, date: LocalDate): List<Long> {
+        return emptyList()
+    }
+
+    override suspend fun deleteExerciseSets(idList: List<Long>) {
         /* No-op */
     }
 }

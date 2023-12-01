@@ -43,6 +43,10 @@ class TestWorkoutRepository : WorkoutRepository {
         /* nothing here */
     }
 
+    override suspend fun deleteWorkoutExerciseCrossRef(workoutId: Long, exerciseId: Long) {
+        /* nothing here */
+    }
+
     override suspend fun updateCompleteWorkout(workoutId: Long, isWorkoutCompleted: Boolean) {
         /* nothing here */
     }

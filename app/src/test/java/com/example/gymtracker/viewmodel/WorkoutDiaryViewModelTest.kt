@@ -1,6 +1,8 @@
 package com.example.gymtracker.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
+import com.example.gymtracker.data.repository.ExerciseSetRepository
+import com.example.gymtracker.testdoubles.repository.TestExerciseSetRepository
 import com.example.gymtracker.testdoubles.repository.TestWorkoutRepository
 import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
@@ -25,13 +27,15 @@ class WorkoutDiaryViewModelTest {
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private lateinit var repository: TestWorkoutRepository
+    private lateinit var workoutRepository: TestWorkoutRepository
+    private lateinit var exerciseSetRepository: ExerciseSetRepository
     private lateinit var viewModel: WorkoutDiaryViewModel
 
     @Before
     fun init() {
-        repository = TestWorkoutRepository()
-        viewModel = WorkoutDiaryViewModel(repository, SavedStateHandle(mapOf("workoutId" to 1L)))
+        workoutRepository = TestWorkoutRepository()
+        exerciseSetRepository = TestExerciseSetRepository()
+        viewModel = WorkoutDiaryViewModel(workoutRepository,exerciseSetRepository, SavedStateHandle(mapOf("workoutId" to 1L)))
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -46,7 +50,7 @@ class WorkoutDiaryViewModelTest {
 
         val collectJob = launch(UnconfinedTestDispatcher(testScheduler)){viewModel.workoutDiaryUiState.collect()}
 
-        repository.emitWorkoutAndExercisesFromId(fullWorkout)
+        workoutRepository.emitWorkoutAndExercisesFromId(fullWorkout)
 
         val state = viewModel.workoutDiaryUiState.value
 

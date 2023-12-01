@@ -33,6 +33,10 @@ class TestWorkoutDao(workouts: List<WorkoutEntity>, fullWorkout: WorkoutWithExer
         workoutsStream.emit(_workouts)
     }
 
+    override suspend fun deleteWorkoutExerciseCrossRef(workoutId: Long, exerciseId: Long) {
+        /* No-op */
+    }
+
     override suspend fun updateCompleteWorkout(workoutId: Long, isWorkoutCompleted: Boolean) {
         /* No-op */
     }

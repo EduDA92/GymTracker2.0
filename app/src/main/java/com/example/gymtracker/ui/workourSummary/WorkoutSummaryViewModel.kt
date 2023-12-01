@@ -1,6 +1,5 @@
 package com.example.gymtracker.ui.workourSummary
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gymtracker.data.repository.WorkoutRepository
@@ -26,6 +25,7 @@ import javax.inject.Inject
 class WorkoutSummaryViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository
 ) : ViewModel() {
+    
 
     private val _date = MutableStateFlow(LocalDate.now())
     val date = _date.asStateFlow()

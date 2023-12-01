@@ -8,14 +8,13 @@ import androidx.navigation.navArgument
 import com.example.gymtracker.ui.workoutDiary.WorkoutDiaryRoute
 
 private const val workoutIdArg = "workoutId"
-
 fun NavController.navigateToWorkoutDiary(workoutId: Long) {
 
     this.navigate("workoutDiaryRoute/$workoutId")
 
 }
 
-fun NavGraphBuilder.workoutDiaryScreen() {
+fun NavGraphBuilder.workoutDiaryScreen(onBackClick: () -> Unit = {}) {
     composable(
         route = "workoutDiaryRoute/{$workoutIdArg}",
         arguments = listOf(
@@ -23,7 +22,7 @@ fun NavGraphBuilder.workoutDiaryScreen() {
         )
     ) {
 
-        WorkoutDiaryRoute()
+        WorkoutDiaryRoute(onBackClick = onBackClick)
 
     }
 }

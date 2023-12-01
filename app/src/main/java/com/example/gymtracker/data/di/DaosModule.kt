@@ -1,6 +1,8 @@
 package com.example.gymtracker.data.di
 
 import com.example.gymtracker.data.GymTrackerDatabase
+import com.example.gymtracker.data.dao.ExerciseDao
+import com.example.gymtracker.data.dao.ExerciseSetDao
 import com.example.gymtracker.data.dao.WorkoutDao
 import dagger.Module
 import dagger.Provides
@@ -15,5 +17,15 @@ object DaosModule {
     fun providesWorkoutDao(
         database: GymTrackerDatabase
     ): WorkoutDao = database.workoutDao()
+
+    @Provides
+    fun providesExerciseDao(
+        database: GymTrackerDatabase
+    ): ExerciseDao = database.exerciseDao()
+
+    @Provides
+    fun providesExerciseSetDao(
+        database: GymTrackerDatabase
+    ): ExerciseSetDao = database.exerciseSetDao()
 
 }

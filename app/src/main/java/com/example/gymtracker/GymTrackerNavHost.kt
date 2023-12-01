@@ -24,7 +24,7 @@ fun GymTrackerNavHost(
 
         workoutSummaryScreen(navigateToWorkout = navController::navigateToWorkoutDiary)
 
-        workoutDiaryScreen()
+        workoutDiaryScreen(onBackClick = navController::popBackStack)
 
     }
 

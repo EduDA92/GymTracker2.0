@@ -22,4 +22,21 @@
     <string name="workout_title_edit_sr">Edit workout title button</string>
     <string name="workout_title_edit_field_cd">Workout Title</string>
     <string name="dropdown_menu_delete_workout_sr">Delete Workout</string>
+    <string name="add_exercise_button">+ Add Exercise</string>
+    <string name="diary_screen_edit_name_clear_button_sr">Clear edit name</string>
+    <string name="copy_workout_button_sr">copy workout</string>
+    <string name="kg_sr">Kg</string>
+    <string name="reps_sr">Reps</string>
+    <string name="add_set_button_sr">Add Set</string>
+    <string name="add_set_button_icon_cd">add set button icon</string>
+    <string name="history_button_icon_cd">Exercise History</string>
+    <string name="history_button_sr">History</string>
+    <string name="exercise_dropdown_menu_sr">Exercise menu icon</string>
+    <string name="back_button_cd">Back button</string>
+    <string name="complete_exercise_set_button_cd">Complete set button</string>
+    <string name="incomplete_exercise_set_button_cd">Incomplete set button</string>
+    <string name="delete_exercise_set_button_cd">delete exercise set button</string>
+    <string name="dropdown_menu_delete_exercise_sr">Delete exercise</string>
+    <string name="workout_diary_reps_edit_text_cd">reps edit text</string>
+    <string name="workout_diary_weight_edit_text_cd">weight edit text</string>
 </resources>
