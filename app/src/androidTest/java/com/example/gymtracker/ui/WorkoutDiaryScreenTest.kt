@@ -79,10 +79,12 @@ class WorkoutDiaryScreenTest {
             WorkoutDiaryScreen(workoutDiaryUiState = completeWorkoutDiaryUiState, workoutNameEditFieldState = true)
         }
 
-        /* Assert Exercise Name is present and the assert edit text and incomplete button are present */
+        /* Assert Exercise Name is present and the assert texts and complete button are present */
         composeTestRule.onNodeWithText("Squat").assertExists()
         composeTestRule.onNodeWithText("10").assertExists()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_reps_edit_text_cd).assertDoesNotExist()
         composeTestRule.onNodeWithText("150.0").assertExists()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_weight_edit_text_cd).assertDoesNotExist()
         composeTestRule.onNodeWithContentDescription(R.string.complete_exercise_set_button_cd).assertExists()
 
     }

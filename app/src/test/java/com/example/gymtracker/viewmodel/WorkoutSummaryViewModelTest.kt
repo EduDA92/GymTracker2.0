@@ -6,9 +6,9 @@ import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.model.WorkoutAndExercises
-import com.example.gymtracker.ui.workourSummary.ExerciseSummary
-import com.example.gymtracker.ui.workourSummary.WorkoutSummaryUiState
-import com.example.gymtracker.ui.workourSummary.WorkoutSummaryViewModel
+import com.example.gymtracker.ui.workoutSummary.ExerciseSummary
+import com.example.gymtracker.ui.workoutSummary.WorkoutSummaryUiState
+import com.example.gymtracker.ui.workoutSummary.WorkoutSummaryViewModel
 import com.example.gymtracker.utils.MainDispatcherRule
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect

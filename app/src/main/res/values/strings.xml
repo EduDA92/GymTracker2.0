@@ -39,4 +39,5 @@
     <string name="dropdown_menu_delete_exercise_sr">Delete exercise</string>
     <string name="workout_diary_reps_edit_text_cd">reps edit text</string>
     <string name="workout_diary_weight_edit_text_cd">weight edit text</string>
+    <string name="workout_exercise_list_create_exercise_sr">Create Exercise</string>
 </resources>

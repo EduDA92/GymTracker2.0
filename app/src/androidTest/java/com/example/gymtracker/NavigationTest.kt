@@ -5,7 +5,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
-import com.example.gymtracker.ui.workourSummary.navigation.workoutScreenSummaryRoute
+import com.example.gymtracker.ui.workoutSummary.navigation.workoutScreenSummaryRoute
 import com.example.gymtracker.utils.assertCurrentRouteName
 import com.example.gymtracker.utils.onNodeWithContentDescription
 import com.example.gymtracker.utils.onNodeWithStringId
@@ -58,6 +58,30 @@ class NavigationTest {
         composeTestRule.onNodeWithContentDescription(R.string.back_button_cd).performClick()
 
         navController.assertCurrentRouteName(workoutScreenSummaryRoute)
+    }
+
+    @Test
+    fun gymTrackerNavHost_navigateToWorkoutExerciseListScreen(){
+
+        composeTestRule.onNodeWithStringId(R.string.create_workout_button_sr).performClick()
+
+        composeTestRule.waitForIdle()
+
+        navController.assertCurrentRouteName("workoutDiaryRoute/{workoutId}")
+
+        composeTestRule.onNodeWithStringId(R.string.add_exercise_button).performClick()
+
+        navController.assertCurrentRouteName("workoutExerciseListRoute/{workoutId}")
+
+        composeTestRule.onNodeWithContentDescription(R.string.back_button_cd).performClick()
+
+        navController.assertCurrentRouteName("workoutDiaryRoute/{workoutId}")
+
+        composeTestRule.onNodeWithContentDescription(R.string.back_button_cd).performClick()
+
+        navController.assertCurrentRouteName(workoutScreenSummaryRoute)
+
+
     }
 
 }

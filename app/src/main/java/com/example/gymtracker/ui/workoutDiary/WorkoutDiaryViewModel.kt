@@ -23,9 +23,7 @@ class WorkoutDiaryViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
     private val exerciseSetRepository: ExerciseSetRepository,
     savedStateHandle: SavedStateHandle
-) : ViewModel(
-
-) {
+) : ViewModel() {
 
 
     val workoutId: Long = savedStateHandle["workoutId"] ?: 0L

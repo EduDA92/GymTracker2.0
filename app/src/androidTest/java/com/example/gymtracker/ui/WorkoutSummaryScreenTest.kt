@@ -1,18 +1,16 @@
 package com.example.gymtracker.ui
 
 import androidx.activity.ComponentActivity
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.example.gymtracker.utils.onNodeWithStringId
-import com.example.gymtracker.ui.workourSummary.WorkoutSummaryScreen
-import com.example.gymtracker.ui.workourSummary.WorkoutSummaryUiState
+import com.example.gymtracker.ui.workoutSummary.WorkoutSummaryScreen
+import com.example.gymtracker.ui.workoutSummary.WorkoutSummaryUiState
 import com.example.gymtracker.R
 import com.example.gymtracker.ui.model.ExerciseType
-import com.example.gymtracker.ui.workourSummary.ExerciseSummary
-import com.example.gymtracker.ui.workourSummary.WorkoutSummary
+import com.example.gymtracker.ui.workoutSummary.ExerciseSummary
+import com.example.gymtracker.ui.workoutSummary.WorkoutSummary
 import com.example.gymtracker.utils.onNodeWithContentDescription
 import org.junit.Rule
 import org.junit.Test

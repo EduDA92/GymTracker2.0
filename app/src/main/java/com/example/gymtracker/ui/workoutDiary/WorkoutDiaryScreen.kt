@@ -1,6 +1,5 @@
 package com.example.gymtracker.ui.workoutDiary
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -74,6 +73,7 @@ import java.time.LocalDate
 fun WorkoutDiaryRoute(
     modifier: Modifier = Modifier,
     viewModel: WorkoutDiaryViewModel = hiltViewModel(),
+    navigateToExerciseList: (Long) -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
 
@@ -86,6 +86,7 @@ fun WorkoutDiaryRoute(
         workoutNameEditFieldState = workoutNameEditFieldState,
         updateWorkoutName = viewModel::updateWorkoutName,
         updateWorkoutNameEditFieldState = viewModel::updateShowEditWorkoutNameFieldState,
+        addExercise = navigateToExerciseList,
         deleteExercise = viewModel::deleteExerciseFromWorkout,
         onBackClick = onBackClick,
         deleteExerciseSet = viewModel::deleteExerciseSet,
@@ -102,7 +103,7 @@ fun WorkoutDiaryScreen(
     workoutNameEditFieldState: Boolean,
     updateWorkoutName: (String) -> Unit = {},
     updateWorkoutNameEditFieldState: () -> Unit = {},
-    addExercise: () -> Unit = {},
+    addExercise: (Long) -> Unit = {},
     deleteExercise: (Long, LocalDate, Long) -> Unit = { _, _, _ -> },
     copyWorkout: () -> Unit = {},
     onBackClick: () -> Unit = {},
@@ -119,45 +120,45 @@ fun WorkoutDiaryScreen(
 
         is WorkoutDiaryUiState.Success -> {
 
-            LazyColumn(
-                modifier = modifier
-                    .fillMaxSize()
-                    .padding(top = dimensionResource(id = R.dimen.small_dp))
-                    .wrapContentWidth(Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.small_dp))
-            ) {
+              LazyColumn(
+                  modifier = modifier
+                      .fillMaxSize()
+                      .padding(top = dimensionResource(id = R.dimen.small_dp))
+                      .wrapContentWidth(Alignment.CenterHorizontally),
+                  verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.small_dp))
+              ) {
 
-                item {
-                    WorkoutDiaryToolbar(
-                        workoutName = workoutDiaryUiState.diary.workoutName,
-                        showEditWorkoutNameField = workoutNameEditFieldState,
-                        updateWorkoutName = updateWorkoutName,
-                        updateWorkoutNameEditFieldState = updateWorkoutNameEditFieldState,
-                        onBackClick = onBackClick
-                    )
-                }
+                  item {
+                      WorkoutDiaryToolbar(
+                          workoutName = workoutDiaryUiState.diary.workoutName,
+                          showEditWorkoutNameField = workoutNameEditFieldState,
+                          updateWorkoutName = updateWorkoutName,
+                          updateWorkoutNameEditFieldState = updateWorkoutNameEditFieldState,
+                          onBackClick = onBackClick
+                      )
+                  }
 
-                items(
-                    items = workoutDiaryUiState.diary.exercisesWithReps,
-                    key = { item: ExerciseAndSets -> item.exerciseId }
-                ) { item: ExerciseAndSets ->
+                  items(
+                      items = workoutDiaryUiState.diary.exercisesWithReps,
+                      key = { item: ExerciseAndSets -> item.exerciseId }
+                  ) { item: ExerciseAndSets ->
 
-                    ExerciseAndSets(
-                        workoutId = workoutDiaryUiState.diary.workoutId,
-                        workoutDate = workoutDiaryUiState.diary.workoutDate,
-                        exerciseId = item.exerciseId,
-                        exerciseName = item.exerciseName,
-                        exerciseSets = item.sets.toImmutableList(),
-                        deleteExercise = deleteExercise,
-                        addExerciseSet = addExerciseSet,
-                        deleteExerciseSet = deleteExerciseSet,
-                        updateExerciseSetIsCompleted = updateExerciseSetIsCompleted,
-                        updateExerciseSetData = updateExerciseSetData
-                    )
+                      ExerciseAndSets(
+                          workoutId = workoutDiaryUiState.diary.workoutId,
+                          workoutDate = workoutDiaryUiState.diary.workoutDate,
+                          exerciseId = item.exerciseId,
+                          exerciseName = item.exerciseName,
+                          exerciseSets = item.sets.toImmutableList(),
+                          deleteExercise = deleteExercise,
+                          addExerciseSet = addExerciseSet,
+                          deleteExerciseSet = deleteExerciseSet,
+                          updateExerciseSetIsCompleted = updateExerciseSetIsCompleted,
+                          updateExerciseSetData = updateExerciseSetData
+                      )
 
-                }
+                  }
 
-                /* This row contains the Add Exercise and Copy Workout buttons */
+                  /* This row contains the Add Exercise and Copy Workout buttons */
                 item {
                     Row(
                         modifier = Modifier
@@ -168,7 +169,7 @@ fun WorkoutDiaryScreen(
                             )
                     ) {
                         Button(
-                            onClick = addExercise,
+                            onClick = { addExercise(workoutDiaryUiState.diary.workoutId) },
                             shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp)),
                             modifier = Modifier.weight(3f)
                         ) {
@@ -307,152 +308,153 @@ fun ExerciseAndSets(
 
             /* This mayme need optimization later */
             exerciseSets.forEach { exerciseSet ->
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    var weight by rememberSaveable {
+                        mutableStateOf(exerciseSet.weight.toString())
+                    }
+
+                    var reps by rememberSaveable {
+                        mutableStateOf(exerciseSet.reps.toString())
+                    }
+
+                    when (exerciseSet.isCompleted) {
+                        true -> {
+                            Text(
+                                text = exerciseSet.weight.toString(),
+                                fontSize = 18.sp,
+                                modifier = Modifier
+                                    .weight(2f)
+                                    .wrapContentWidth(Alignment.CenterHorizontally)
+                                    .clickable {
+                                        updateExerciseSetIsCompleted(
+                                            exerciseSet.id,
+                                            false
+                                        )
+                                    }
+                            )
+
+                            Text(
+                                text = exerciseSet.reps.toString(),
+                                fontSize = 18.sp,
+                                modifier = Modifier
+                                    .weight(2f)
+                                    .wrapContentWidth(Alignment.CenterHorizontally)
+                                    .clickable {
+                                        updateExerciseSetIsCompleted(
+                                            exerciseSet.id,
+                                            false
+                                        )
+                                    }
+                            )
+                        }
+
+                        false -> {
+                            BasicTextField(
+                                value = weight,
+                                onValueChange = { weight = it },
+                                textStyle = TextStyle(
+                                    fontSize = 18.sp,
+                                    textAlign = TextAlign.Center
+                                ),
+                                decorationBox = { innerTextField ->
+                                    Box(
+                                        modifier = Modifier
+                                            .wrapContentHeight(Alignment.CenterVertically)
+                                            .wrapContentWidth(Alignment.CenterHorizontally)
+                                            .background(
+                                                color = Color.LightGray,
+                                                shape = RoundedCornerShape(4.dp)
+                                            )
+                                            .padding(4.dp)
+                                    ) {
+
+                                        innerTextField()
+                                    }
+                                },
+                                modifier = Modifier
+                                    .weight(2f)
+                                    .requiredSize(width = 56.dp, height = 46.dp)
+                                    .semantics { contentDescription = weightEditTextsCd }
+                            )
+
+                            BasicTextField(
+                                value = reps,
+                                onValueChange = { reps = it },
+                                textStyle = TextStyle(
+                                    fontSize = 18.sp,
+                                    textAlign = TextAlign.Center
+                                ),
+                                decorationBox = { innerTextField ->
+                                    Box(
+                                        modifier = Modifier
+                                            .wrapContentHeight(Alignment.CenterVertically)
+                                            .wrapContentWidth(Alignment.CenterHorizontally)
+                                            .background(
+                                                color = Color.LightGray,
+                                                shape = RoundedCornerShape(4.dp)
+                                            )
+                                            .padding(4.dp)
+                                    ) {
+
+                                        innerTextField()
+                                    }
+                                },
+                                modifier = Modifier
+                                    .weight(2f)
+                                    .requiredSize(width = 56.dp, height = 46.dp)
+                                    .semantics { contentDescription = repsEditTextsCd }
+                            )
+                        }
+                    }
+
+                    IconButton(
+                        onClick = {
+                            if (!exerciseSet.isCompleted) {
+                                updateExerciseSetData(
+                                    exerciseSet.id,
+                                    reps.toInt(),
+                                    weight.toFloat()
+                                )
+                                updateExerciseSetIsCompleted(exerciseSet.id, true)
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
                     ) {
-
-                        var weight by rememberSaveable {
-                            mutableStateOf(exerciseSet.weight.toString())
-                        }
-
-                        var reps by rememberSaveable {
-                            mutableStateOf(exerciseSet.reps.toString())
-                        }
-
                         when (exerciseSet.isCompleted) {
                             true -> {
-                                Text(
-                                    text = exerciseSet.weight.toString(),
-                                    fontSize = 18.sp,
-                                    modifier = Modifier
-                                        .weight(2f)
-                                        .wrapContentWidth(Alignment.CenterHorizontally)
-                                        .clickable {
-                                            updateExerciseSetIsCompleted(
-                                                exerciseSet.id,
-                                                false
-                                            )
-                                        }
-                                )
-
-                                Text(
-                                    text = exerciseSet.reps.toString(),
-                                    fontSize = 18.sp,
-                                    modifier = Modifier
-                                        .weight(2f)
-                                        .wrapContentWidth(Alignment.CenterHorizontally)
-                                        .clickable {
-                                            updateExerciseSetIsCompleted(
-                                                exerciseSet.id,
-                                                false
-                                            )
-                                        }
+                                Icon(
+                                    imageVector = Icons.Filled.CheckCircle,
+                                    contentDescription = stringResource(id = R.string.complete_exercise_set_button_cd)
                                 )
                             }
 
                             false -> {
-                                BasicTextField(
-                                    value = weight,
-                                    onValueChange = { weight = it },
-                                    textStyle = TextStyle(
-                                        fontSize = 18.sp,
-                                        textAlign = TextAlign.Center
-                                    ),
-                                    decorationBox = { innerTextField ->
-                                        Box(
-                                            modifier = Modifier
-                                                .wrapContentHeight(Alignment.CenterVertically)
-                                                .wrapContentWidth(Alignment.CenterHorizontally)
-                                                .background(
-                                                    color = Color.LightGray,
-                                                    shape = RoundedCornerShape(4.dp)
-                                                )
-                                                .padding(4.dp)
-                                        ) {
-
-                                            innerTextField()
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .weight(2f)
-                                        .requiredSize(width = 56.dp, height = 46.dp)
-                                        .semantics { contentDescription = weightEditTextsCd}
-                                )
-
-                                BasicTextField(
-                                    value = reps,
-                                    onValueChange = { reps = it },
-                                    textStyle = TextStyle(
-                                        fontSize = 18.sp,
-                                        textAlign = TextAlign.Center
-                                    ),
-                                    decorationBox = { innerTextField ->
-                                        Box(
-                                            modifier = Modifier
-                                                .wrapContentHeight(Alignment.CenterVertically)
-                                                .wrapContentWidth(Alignment.CenterHorizontally)
-                                                .background(
-                                                    color = Color.LightGray,
-                                                    shape = RoundedCornerShape(4.dp)
-                                                )
-                                                .padding(4.dp)
-                                        ) {
-
-                                            innerTextField()
-                                        }
-                                    },
-                                    modifier = Modifier
-                                        .weight(2f)
-                                        .requiredSize(width = 56.dp, height = 46.dp)
-                                        .semantics { contentDescription = repsEditTextsCd}
+                                Icon(
+                                    imageVector = Icons.Outlined.CheckCircle,
+                                    contentDescription = stringResource(id = R.string.incomplete_exercise_set_button_cd)
                                 )
                             }
-                        }
-
-                        IconButton(
-                            onClick = {
-                                if (!exerciseSet.isCompleted) {
-                                    updateExerciseSetData(
-                                        exerciseSet.id,
-                                        reps.toInt(),
-                                        weight.toFloat()
-                                    )
-                                    updateExerciseSetIsCompleted(exerciseSet.id, true)
-                                }
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            when (exerciseSet.isCompleted) {
-                                true -> {
-                                    Icon(
-                                        imageVector = Icons.Filled.CheckCircle,
-                                        contentDescription = stringResource(id = R.string.complete_exercise_set_button_cd)
-                                    )
-                                }
-
-                                false -> {
-                                    Icon(
-                                        imageVector = Icons.Outlined.CheckCircle,
-                                        contentDescription = stringResource(id = R.string.incomplete_exercise_set_button_cd)
-                                    )
-                                }
-                            }
-                        }
-
-                        IconButton(
-                            onClick = { Log.e("DELETE", "Deleteing exercise set with id" + exerciseSet.exerciseId)
-                                deleteExerciseSet(exerciseSet.id) },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Delete, contentDescription = stringResource(
-                                    id = R.string.delete_exercise_set_button_cd
-                                )
-                            )
                         }
                     }
+
+                    IconButton(
+                        onClick = {
+                            deleteExerciseSet(exerciseSet.id)
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Delete, contentDescription = stringResource(
+                                id = R.string.delete_exercise_set_button_cd
+                            )
+                        )
+                    }
+                }
 
             }
 
