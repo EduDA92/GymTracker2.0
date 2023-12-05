@@ -1,8 +1,5 @@
 package com.example.gymtracker.ui.workoutExerciseList
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,12 +7,10 @@ import com.example.gymtracker.data.repository.ExerciseRepository
 import com.example.gymtracker.data.repository.WorkoutRepository
 import com.example.gymtracker.ui.model.Exercise
 import com.example.gymtracker.ui.model.ExerciseType
-import com.example.gymtracker.ui.workoutDiary.WorkoutDiary
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -47,11 +42,16 @@ class WorkoutExerciseListViewModel @Inject constructor(
             _exerciseTypeFilter
         ) { exerciseList, exerciseName, exerciseType ->
 
-            // TODO filter exercise List
 
             WorkoutExerciseListUiState.Success(
                 WorkoutExerciseListScreenState(
-                    exerciseList = exerciseList,
+                    exerciseList = exerciseList.filter {
+                        if(exerciseType == ExerciseType.Other){
+                            it.name.contains(exerciseName)
+                        } else {
+                            it.name.contains(exerciseName) && it.type == exerciseType
+                        }
+                    },
                     exerciseTypeFiler = exerciseType,
                     exerciseNameFilter = exerciseName
                 )
@@ -63,7 +63,7 @@ class WorkoutExerciseListViewModel @Inject constructor(
             WorkoutExerciseListUiState.Loading
         )
 
-    fun updateExerciseTypeFilter(exerciseType: ExerciseType){
+    fun updateExerciseTypeFilter(exerciseType: ExerciseType) {
         _exerciseTypeFilter.update {
             exerciseType
         }
