@@ -6,6 +6,10 @@ import com.example.gymtracker.data.repository.WorkoutRepository
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.model.Workout
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.ImmutableMap
+import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.toImmutableMap
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -98,8 +102,8 @@ class WorkoutSummaryViewModel @Inject constructor(
                         workoutDate = workoutAndExercises.workoutDate,
                         workoutTotalWeightVolume = totalWeight,
                         workoutTotalRepsVolume = totalRepsVolume,
-                        workoutExerciseDistribution = workoutExerciseDistribution,
-                        exercisesSummary = exerciseSummaryList
+                        workoutExerciseDistribution = workoutExerciseDistribution.toImmutableMap(),
+                        exercisesSummary = exerciseSummaryList.toImmutableList()
                     )
                 )
             } else {
@@ -152,8 +156,8 @@ data class WorkoutSummary(
     val workoutDate: LocalDate,
     val workoutTotalWeightVolume: Float,
     val workoutTotalRepsVolume: Int,
-    val workoutExerciseDistribution: Map<ExerciseType, Int>,
-    val exercisesSummary: List<ExerciseSummary>
+    val workoutExerciseDistribution: ImmutableMap<ExerciseType, Int>,
+    val exercisesSummary: ImmutableList<ExerciseSummary>
 )
 
 data class ExerciseSummary(

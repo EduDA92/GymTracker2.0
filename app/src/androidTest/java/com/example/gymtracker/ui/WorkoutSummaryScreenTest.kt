@@ -12,6 +12,8 @@ import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.workoutSummary.ExerciseSummary
 import com.example.gymtracker.ui.workoutSummary.WorkoutSummary
 import com.example.gymtracker.utils.onNodeWithContentDescription
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import org.junit.Rule
 import org.junit.Test
 import java.time.LocalDate
@@ -109,12 +111,12 @@ class WorkoutSummaryScreenTest {
             workoutDate = LocalDate.now(),
             workoutTotalWeightVolume = 3000f,
             workoutTotalRepsVolume = 250,
-            workoutExerciseDistribution = mutableMapOf(
+            workoutExerciseDistribution = persistentMapOf(
                 ExerciseType.Arms to 2,
                 ExerciseType.Chest to 3,
                 ExerciseType.Shoulders to 2
             ),
-            exercisesSummary = listOf(
+            exercisesSummary = persistentListOf(
                 ExerciseSummary(
                     name = "Squat",
                     sets = 300,

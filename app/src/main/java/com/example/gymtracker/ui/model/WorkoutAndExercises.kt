@@ -1,5 +1,6 @@
 package com.example.gymtracker.ui.model
 
+import kotlinx.collections.immutable.ImmutableList
 import java.time.LocalDate
 
 data class WorkoutAndExercises (
@@ -8,5 +9,5 @@ data class WorkoutAndExercises (
     val workoutDate: LocalDate,
     val workoutDuration: Long,
     val workoutCompleted: Boolean,
-    val exercisesAndSets: List<ExerciseAndSets>
+    val exercisesAndSets: ImmutableList<ExerciseAndSets>
 )

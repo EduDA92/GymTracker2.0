@@ -21,17 +21,16 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.CheckCircle
-import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -66,7 +65,7 @@ import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
 import com.example.gymtracker.ui.model.ExerciseType
 import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.toImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import java.time.LocalDate
 
 @Composable
@@ -120,6 +119,7 @@ fun WorkoutDiaryScreen(
 
         is WorkoutDiaryUiState.Success -> {
 
+            // TODO ADD HERE ANIMATED ITEM PLACEMENT
               LazyColumn(
                   modifier = modifier
                       .fillMaxSize()
@@ -148,12 +148,12 @@ fun WorkoutDiaryScreen(
                           workoutDate = workoutDiaryUiState.diary.workoutDate,
                           exerciseId = item.exerciseId,
                           exerciseName = item.exerciseName,
-                          exerciseSets = item.sets.toImmutableList(),
+                          exerciseSets = item.sets,
                           deleteExercise = deleteExercise,
                           addExerciseSet = addExerciseSet,
                           deleteExerciseSet = deleteExerciseSet,
                           updateExerciseSetIsCompleted = updateExerciseSetIsCompleted,
-                          updateExerciseSetData = updateExerciseSetData
+                          updateExerciseSetData = updateExerciseSetData,
                       )
 
                   }
@@ -494,7 +494,6 @@ fun ExerciseAndSets(
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutDiaryToolbar(
     modifier: Modifier = Modifier,
@@ -521,7 +520,7 @@ fun WorkoutDiaryToolbar(
 
             IconButton(onClick = onBackClick, modifier = Modifier.weight(1f)) {
                 Icon(
-                    imageVector = Icons.Rounded.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                     contentDescription = stringResource(id = R.string.back_button_cd)
                 )
             }
@@ -590,7 +589,7 @@ fun WorkoutDiaryScreenPreview() {
         exerciseId = 1,
         exerciseName = "DeadLift",
         exerciseType = ExerciseType.Legs,
-        sets = listOf(
+        sets = persistentListOf(
             ExerciseSet(
                 id = 1,
                 exerciseId = 1,
@@ -622,7 +621,7 @@ fun WorkoutDiaryScreenPreview() {
         exerciseId = 2,
         exerciseName = "Squat",
         exerciseType = ExerciseType.Legs,
-        sets = listOf(
+        sets = persistentListOf(
             ExerciseSet(
                 id = 4,
                 exerciseId = 2,
@@ -655,7 +654,7 @@ fun WorkoutDiaryScreenPreview() {
             workoutId = 1,
             workoutName = "Push",
             workoutDate = LocalDate.now(),
-            exercisesWithReps = listOf(
+            exercisesWithReps = persistentListOf(
                 testExercise1, testExercise2
             )
         )

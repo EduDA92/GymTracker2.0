@@ -8,6 +8,8 @@ import com.example.gymtracker.data.repository.WorkoutRepository
 import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
@@ -44,7 +46,7 @@ class WorkoutDiaryViewModel @Inject constructor(
                         exerciseId = exerciseAndSets.exerciseId,
                         exerciseName = exerciseAndSets.exerciseName,
                         exerciseType = exerciseAndSets.exerciseType,
-                        sets = exerciseAndSets.sets.filter { it.date == workoutAndExercises.workoutDate }
+                        sets = exerciseAndSets.sets.filter { it.date == workoutAndExercises.workoutDate }.toImmutableList()
                     )
                 )
 
@@ -55,7 +57,7 @@ class WorkoutDiaryViewModel @Inject constructor(
                     workoutId = workoutAndExercises.workoutId,
                     workoutName = workoutAndExercises.workoutName,
                     workoutDate = workoutAndExercises.workoutDate,
-                    exercisesWithReps = exercisesWithReps
+                    exercisesWithReps = exercisesWithReps.toImmutableList()
                 )
             )
 
@@ -154,5 +156,5 @@ data class WorkoutDiary(
     val workoutId: Long,
     val workoutName: String,
     val workoutDate: LocalDate,
-    val exercisesWithReps: List<ExerciseAndSets>
+    val exercisesWithReps: ImmutableList<ExerciseAndSets>
 )

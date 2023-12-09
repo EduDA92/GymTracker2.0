@@ -11,6 +11,8 @@ import com.example.gymtracker.ui.model.WorkoutAndExercises
 import com.example.gymtracker.ui.workoutDiary.WorkoutDiaryUiState
 import com.example.gymtracker.ui.workoutDiary.WorkoutDiaryViewModel
 import com.example.gymtracker.utils.MainDispatcherRule
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
@@ -44,7 +46,7 @@ class WorkoutDiaryViewModelTest {
 
         val filteredList = exerciseAndSets.map {
              it.copy(
-                 sets = it.sets.filter { it.date == LocalDate.now() }
+                 sets = it.sets.filter { it.date == LocalDate.now() }.toImmutableList()
              )
         }
 
@@ -60,12 +62,12 @@ class WorkoutDiaryViewModelTest {
     }
 
 
-    private val exerciseAndSets = listOf(
+    private val exerciseAndSets = persistentListOf<ExerciseAndSets>(
         ExerciseAndSets(
             exerciseId = 1,
             exerciseName = "DeadLift",
             exerciseType = ExerciseType.Legs,
-            sets = listOf(
+            sets = persistentListOf(
                 ExerciseSet(
                     id = 1,
                     exerciseId = 1,
@@ -104,7 +106,7 @@ class WorkoutDiaryViewModelTest {
             exerciseId = 2,
             exerciseName = "BenchPress",
             exerciseType = ExerciseType.Chest,
-            sets = listOf(
+            sets = persistentListOf(
                 ExerciseSet(
                     id = 4,
                     exerciseId = 2,
@@ -143,7 +145,7 @@ class WorkoutDiaryViewModelTest {
             exerciseId = 1,
             exerciseName = "DeadLift",
             exerciseType = ExerciseType.Legs,
-            sets = listOf(
+            sets = persistentListOf(
                 ExerciseSet(
                     id = 1,
                     exerciseId = 1,
@@ -183,7 +185,7 @@ class WorkoutDiaryViewModelTest {
             exerciseId = 1,
             exerciseName = "EmptyExercise",
             exerciseType = ExerciseType.Legs,
-            sets = listOf(
+            sets = persistentListOf(
                 ExerciseSet(
                     id = 1,
                     exerciseId = 1,

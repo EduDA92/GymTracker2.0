@@ -12,6 +12,7 @@ import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.utils.onNodeWithContentDescription
+import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
 import org.junit.Test
 import java.time.LocalDate
@@ -96,12 +97,12 @@ class WorkoutDiaryScreenTest {
             workoutId = 1,
             workoutDate = LocalDate.now(),
             workoutName = workoutName,
-            exercisesWithReps = listOf(
+            exercisesWithReps = persistentListOf(
                 ExerciseAndSets(
                     exerciseId = 1,
                     exerciseName = "Squat",
                     exerciseType = ExerciseType.Legs,
-                    sets = listOf(
+                    sets = persistentListOf(
                         ExerciseSet(
                             id = 1,
                             exerciseId = 1,
@@ -121,12 +122,12 @@ class WorkoutDiaryScreenTest {
             workoutId = 1,
             workoutDate = LocalDate.now(),
             workoutName = workoutName,
-            exercisesWithReps = listOf(
+            exercisesWithReps = persistentListOf(
                 ExerciseAndSets(
                     exerciseId = 1,
                     exerciseName = "Squat",
                     exerciseType = ExerciseType.Legs,
-                    sets = listOf(
+                    sets = persistentListOf(
                         ExerciseSet(
                             id = 1,
                             exerciseId = 1,

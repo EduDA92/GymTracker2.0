@@ -1,5 +1,6 @@
 package com.example.gymtracker.ui.workoutExerciseList
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -12,17 +13,25 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.outlined.Menu
-import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
@@ -36,6 +45,8 @@ import com.example.gymtracker.R
 import com.example.gymtracker.ui.commonComposables.LoadingState
 import com.example.gymtracker.ui.model.Exercise
 import com.example.gymtracker.ui.model.ExerciseType
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.coroutines.launch
 
 @Composable
 fun WorkoutExerciseListRoute(
@@ -50,19 +61,30 @@ fun WorkoutExerciseListRoute(
         modifier = modifier,
         workoutExerciseListState = workoutExerciseListState,
         updateSearchedExerciseName = viewModel::updateSearchedExerciseName,
+        clearSearchedExerciseName = viewModel::clearSearchedExerciseName,
+        updateExerciseTypeFilter = viewModel::updateExerciseTypeFilter,
+        clearExerciseTypeFilter = viewModel::clearExerciseTypeFilter,
         onBackClick = onBackClick
     )
 
 }
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun WorkoutExerciseListScreen(
     modifier: Modifier = Modifier,
     workoutExerciseListState: WorkoutExerciseListUiState,
     updateSearchedExerciseName: (String) -> Unit = {},
+    clearSearchedExerciseName: () -> Unit = {},
+    updateExerciseTypeFilter: (ExerciseType) -> Unit = {},
+    clearExerciseTypeFilter: () -> Unit = {},
     onBackClick: () -> Unit = {},
 ) {
+
+    var showBottomSheet by remember { mutableStateOf(false) }
+    val sheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
 
     when (workoutExerciseListState) {
         WorkoutExerciseListUiState.Loading -> {
@@ -79,7 +101,12 @@ fun WorkoutExerciseListScreen(
 
                 SearchFilterBar(
                     searchedExerciseName = workoutExerciseListState.state.exerciseNameFilter,
-                    updateSearchedExerciseName = updateSearchedExerciseName
+                    updateSearchedExerciseName = updateSearchedExerciseName,
+                    clearSearchedExerciseName = clearSearchedExerciseName,
+                    exerciseTypeFilter = workoutExerciseListState.state.exerciseTypeFilter,
+                    showFilterList = { showBottomSheet = it },
+                    updateExerciseTypeFilter = updateExerciseTypeFilter,
+                    clearExerciseTypeFilter = clearExerciseTypeFilter
                 )
 
                 LazyColumn(modifier = Modifier) {
@@ -89,6 +116,7 @@ fun WorkoutExerciseListScreen(
                         key = { item: Exercise -> item.id })
                     {
 
+                        // TODO add animated item placement here!
                         Text(text = it.name)
 
                     }
@@ -102,6 +130,37 @@ fun WorkoutExerciseListScreen(
                 ) {
                     Text(text = stringResource(id = R.string.workout_exercise_list_create_exercise_sr))
                 }
+
+                if (showBottomSheet) {
+                    ModalBottomSheet(
+                        onDismissRequest = { showBottomSheet = false },
+                        sheetState = sheetState
+                    ) {
+
+                        Text(text = "HELLO")
+
+                        Button(onClick = {
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showBottomSheet = false
+                                }
+                            }
+                        }) {
+                            Text("Save")
+                        }
+
+                        OutlinedButton(onClick = {
+                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                if (!sheetState.isVisible) {
+                                    showBottomSheet = false
+                                }
+                            }
+                        }) {
+                            Text("Cancel")
+                        }
+
+                    }
+                }
             }
         }
     }
@@ -112,7 +171,12 @@ fun WorkoutExerciseListScreen(
 fun SearchFilterBar(
     modifier: Modifier = Modifier,
     searchedExerciseName: String,
+    exerciseTypeFilter: String,
+    showFilterList: (Boolean) -> Unit = {},
     updateSearchedExerciseName: (String) -> Unit = {},
+    clearSearchedExerciseName: () -> Unit = {},
+    updateExerciseTypeFilter: (ExerciseType) -> Unit = {},
+    clearExerciseTypeFilter: () -> Unit = {},
 ) {
 
     Surface(
@@ -129,17 +193,47 @@ fun SearchFilterBar(
                     value = searchedExerciseName,
                     onValueChange = { updateSearchedExerciseName(it) },
                     shape = RoundedCornerShape(16.dp),
+                    trailingIcon = {
+                        IconButton(onClick =  clearSearchedExerciseName ) {
+                            Icon(
+                                imageVector = Icons.Rounded.Clear,
+                                contentDescription = stringResource(id = R.string.workout_exercise_list_clear_name_cd)
+                            )
+                        }
+                    },
                     modifier = Modifier
                         .padding(dimensionResource(id = R.dimen.medium_dp))
                         .weight(7f)
                 )
-                IconButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f)) {
-                    Icon(imageVector = Icons.Outlined.Menu, contentDescription = "")
+                IconButton(onClick = { showFilterList(true) }, modifier = Modifier.weight(1f)) {
+                    Icon(imageVector = Icons.Outlined.Menu,
+                        contentDescription = stringResource(id = R.string.workout_exercise_list_filter_button_cd))
                 }
             }
 
-            Row {
-                // TODO here show filter type and clear button
+            AnimatedVisibility(visible = exerciseTypeFilter.isNotEmpty()) {
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+
+                    Button(
+                        onClick = {},
+                        modifier.padding(start = dimensionResource(id = R.dimen.medium_dp))
+                    ) {
+                        Text(text = exerciseTypeFilter)
+                    }
+
+                    OutlinedButton(
+                        onClick = clearExerciseTypeFilter,
+                        modifier.padding(start = dimensionResource(id = R.dimen.medium_dp))
+                    ) {
+                        Text(text = stringResource(id = R.string.workout_exercise_list_clear_type_filter_sr))
+                    }
+
+                }
+
             }
 
 
@@ -149,7 +243,18 @@ fun SearchFilterBar(
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun exerciseItem(
+    modifier: Modifier = Modifier
+) {
+
+    Surface(modifier = modifier) {
+        //TODO
+    }
+
+}
+
+
 @Composable
 fun WorkoutExerciseListTopAppBar(
     modifier: Modifier = Modifier,
@@ -160,7 +265,7 @@ fun WorkoutExerciseListTopAppBar(
 
         IconButton(onClick = onBackClick) {
             Icon(
-                imageVector = Icons.Rounded.ArrowBack,
+                imageVector = Icons.AutoMirrored.Rounded.ArrowBack,
                 contentDescription = stringResource(id = R.string.back_button_cd)
             )
         }
@@ -185,9 +290,9 @@ fun WorkoutExerciseListScreenPreview() {
         workoutExerciseListState =
         WorkoutExerciseListUiState.Success(
             WorkoutExerciseListScreenState(
-                exerciseList = listOf(
+                exerciseList = persistentListOf(
                     Exercise(
-                        id= 0,
+                        id = 0,
                         name = "exercise1",
                         type = ExerciseType.Arms
                     ),
@@ -202,7 +307,7 @@ fun WorkoutExerciseListScreenPreview() {
                         type = ExerciseType.Chest
                     )
                 ),
-                exerciseTypeFiler = ExerciseType.Arms,
+                exerciseTypeFilter = ExerciseType.Arms.name,
                 exerciseNameFilter = "Test"
             )
         )

@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import com.example.gymtracker.ui.model.ExerciseSet
+import kotlinx.collections.immutable.toImmutableList
 import java.time.LocalDate
 
 // There is a relationship 1:N between Exercise and Set
@@ -40,7 +41,7 @@ fun ExerciseSetEntity.toExternalModel() = ExerciseSet(
     isCompleted = isCompleted
 )
 
-fun List<ExerciseSetEntity>.toExternalModel() = map(ExerciseSetEntity::toExternalModel)
+fun List<ExerciseSetEntity>.toExternalModel() = map(ExerciseSetEntity::toExternalModel).toImmutableList()
 
 fun ExerciseSet.asEntity() = ExerciseSetEntity(
     id = id,

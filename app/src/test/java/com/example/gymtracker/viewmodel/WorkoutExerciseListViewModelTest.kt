@@ -8,6 +8,7 @@ import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.workoutExerciseList.WorkoutExerciseListUiState
 import com.example.gymtracker.ui.workoutExerciseList.WorkoutExerciseListViewModel
 import com.example.gymtracker.utils.MainDispatcherRule
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -53,8 +54,7 @@ class WorkoutExerciseListViewModelTest {
             // First check unfiltered list
             var state = viewModel.workoutExerciseListScreenState.value
 
-            assertEquals(exerciseList.filter { it.name.contains("") },
-                (state as WorkoutExerciseListUiState.Success).state.exerciseList)
+            assertEquals(exerciseList, (state as WorkoutExerciseListUiState.Success).state.exerciseList)
 
             // Check state filtering by name
             viewModel.updateSearchedExerciseName("exercise1")
@@ -74,7 +74,7 @@ class WorkoutExerciseListViewModelTest {
             state = viewModel.workoutExerciseListScreenState.value
 
             assertEquals(exerciseList.filter { it.type == ExerciseType.Arms }, (state as WorkoutExerciseListUiState.Success).state.exerciseList)
-            assertEquals(ExerciseType.Arms, state.state.exerciseTypeFiler)
+            assertEquals(ExerciseType.Arms.name, state.state.exerciseTypeFilter)
 
             // Check state filtering by name and type
             viewModel.updateSearchedExerciseName("exercise1")
@@ -82,7 +82,7 @@ class WorkoutExerciseListViewModelTest {
 
             state = viewModel.workoutExerciseListScreenState.value
             assertEquals(exerciseList.filter { it.type == ExerciseType.Arms && it.name.contains("exercise1")}, (state as WorkoutExerciseListUiState.Success).state.exerciseList)
-            assertEquals(ExerciseType.Arms, state.state.exerciseTypeFiler)
+            assertEquals(ExerciseType.Arms.name, state.state.exerciseTypeFilter)
             assertEquals("exercise1", state.state.exerciseNameFilter)
 
             collectJob.cancel()
@@ -90,7 +90,7 @@ class WorkoutExerciseListViewModelTest {
         }
 
 
-    val exerciseList = listOf(
+    val exerciseList = persistentListOf(
         Exercise(
             id = 0,
             name = "exercise1",

@@ -10,6 +10,8 @@ import com.example.gymtracker.ui.workoutSummary.ExerciseSummary
 import com.example.gymtracker.ui.workoutSummary.WorkoutSummaryUiState
 import com.example.gymtracker.ui.workoutSummary.WorkoutSummaryViewModel
 import com.example.gymtracker.utils.MainDispatcherRule
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
@@ -138,7 +140,7 @@ class WorkoutSummaryViewModelTest {
     fun workoutSummaryViewModel_workoutSummaryUiStateSuccessValue_returnsCorrectExerciseTypeDistribution() =
         runTest {
 
-            val exerciseDistribution = mutableMapOf<ExerciseType, Int>(
+            val exerciseDistribution = persistentMapOf<ExerciseType, Int>(
                 ExerciseType.Legs to 3,
                 ExerciseType.Chest to 1
             )
@@ -163,12 +165,12 @@ class WorkoutSummaryViewModelTest {
         }
 
 
-    private val exerciseAndSets = listOf(
+    private val exerciseAndSets = persistentListOf(
         ExerciseAndSets(
             exerciseId = 1,
             exerciseName = "DeadLift",
             exerciseType = ExerciseType.Legs,
-            sets = listOf(
+            sets = persistentListOf(
                 ExerciseSet(
                     id = 1,
                     exerciseId = 1,
@@ -207,7 +209,7 @@ class WorkoutSummaryViewModelTest {
             exerciseId = 2,
             exerciseName = "BenchPress",
             exerciseType = ExerciseType.Chest,
-            sets = listOf(
+            sets = persistentListOf(
                 ExerciseSet(
                     id = 4,
                     exerciseId = 2,
@@ -246,7 +248,7 @@ class WorkoutSummaryViewModelTest {
             exerciseId = 1,
             exerciseName = "DeadLift",
             exerciseType = ExerciseType.Legs,
-            sets = listOf(
+            sets = persistentListOf(
                 ExerciseSet(
                     id = 1,
                     exerciseId = 1,
@@ -286,7 +288,7 @@ class WorkoutSummaryViewModelTest {
             exerciseId = 1,
             exerciseName = "EmptyExercise",
             exerciseType = ExerciseType.Legs,
-            sets = listOf(
+            sets = persistentListOf(
                 ExerciseSet(
                     id = 1,
                     exerciseId = 1,

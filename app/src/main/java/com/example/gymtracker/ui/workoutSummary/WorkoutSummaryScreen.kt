@@ -21,15 +21,15 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.filled.KeyboardArrowRight
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -68,8 +68,8 @@ import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.theme.GymTrackerTheme
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
-import kotlinx.collections.immutable.toImmutableList
-import kotlinx.collections.immutable.toImmutableMap
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -179,7 +179,7 @@ fun WorkoutSummaryScreen(
                             workoutId = workoutSummaryUiState.workoutSummary.workoutId,
                             workoutName = workoutSummaryUiState.workoutSummary.workoutName,
                             workoutDate = workoutSummaryUiState.workoutSummary.workoutDate,
-                            exerciseSummary = workoutSummaryUiState.workoutSummary.exercisesSummary.toImmutableList(),
+                            exerciseSummary = workoutSummaryUiState.workoutSummary.exercisesSummary,
                             onEditWorkoutButton = navigateToWorkout,
                             deleteWorkout = deleteWorkout
                         )
@@ -210,7 +210,7 @@ fun WorkoutSummaryScreen(
 
                             ExerciseDistributionCard(
                                 modifier = Modifier.weight(1f),
-                                data = workoutSummaryUiState.workoutSummary.workoutExerciseDistribution.toImmutableMap()
+                                data = workoutSummaryUiState.workoutSummary.workoutExerciseDistribution
                             )
                         }
 
@@ -366,7 +366,7 @@ fun WorkoutSummaryCard(
                 }
 
                 if (index < exerciseSummary.size - 1) {
-                    Divider()
+                    HorizontalDivider()
                 }
 
             }
@@ -603,7 +603,7 @@ fun CurrentDateBar(
                     .wrapContentWidth(Alignment.Start)
             ) {
                 Icon(
-                    imageVector = Icons.Filled.KeyboardArrowLeft,
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                     contentDescription = stringResource(
                         id = R.string.prev_date_icon_sr
                     )
@@ -629,7 +629,7 @@ fun CurrentDateBar(
                     .wrapContentWidth(Alignment.End)
             ) {
                 Icon(
-                    imageVector = Icons.Filled.KeyboardArrowRight,
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                     contentDescription = stringResource(
                         id = R.string.next_date_icon_sr
                     )
@@ -651,13 +651,13 @@ fun WorkoutSummaryPreview() {
             workoutDate = LocalDate.now(),
             workoutTotalWeightVolume = 300000.68f,
             workoutTotalRepsVolume = 10000,
-            workoutExerciseDistribution = mutableMapOf(
+            workoutExerciseDistribution = persistentMapOf(
                 ExerciseType.Arms to 2,
                 ExerciseType.Chest to 3,
                 ExerciseType.Shoulders to 2,
                 ExerciseType.FullBody to 4
             ),
-            exercisesSummary = listOf(
+            exercisesSummary = persistentListOf(
                 ExerciseSummary(
                     name = "Squat",
                     sets = 999,

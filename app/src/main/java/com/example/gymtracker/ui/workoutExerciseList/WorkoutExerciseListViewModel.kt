@@ -8,6 +8,8 @@ import com.example.gymtracker.data.repository.WorkoutRepository
 import com.example.gymtracker.ui.model.Exercise
 import com.example.gymtracker.ui.model.ExerciseType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -26,13 +28,13 @@ class WorkoutExerciseListViewModel @Inject constructor(
     val workoutId: Long = savedStateHandle["workoutId"] ?: 0L
 
     // Exercise list state
-    val exerciseList = exerciseRepository.observeExercises()
+    private val exerciseList = exerciseRepository.observeExercises()
 
     // State to handle the filter by name
     private val _searchedExerciseName = MutableStateFlow("")
 
     // State to handle the filter by exercise type
-    private val _exerciseTypeFilter = MutableStateFlow(ExerciseType.Other)
+    private val _exerciseTypeFilter = MutableStateFlow("")
 
 
     val workoutExerciseListScreenState: StateFlow<WorkoutExerciseListUiState> =
@@ -42,17 +44,12 @@ class WorkoutExerciseListViewModel @Inject constructor(
             _exerciseTypeFilter
         ) { exerciseList, exerciseName, exerciseType ->
 
-
             WorkoutExerciseListUiState.Success(
                 WorkoutExerciseListScreenState(
                     exerciseList = exerciseList.filter {
-                        if(exerciseType == ExerciseType.Other){
-                            it.name.contains(exerciseName)
-                        } else {
-                            it.name.contains(exerciseName) && it.type == exerciseType
-                        }
-                    },
-                    exerciseTypeFiler = exerciseType,
+                        it.name.contains(exerciseName) && it.type.name.contains(exerciseType)
+                    }.toImmutableList(),
+                    exerciseTypeFilter = exerciseType,
                     exerciseNameFilter = exerciseName
                 )
             )
@@ -65,7 +62,13 @@ class WorkoutExerciseListViewModel @Inject constructor(
 
     fun updateExerciseTypeFilter(exerciseType: ExerciseType) {
         _exerciseTypeFilter.update {
-            exerciseType
+            exerciseType.name
+        }
+    }
+
+    fun clearExerciseTypeFilter() {
+        _exerciseTypeFilter.update {
+            ""
         }
     }
 
@@ -74,6 +77,13 @@ class WorkoutExerciseListViewModel @Inject constructor(
             searchedName
         }
     }
+
+    fun clearSearchedExerciseName() {
+        _searchedExerciseName.update {
+            ""
+        }
+    }
+
 
 }
 
@@ -84,7 +94,7 @@ sealed interface WorkoutExerciseListUiState {
 }
 
 data class WorkoutExerciseListScreenState(
-    val exerciseList: List<Exercise>,
-    val exerciseTypeFiler: ExerciseType,
+    val exerciseList: ImmutableList<Exercise>,
+    val exerciseTypeFilter: String,
     val exerciseNameFilter: String
 )
