@@ -21,15 +21,15 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.KeyboardArrowLeft
+import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -366,7 +366,7 @@ fun WorkoutSummaryCard(
                 }
 
                 if (index < exerciseSummary.size - 1) {
-                    HorizontalDivider()
+                    Divider()
                 }
 
             }
@@ -603,7 +603,7 @@ fun CurrentDateBar(
                     .wrapContentWidth(Alignment.Start)
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
+                    imageVector = Icons.Filled.KeyboardArrowLeft,
                     contentDescription = stringResource(
                         id = R.string.prev_date_icon_sr
                     )
@@ -629,7 +629,7 @@ fun CurrentDateBar(
                     .wrapContentWidth(Alignment.End)
             ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    imageVector = Icons.Filled.KeyboardArrowRight,
                     contentDescription = stringResource(
                         id = R.string.next_date_icon_sr
                     )
