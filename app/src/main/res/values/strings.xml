@@ -43,4 +43,12 @@
     <string name="workout_exercise_list_clear_type_filter_sr">Clear</string>
     <string name="workout_exercise_list_clear_name_cd">Clear search name</string>
     <string name="workout_exercise_list_filter_button_cd">Filter button</string>
+    <string name="workout_exercise_list_search_name_cd">Search name</string>
+    <string name="workout_exercise_list_exercise_name_sr">Exercise Name</string>
+    <string name="workout_exercise_list_exercise_type_sr">Exercise Type</string>
+    <string name="workout_exercise_list_exercise_name_text_field_cd">Exercise name text field</string>
+    <string name="workout_exercise_list_exercise_type_text_field_cd">Exercise type text field</string>
+    <string name="workout_exercise_list_save_exercise_text_sr">Save Exercise</string>
+    <string name="workout_exercise_list_cancel_exercise_creation_text_sr">Cancel</string>
+    <string name="workout_exercise_list_drop_menu_button_cd">exercise list menu button</string>
 </resources>

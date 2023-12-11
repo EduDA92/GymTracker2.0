@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -82,6 +83,19 @@ class WorkoutExerciseListViewModel @Inject constructor(
         _searchedExerciseName.update {
             ""
         }
+    }
+
+    fun createExercise(exerciseName: String, exerciseType: ExerciseType) {
+
+        viewModelScope.launch {
+            exerciseRepository.upsertExercise(
+                Exercise(
+                    name = exerciseName,
+                    type = exerciseType
+                )
+            )
+        }
+
     }
 
 

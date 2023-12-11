@@ -78,7 +78,7 @@ class WorkoutDiaryViewModel @Inject constructor(
 
         viewModelScope.launch {
             workoutRepository.updateWorkoutName(
-                workoutId = (workoutDiaryUiState.value as WorkoutDiaryUiState.Success).diary.workoutId,
+                workoutId = workoutId,
                 workoutName = workoutName
             )
         }

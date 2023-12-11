@@ -62,7 +62,7 @@ class WorkoutDiaryScreenTest {
     }
 
     @Test
-    fun workoutDiaryScreen_whenRotatingDevice_editTextFieldsRetainState(){
+    fun workoutDiaryScreen_whenRestoringState_editTextFieldsRetainState(){
 
         val restorationTester = StateRestorationTester(composeTestRule)
 
