@@ -1,8 +1,11 @@
 package com.example.gymtracker.ui
 
 import androidx.activity.ComponentActivity
+import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performTextClearance
+import androidx.compose.ui.test.performTextInput
 import com.example.gymtracker.ui.workoutDiary.WorkoutDiary
 import com.example.gymtracker.ui.workoutDiary.WorkoutDiaryScreen
 import com.example.gymtracker.ui.workoutDiary.WorkoutDiaryUiState
@@ -59,6 +62,40 @@ class WorkoutDiaryScreenTest {
     }
 
     @Test
+    fun workoutDiaryScreen_whenRotatingDevice_editTextFieldsRetainState(){
+
+        val restorationTester = StateRestorationTester(composeTestRule)
+
+        restorationTester.setContent {
+            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState, workoutNameEditFieldState = true)
+        }
+
+        // Clean edittext title, reps and weight
+        composeTestRule.onNodeWithContentDescription(R.string.workout_title_edit_field_cd).assertExists()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_title_edit_field_cd).performTextClearance()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_weight_edit_text_cd).assertExists()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_weight_edit_text_cd).performTextClearance()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_reps_edit_text_cd).assertExists()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_reps_edit_text_cd).performTextClearance()
+
+        // Add new text
+        composeTestRule.onNodeWithContentDescription(R.string.workout_title_edit_field_cd).performTextInput("NewWorkout")
+        composeTestRule.onNodeWithText("NewWorkout").assertExists()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_weight_edit_text_cd).performTextInput("234")
+        composeTestRule.onNodeWithText("234").assertExists()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_reps_edit_text_cd).performTextInput("23")
+        composeTestRule.onNodeWithText("23").assertExists()
+
+        // trigger recreation and check
+        restorationTester.emulateSavedInstanceStateRestore()
+
+        composeTestRule.onNodeWithText("NewWorkout").assertExists()
+        composeTestRule.onNodeWithText("234").assertExists()
+        composeTestRule.onNodeWithText("23").assertExists()
+
+    }
+
+    @Test
     fun workoutDiaryScreen_whenSetIsNotCompleted_editTextsAndCorrectIconIsShown(){
 
         composeTestRule.setContent {
@@ -72,6 +109,7 @@ class WorkoutDiaryScreenTest {
         composeTestRule.onNodeWithContentDescription(R.string.incomplete_exercise_set_button_cd).assertExists()
 
     }
+
 
     @Test
     fun workoutDiaryScreen_whenSetIsCompleted_TextsAndCorrectIconIsShown(){

@@ -104,7 +104,6 @@ fun WorkoutExerciseListScreen(
                     updateSearchedExerciseName = updateSearchedExerciseName,
                     clearSearchedExerciseName = clearSearchedExerciseName,
                     exerciseTypeFilter = workoutExerciseListState.state.exerciseTypeFilter,
-                    showFilterList = { showBottomSheet = it },
                     updateExerciseTypeFilter = updateExerciseTypeFilter,
                     clearExerciseTypeFilter = clearExerciseTypeFilter
                 )
@@ -125,7 +124,7 @@ fun WorkoutExerciseListScreen(
                 }
 
                 Button(
-                    onClick = { /*TODO*/ },
+                    onClick = { showBottomSheet = true },
                     shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp))
                 ) {
                     Text(text = stringResource(id = R.string.workout_exercise_list_create_exercise_sr))
@@ -213,26 +212,7 @@ fun SearchFilterBar(
 
             AnimatedVisibility(visible = exerciseTypeFilter.isNotEmpty()) {
 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-
-                    Button(
-                        onClick = {},
-                        modifier.padding(start = dimensionResource(id = R.dimen.medium_dp))
-                    ) {
-                        Text(text = exerciseTypeFilter)
-                    }
-
-                    OutlinedButton(
-                        onClick = clearExerciseTypeFilter,
-                        modifier.padding(start = dimensionResource(id = R.dimen.medium_dp))
-                    ) {
-                        Text(text = stringResource(id = R.string.workout_exercise_list_clear_type_filter_sr))
-                    }
-
-                }
+                // TODO Create exercise here
 
             }
 
