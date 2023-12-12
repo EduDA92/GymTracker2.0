@@ -100,8 +100,27 @@ fun WorkoutExerciseListScreen(
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
+    val exerciseTypeList = remember {ExerciseType.entries.toImmutableList() }
+    
+    /* Bottom sheet states are hoisted here in order to survive all config changes, if this states
+    * instead of being hoisted here are inside the ExerciseNameCreation Composable the composable
+    * wont pass the config change test
+    * Maybe this has to do with how ModalBottomSheet works under the hood, because in the device
+    * on rotation the state is saved successfully*/
 
-    val exerciseTypeList = ExerciseType.entries.toImmutableList()
+   var exerciseName by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var exerciseType by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    val buttonState by remember {
+        derivedStateOf {
+            exerciseName.isNotEmpty() && exerciseType.isNotEmpty()
+        }
+    }
 
     when (workoutExerciseListState) {
         WorkoutExerciseListUiState.Loading -> {
@@ -155,6 +174,7 @@ fun WorkoutExerciseListScreen(
                         sheetState = sheetState
                     ) {
 
+
                         ExerciseNameCreation(
                             showBottomSheet = {
                                 scope.launch { sheetState.hide() }.invokeOnCompletion {
@@ -164,7 +184,12 @@ fun WorkoutExerciseListScreen(
                                 }
                             },
                             exerciseTypeList = exerciseTypeList,
-                            createExercise = createExercise
+                            createExercise = createExercise,
+                            exerciseType = exerciseType,
+                            exerciseName = exerciseName,
+                            saveButtonState = buttonState,
+                            onExerciseNameChanged = {exerciseName = it},
+                            onExerciseTypeChanged = {exerciseType = it}
                         )
 
                     }
@@ -180,6 +205,11 @@ fun WorkoutExerciseListScreen(
 fun ExerciseNameCreation(
     modifier: Modifier = Modifier,
     showBottomSheet: () -> Unit,
+    exerciseName: String,
+    exerciseType: String,
+    saveButtonState: Boolean,
+    onExerciseNameChanged: (String) -> Unit = {},
+    onExerciseTypeChanged: (String) -> Unit = {},
     exerciseTypeList: ImmutableList<ExerciseType>,
     createExercise: (String, ExerciseType) -> Unit = { _, _ -> }
 ) {
@@ -189,25 +219,11 @@ fun ExerciseNameCreation(
     val exerciseTypeTextFieldCd =
         stringResource(id = R.string.workout_exercise_list_exercise_type_text_field_cd)
 
-    var exerciseName by rememberSaveable {
-        mutableStateOf("")
-    }
-
-    var exerciseType by rememberSaveable {
-        mutableStateOf("")
-    }
 
     var dropdownMenuExpanded by rememberSaveable {
         mutableStateOf(false)
     }
-
-    /* This will enable the button when the fields are not empty */
-    val buttonState by remember {
-        derivedStateOf {
-            exerciseName.isNotEmpty() && exerciseType.isNotEmpty()
-        }
-    }
-
+    
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -218,7 +234,7 @@ fun ExerciseNameCreation(
 
         OutlinedTextField(
             value = exerciseName,
-            onValueChange = { exerciseName = it },
+            onValueChange = {onExerciseNameChanged(it)},
             shape = RoundedCornerShape(16.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             modifier = Modifier.semantics { contentDescription = exerciseNameTextFieldCd }
@@ -256,7 +272,7 @@ fun ExerciseNameCreation(
                     DropdownMenuItem(
                         text = { Text(text = exerciseTypeOption.name) },
                         onClick = {
-                            exerciseType = exerciseTypeOption.name
+                            onExerciseTypeChanged(exerciseTypeOption.name)
                             dropdownMenuExpanded = false
                         })
 
@@ -269,7 +285,7 @@ fun ExerciseNameCreation(
         Button(onClick = {
             createExercise(exerciseName, ExerciseType.valueOf(exerciseType))
             showBottomSheet()
-        }, enabled = buttonState) {
+        }, enabled = saveButtonState) {
             Text(stringResource(id = R.string.workout_exercise_list_save_exercise_text_sr))
         }
 
@@ -418,7 +434,10 @@ fun ExerciseNameCreationPreview() {
 
     ExerciseNameCreation(
         showBottomSheet = { },
-        exerciseTypeList = ExerciseType.entries.toImmutableList()
+        exerciseTypeList = ExerciseType.entries.toImmutableList(),
+        exerciseName = "",
+        exerciseType = "",
+        saveButtonState = false
     )
 
 }

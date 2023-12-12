@@ -48,7 +48,7 @@ class WorkoutExerciseListViewModel @Inject constructor(
             WorkoutExerciseListUiState.Success(
                 WorkoutExerciseListScreenState(
                     exerciseList = exerciseList.filter {
-                        it.name.contains(exerciseName) && it.type.name.contains(exerciseType)
+                        it.name.contains(exerciseName, ignoreCase = true) && it.type.name.contains(exerciseType, ignoreCase = true)
                     }.toImmutableList(),
                     exerciseTypeFilter = exerciseType,
                     exerciseNameFilter = exerciseName
