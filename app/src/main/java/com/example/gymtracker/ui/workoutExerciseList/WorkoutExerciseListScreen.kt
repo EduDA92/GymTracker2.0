@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -91,11 +92,11 @@ fun WorkoutExerciseListRoute(
     val lifecycleOwner = LocalLifecycleOwner.current
 
     // navigate back when the exercises are added to the workout
-    LaunchedEffect(lifecycleOwner.lifecycle){
+    LaunchedEffect(lifecycleOwner.lifecycle) {
         lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
             withContext(Dispatchers.Main.immediate) {
-                viewModel.addExerciseEventFlow.collect{
-                   onBackClick()
+                viewModel.addExerciseEventFlow.collect {
+                    onBackClick()
                 }
 
             }
@@ -183,7 +184,7 @@ fun WorkoutExerciseListScreen(
 
                         items(
                             items = workoutExerciseListState.state.exerciseList,
-                            key = { item: ExerciseState-> item.exercise.id })
+                            key = { item: ExerciseState -> item.exercise.id })
                         {
 
                             ExerciseItem(
@@ -227,10 +228,10 @@ fun WorkoutExerciseListScreen(
                     }
 
                     Button(
-                        onClick = {addExercisesToWorkout()},
+                        onClick = { addExercisesToWorkout() },
                         modifier = Modifier.align(Alignment.BottomCenter),
                         enabled = workoutExerciseListState.state.checkedExercises
-                    ){
+                    ) {
                         Text(text = stringResource(id = R.string.workout_exercise_list_add_exercises_button_sr))
                     }
 
@@ -487,11 +488,16 @@ fun ExerciseItem(
     Surface(modifier = modifier
         .fillMaxWidth()
         .clickable { updateExerciseToCheckedList(exerciseId) }) {
-        Row {
+        Row(verticalAlignment = Alignment.CenterVertically) {
 
-            Column {
+            Column(
+                modifier = Modifier
+                    .padding(dimensionResource(id = R.dimen.medium_dp))
+                    .weight(5f)
+            ) {
                 Text(
                     text = exerciseName,
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
@@ -502,7 +508,11 @@ fun ExerciseItem(
             }
 
             if (isChecked) {
-                Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = "test")
+                Icon(
+                    imageVector = Icons.Rounded.CheckCircle,
+                    contentDescription = "test",
+                    modifier = Modifier.weight(1f)
+                )
             }
 
         }
@@ -557,22 +567,27 @@ fun WorkoutExerciseListScreenPreview() {
         WorkoutExerciseListUiState.Success(
             WorkoutExerciseListScreenState(
                 exerciseList = persistentListOf(
-                    ExerciseState(exercise = Exercise(
-                        id = 0,
-                        name = "exercise1",
-                        type = ExerciseType.Arms
-                    ), isChecked = true)
-                    ,
-                    ExerciseState(exercise = Exercise(
-                        id = 1,
-                        name = "exercise2",
-                        type = ExerciseType.Legs
-                    ), isChecked = false),
-                    ExerciseState(exercise = Exercise(
-                        id = 2,
-                        name = "exercise3",
-                        type = ExerciseType.Chest
-                    ), isChecked = false)
+                    ExerciseState(
+                        exercise = Exercise(
+                            id = 0,
+                            name = "exercise1",
+                            type = ExerciseType.Arms
+                        ), isChecked = true
+                    ),
+                    ExerciseState(
+                        exercise = Exercise(
+                            id = 1,
+                            name = "exercise2",
+                            type = ExerciseType.Legs
+                        ), isChecked = false
+                    ),
+                    ExerciseState(
+                        exercise = Exercise(
+                            id = 2,
+                            name = "exercise3",
+                            type = ExerciseType.Chest
+                        ), isChecked = false
+                    )
                 ),
                 exerciseTypeFilter = ExerciseType.Arms.name,
                 exerciseNameFilter = "Test",

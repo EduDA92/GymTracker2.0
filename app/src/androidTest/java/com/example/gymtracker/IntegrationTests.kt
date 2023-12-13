@@ -2,17 +2,18 @@ package com.example.gymtracker
 
 
 
+import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.utils.onNodeWithContentDescription
 import com.example.gymtracker.utils.onNodeWithStringId
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
-import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -32,7 +33,7 @@ class IntegrationTests {
     }
 
     @Test
-    fun gymTracker_basic_behaviour_test() = runTest {
+    fun gymTracker_basic_behaviour_test()  {
 
         /* Create workout and assert navigation to diary was done */
         composeTestRule.onNodeWithStringId(R.string.create_workout_button_sr).performClick()
@@ -54,6 +55,64 @@ class IntegrationTests {
         composeTestRule.onNodeWithStringId(R.string.dropdown_menu_delete_workout_sr).performClick()
 
         composeTestRule.onNodeWithStringId(R.string.no_workout_data_sr).assertExists()
+
+    }
+
+    /* This test the path of creating workout - creating exercise and adding it to the workout -
+    * adding set and modifying it and back to main screen */
+    @Test
+    fun gymTracker_createExerciseAndAddingSets_test(){
+
+        // Create new workout
+        composeTestRule.onNodeWithStringId(R.string.create_workout_button_sr).performClick()
+        composeTestRule.onNodeWithText("default").assertExists()
+
+        // go to exercise List screen
+        composeTestRule.onNodeWithStringId(R.string.add_exercise_button).performClick()
+
+        // Create new exercise
+        composeTestRule.onNodeWithStringId(R.string.workout_exercise_list_create_exercise_sr).performClick()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_exercise_list_exercise_name_text_field_cd).performTextInput("Squat")
+        composeTestRule.onNodeWithContentDescription(R.string.workout_exercise_list_drop_menu_button_cd).performClick()
+        composeTestRule.onNodeWithText(ExerciseType.Legs.name).performClick()
+        composeTestRule.onNodeWithStringId(R.string.workout_exercise_list_save_exercise_text_sr).performClick()
+
+        // tap on exercise and add it to the workout
+        composeTestRule.onNodeWithText("Squat").performClick()
+        composeTestRule.onNodeWithStringId(R.string.workout_exercise_list_add_exercises_button_sr).assertIsEnabled()
+        composeTestRule.onNodeWithStringId(R.string.workout_exercise_list_add_exercises_button_sr).performClick()
+
+        /* add a set to the exercise and check the behaviour:
+        * At the start the fields are editable and the icon is an incomplete icon button
+        * When the set is submitted the fields are plain text and the icon button is complete icon button
+        * When the set is submitted tapping the complete set icon button will do nothing
+        * In order to edit a set clicking the text will make the set editable again*/
+
+        composeTestRule.onNodeWithStringId(R.string.add_set_button_sr).performClick()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_weight_edit_text_cd).assertExists()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_reps_edit_text_cd).assertExists()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_weight_edit_text_cd).performTextClearance()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_reps_edit_text_cd).performTextClearance()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_weight_edit_text_cd).performTextInput("234")
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_reps_edit_text_cd).performTextInput("23")
+        composeTestRule.onNodeWithContentDescription(R.string.incomplete_exercise_set_button_cd).performClick()
+
+        //check that the fields ain't editable and the button is completed set button
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_weight_edit_text_cd).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_reps_edit_text_cd).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(R.string.complete_exercise_set_button_cd).assertExists()
+
+        // Check that tapping completed button doesn't set fields to editable
+        composeTestRule.onNodeWithContentDescription(R.string.complete_exercise_set_button_cd).performClick()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_weight_edit_text_cd).assertDoesNotExist()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_reps_edit_text_cd).assertDoesNotExist()
+
+        // assert that taping in a text makes the field editable again
+        composeTestRule.onNodeWithText("23").performClick()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_weight_edit_text_cd).assertExists()
+        composeTestRule.onNodeWithContentDescription(R.string.workout_diary_reps_edit_text_cd).assertExists()
+        composeTestRule.onNodeWithContentDescription(R.string.incomplete_exercise_set_button_cd).assertExists()
+
 
     }
 
