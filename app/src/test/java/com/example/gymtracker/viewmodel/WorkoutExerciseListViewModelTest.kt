@@ -5,6 +5,7 @@ import com.example.gymtracker.testdoubles.repository.TestExerciseRepository
 import com.example.gymtracker.testdoubles.repository.TestWorkoutRepository
 import com.example.gymtracker.ui.model.Exercise
 import com.example.gymtracker.ui.model.ExerciseType
+import com.example.gymtracker.ui.workoutExerciseList.ExerciseState
 import com.example.gymtracker.ui.workoutExerciseList.WorkoutExerciseListUiState
 import com.example.gymtracker.ui.workoutExerciseList.WorkoutExerciseListViewModel
 import com.example.gymtracker.utils.MainDispatcherRule
@@ -54,7 +55,7 @@ class WorkoutExerciseListViewModelTest {
             // First check unfiltered list
             var state = viewModel.workoutExerciseListScreenState.value
 
-            assertEquals(exerciseList, (state as WorkoutExerciseListUiState.Success).state.exerciseList)
+            assertEquals(exerciseStateList, (state as WorkoutExerciseListUiState.Success).state.exerciseList)
 
             // Check state filtering by name
             viewModel.updateSearchedExerciseName("exercise1")
@@ -62,7 +63,7 @@ class WorkoutExerciseListViewModelTest {
             state = viewModel.workoutExerciseListScreenState.value
 
             assertEquals(
-                exerciseList.filter { it.name.contains("exercise1") },
+                exerciseStateList.filter { it.exercise.name.contains("exercise1") },
                 (state as WorkoutExerciseListUiState.Success).state.exerciseList
             )
             assertEquals("exercise1", state.state.exerciseNameFilter)
@@ -73,7 +74,7 @@ class WorkoutExerciseListViewModelTest {
 
             state = viewModel.workoutExerciseListScreenState.value
 
-            assertEquals(exerciseList.filter { it.type == ExerciseType.Arms }, (state as WorkoutExerciseListUiState.Success).state.exerciseList)
+            assertEquals(exerciseStateList.filter { it.exercise.type == ExerciseType.Arms }, (state as WorkoutExerciseListUiState.Success).state.exerciseList)
             assertEquals(ExerciseType.Arms.name, state.state.exerciseTypeFilter)
 
             // Check state filtering by name and type
@@ -81,7 +82,7 @@ class WorkoutExerciseListViewModelTest {
             viewModel.updateExerciseTypeFilter(ExerciseType.Arms)
 
             state = viewModel.workoutExerciseListScreenState.value
-            assertEquals(exerciseList.filter { it.type == ExerciseType.Arms && it.name.contains("exercise1")}, (state as WorkoutExerciseListUiState.Success).state.exerciseList)
+            assertEquals(exerciseStateList.filter { it.exercise.type == ExerciseType.Arms && it.exercise.name.contains("exercise1")}, (state as WorkoutExerciseListUiState.Success).state.exerciseList)
             assertEquals(ExerciseType.Arms.name, state.state.exerciseTypeFilter)
             assertEquals("exercise1", state.state.exerciseNameFilter)
 
@@ -89,6 +90,95 @@ class WorkoutExerciseListViewModelTest {
 
         }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    @Test
+    fun workoutExerciseListViewModel_checkingAndUncheckingExercises_updatesStateAccordingly() = runTest {
+
+        val collectJob = launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.workoutExerciseListScreenState.collect() }
+
+        exerciseRepository.emitExercises(exerciseList)
+
+        // Mark some exercises as checked
+        viewModel.updateExerciseToCheckedList(0)
+        viewModel.updateExerciseToCheckedList(1)
+
+        val state = viewModel.workoutExerciseListScreenState.value
+
+        assertEquals(testExerciseStateList, (state as WorkoutExerciseListUiState.Success).state.exerciseList)
+
+
+        collectJob.cancel()
+    }
+
+    val exerciseStateList = persistentListOf(
+        ExerciseState(
+            exercise =  Exercise(
+                id = 0,
+                name = "exercise1",
+                type = ExerciseType.Arms
+            ),
+            isChecked = false
+        ),
+        ExerciseState(
+            Exercise(
+                id = 1,
+                name = "exercise2",
+                type = ExerciseType.Legs
+            ),
+            isChecked = false
+        ),
+        ExerciseState(
+            Exercise(
+                id = 2,
+                name = "exercise2",
+                type = ExerciseType.Chest
+            ),
+            isChecked = false
+        ),
+        ExerciseState(
+            Exercise(
+                id = 3,
+                name = "exercise4",
+                type = ExerciseType.Arms
+            ),
+            isChecked = false
+        )
+    )
+
+    val testExerciseStateList = persistentListOf(
+        ExerciseState(
+            exercise =  Exercise(
+                id = 0,
+                name = "exercise1",
+                type = ExerciseType.Arms
+            ),
+            isChecked = true
+        ),
+        ExerciseState(
+            Exercise(
+                id = 1,
+                name = "exercise2",
+                type = ExerciseType.Legs
+            ),
+            isChecked = true
+        ),
+        ExerciseState(
+            Exercise(
+                id = 2,
+                name = "exercise2",
+                type = ExerciseType.Chest
+            ),
+            isChecked = false
+        ),
+        ExerciseState(
+            Exercise(
+                id = 3,
+                name = "exercise4",
+                type = ExerciseType.Arms
+            ),
+            isChecked = false
+        )
+    )
 
     val exerciseList = persistentListOf(
         Exercise(
@@ -107,7 +197,7 @@ class WorkoutExerciseListViewModelTest {
             type = ExerciseType.Chest
         ),
         Exercise(
-            id = 0,
+            id = 3,
             name = "exercise4",
             type = ExerciseType.Arms
         )

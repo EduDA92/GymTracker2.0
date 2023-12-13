@@ -1,24 +1,33 @@
 package com.example.gymtracker.ui.workoutExerciseList
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowColumn
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.Menu
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Clear
+import androidx.compose.material.icons.rounded.KeyboardArrowUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +42,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -42,24 +52,32 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.repeatOnLifecycle
 import com.example.gymtracker.R
 import com.example.gymtracker.ui.commonComposables.LoadingState
 import com.example.gymtracker.ui.model.Exercise
 import com.example.gymtracker.ui.model.ExerciseType
+import com.example.gymtracker.ui.utils.recomposeHighlighter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun WorkoutExerciseListRoute(
@@ -70,6 +88,20 @@ fun WorkoutExerciseListRoute(
 
     val workoutExerciseListState by viewModel.workoutExerciseListScreenState.collectAsStateWithLifecycle()
 
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    // navigate back when the exercises are added to the workout
+    LaunchedEffect(lifecycleOwner.lifecycle){
+        lifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            withContext(Dispatchers.Main.immediate) {
+                viewModel.addExerciseEventFlow.collect{
+                   onBackClick()
+                }
+
+            }
+        }
+    }
+
     WorkoutExerciseListScreen(
         modifier = modifier,
         workoutExerciseListState = workoutExerciseListState,
@@ -78,13 +110,15 @@ fun WorkoutExerciseListRoute(
         createExercise = viewModel::createExercise,
         updateExerciseTypeFilter = viewModel::updateExerciseTypeFilter,
         clearExerciseTypeFilter = viewModel::clearExerciseTypeFilter,
+        updateExerciseToCheckedList = viewModel::updateExerciseToCheckedList,
+        addExercisesToWorkout = viewModel::addExercisesToWorkout,
         onBackClick = onBackClick
     )
 
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun WorkoutExerciseListScreen(
     modifier: Modifier = Modifier,
@@ -94,33 +128,25 @@ fun WorkoutExerciseListScreen(
     createExercise: (String, ExerciseType) -> Unit = { _, _ -> },
     updateExerciseTypeFilter: (ExerciseType) -> Unit = {},
     clearExerciseTypeFilter: () -> Unit = {},
+    updateExerciseToCheckedList: (Long) -> Unit = {},
+    addExercisesToWorkout: () -> Unit = {},
     onBackClick: () -> Unit = {},
 ) {
 
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
     val sheetState = rememberModalBottomSheetState()
+    val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    val exerciseTypeList = remember {ExerciseType.entries.toImmutableList() }
-    
-    /* Bottom sheet states are hoisted here in order to survive all config changes, if this states
-    * instead of being hoisted here are inside the ExerciseNameCreation Composable the composable
-    * wont pass the config change test
-    * Maybe this has to do with how ModalBottomSheet works under the hood, because in the device
-    * on rotation the state is saved successfully*/
+    val exerciseTypeList = remember { ExerciseType.entries.toImmutableList() }
 
-   var exerciseName by rememberSaveable {
-        mutableStateOf("")
-    }
 
-    var exerciseType by rememberSaveable {
-        mutableStateOf("")
-    }
-
-    val buttonState by remember {
+    val showScrollTopButton by remember {
         derivedStateOf {
-            exerciseName.isNotEmpty() && exerciseType.isNotEmpty()
+            listState.firstVisibleItemIndex > 0
         }
     }
+
+
 
     when (workoutExerciseListState) {
         WorkoutExerciseListUiState.Loading -> {
@@ -128,6 +154,8 @@ fun WorkoutExerciseListScreen(
         }
 
         is WorkoutExerciseListUiState.Success -> {
+
+
             Column(
                 modifier = modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
@@ -144,27 +172,68 @@ fun WorkoutExerciseListScreen(
                     updateExerciseTypeFilter = updateExerciseTypeFilter,
                     clearExerciseTypeFilter = clearExerciseTypeFilter
                 )
+                Box(modifier = Modifier.fillMaxSize()) {
 
-                LazyColumn(modifier = Modifier) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxWidth(),
+                        state = listState,
+                        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.small_dp)),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
 
-                    items(
-                        items = workoutExerciseListState.state.exerciseList,
-                        key = { item: Exercise -> item.id })
-                    {
+                        items(
+                            items = workoutExerciseListState.state.exerciseList,
+                            key = { item: ExerciseState-> item.exercise.id })
+                        {
 
-                        // TODO add animated item placement here!
-                        Text(text = it.name)
+                            ExerciseItem(
+                                exerciseId = it.exercise.id,
+                                exerciseName = it.exercise.name,
+                                exerciseType = it.exercise.type.name,
+                                isChecked = it.isChecked,
+                                updateExerciseToCheckedList = updateExerciseToCheckedList,
+                                modifier = Modifier
+                                    .animateItemPlacement()
+                                    .recomposeHighlighter()
+                            )
 
+                        }
+
+                        // Create exercise button
+                        item {
+
+                            Button(
+                                onClick = { showBottomSheet = true },
+                                shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp))
+                            ) {
+                                Text(text = stringResource(id = R.string.workout_exercise_list_create_exercise_sr))
+                            }
+
+                        }
                     }
 
+                    /* This will show button to scroll to the top */
+                    this@Column.AnimatedVisibility(visible = showScrollTopButton) {
+                        Button(
+                            onClick = { scope.launch { listState.animateScrollToItem(0) } },
+                            shape = CircleShape,
+                            modifier = Modifier.align(Alignment.BottomEnd)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Rounded.KeyboardArrowUp,
+                                contentDescription = stringResource(id = R.string.workout_exercise_list_scroll_top_button_cd)
+                            )
+                        }
+                    }
 
-                }
+                    Button(
+                        onClick = {addExercisesToWorkout()},
+                        modifier = Modifier.align(Alignment.BottomCenter),
+                        enabled = workoutExerciseListState.state.checkedExercises
+                    ){
+                        Text(text = stringResource(id = R.string.workout_exercise_list_add_exercises_button_sr))
+                    }
 
-                Button(
-                    onClick = { showBottomSheet = true },
-                    shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp))
-                ) {
-                    Text(text = stringResource(id = R.string.workout_exercise_list_create_exercise_sr))
                 }
 
                 /* Bottom sheet handles the exercise creation */
@@ -184,14 +253,10 @@ fun WorkoutExerciseListScreen(
                                 }
                             },
                             exerciseTypeList = exerciseTypeList,
-                            createExercise = createExercise,
-                            exerciseType = exerciseType,
-                            exerciseName = exerciseName,
-                            saveButtonState = buttonState,
-                            onExerciseNameChanged = {exerciseName = it},
-                            onExerciseTypeChanged = {exerciseType = it}
+                            createExercise = createExercise
                         )
 
+                        Spacer(modifier = Modifier.size(56.dp))
                     }
                 }
             }
@@ -204,12 +269,7 @@ fun WorkoutExerciseListScreen(
 @Composable
 fun ExerciseNameCreation(
     modifier: Modifier = Modifier,
-    showBottomSheet: () -> Unit,
-    exerciseName: String,
-    exerciseType: String,
-    saveButtonState: Boolean,
-    onExerciseNameChanged: (String) -> Unit = {},
-    onExerciseTypeChanged: (String) -> Unit = {},
+    showBottomSheet: () -> Unit = {},
     exerciseTypeList: ImmutableList<ExerciseType>,
     createExercise: (String, ExerciseType) -> Unit = { _, _ -> }
 ) {
@@ -219,28 +279,48 @@ fun ExerciseNameCreation(
     val exerciseTypeTextFieldCd =
         stringResource(id = R.string.workout_exercise_list_exercise_type_text_field_cd)
 
+    var exerciseName by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    var exerciseType by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    val buttonState by remember {
+        derivedStateOf {
+            exerciseName.isNotEmpty() && exerciseType.isNotEmpty()
+        }
+    }
+
 
     var dropdownMenuExpanded by rememberSaveable {
         mutableStateOf(false)
     }
-    
+
 
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Text(text = stringResource(id = R.string.workout_exercise_list_exercise_name_sr))
+        Text(
+            text = stringResource(id = R.string.workout_exercise_list_exercise_name_sr),
+            modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.medium_dp))
+        )
 
         OutlinedTextField(
             value = exerciseName,
-            onValueChange = {onExerciseNameChanged(it)},
+            onValueChange = { exerciseName = it },
             shape = RoundedCornerShape(16.dp),
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             modifier = Modifier.semantics { contentDescription = exerciseNameTextFieldCd }
         )
 
-        Text(text = stringResource(id = R.string.workout_exercise_list_exercise_type_sr))
+        Text(
+            text = stringResource(id = R.string.workout_exercise_list_exercise_type_sr),
+            modifier = Modifier.padding(bottom = dimensionResource(id = R.dimen.medium_dp))
+        )
 
         ExposedDropdownMenuBox(
             expanded = dropdownMenuExpanded,
@@ -272,7 +352,7 @@ fun ExerciseNameCreation(
                     DropdownMenuItem(
                         text = { Text(text = exerciseTypeOption.name) },
                         onClick = {
-                            onExerciseTypeChanged(exerciseTypeOption.name)
+                            exerciseType = exerciseTypeOption.name
                             dropdownMenuExpanded = false
                         })
 
@@ -282,10 +362,14 @@ fun ExerciseNameCreation(
 
         }
 
-        Button(onClick = {
-            createExercise(exerciseName, ExerciseType.valueOf(exerciseType))
-            showBottomSheet()
-        }, enabled = saveButtonState) {
+        Button(
+            onClick = {
+                createExercise(exerciseName, ExerciseType.valueOf(exerciseType))
+                showBottomSheet()
+            },
+            modifier = Modifier.padding(top = dimensionResource(id = R.dimen.medium_dp)),
+            enabled = buttonState
+        ) {
             Text(stringResource(id = R.string.workout_exercise_list_save_exercise_text_sr))
         }
 
@@ -333,7 +417,7 @@ fun SearchFilterBar(
                     onValueChange = { updateSearchedExerciseName(it) },
                     shape = RoundedCornerShape(16.dp),
                     trailingIcon = {
-                        if(searchedExerciseName.isNotEmpty()){
+                        if (searchedExerciseName.isNotEmpty()) {
                             IconButton(onClick = clearSearchedExerciseName) {
                                 Icon(
                                     imageVector = Icons.Rounded.Clear,
@@ -391,12 +475,37 @@ fun SearchFilterBar(
 }
 
 @Composable
-fun exerciseItem(
-    modifier: Modifier = Modifier
+fun ExerciseItem(
+    modifier: Modifier = Modifier,
+    exerciseId: Long,
+    exerciseName: String,
+    exerciseType: String,
+    isChecked: Boolean,
+    updateExerciseToCheckedList: (Long) -> Unit = {}
 ) {
 
-    Surface(modifier = modifier) {
-        //TODO
+    Surface(modifier = modifier
+        .fillMaxWidth()
+        .clickable { updateExerciseToCheckedList(exerciseId) }) {
+        Row {
+
+            Column {
+                Text(
+                    text = exerciseName,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = exerciseType,
+                    fontStyle = FontStyle.Italic,
+                    fontSize = 14.sp
+                )
+            }
+
+            if (isChecked) {
+                Icon(imageVector = Icons.Rounded.CheckCircle, contentDescription = "test")
+            }
+
+        }
     }
 
 }
@@ -428,19 +537,15 @@ fun WorkoutExerciseListTopAppBar(
 
 }
 
-@Preview
+/*@Preview
 @Composable
 fun ExerciseNameCreationPreview() {
 
     ExerciseNameCreation(
-        showBottomSheet = { },
         exerciseTypeList = ExerciseType.entries.toImmutableList(),
-        exerciseName = "",
-        exerciseType = "",
-        saveButtonState = false
     )
 
-}
+}*/
 
 
 @Preview
@@ -452,24 +557,26 @@ fun WorkoutExerciseListScreenPreview() {
         WorkoutExerciseListUiState.Success(
             WorkoutExerciseListScreenState(
                 exerciseList = persistentListOf(
-                    Exercise(
+                    ExerciseState(exercise = Exercise(
                         id = 0,
                         name = "exercise1",
                         type = ExerciseType.Arms
-                    ),
-                    Exercise(
+                    ), isChecked = true)
+                    ,
+                    ExerciseState(exercise = Exercise(
                         id = 1,
                         name = "exercise2",
                         type = ExerciseType.Legs
-                    ),
-                    Exercise(
+                    ), isChecked = false),
+                    ExerciseState(exercise = Exercise(
                         id = 2,
-                        name = "exercise2",
+                        name = "exercise3",
                         type = ExerciseType.Chest
-                    )
+                    ), isChecked = false)
                 ),
                 exerciseTypeFilter = ExerciseType.Arms.name,
-                exerciseNameFilter = "Test"
+                exerciseNameFilter = "Test",
+                checkedExercises = false
             )
         )
     )

@@ -51,4 +51,6 @@
     <string name="workout_exercise_list_save_exercise_text_sr">Save Exercise</string>
     <string name="workout_exercise_list_cancel_exercise_creation_text_sr">Cancel</string>
     <string name="workout_exercise_list_drop_menu_button_cd">exercise list menu button</string>
+    <string name="workout_exercise_list_scroll_top_button_cd">Scroll to top button</string>
+    <string name="workout_exercise_list_add_exercises_button_sr">Add Exercises</string>
 </resources>

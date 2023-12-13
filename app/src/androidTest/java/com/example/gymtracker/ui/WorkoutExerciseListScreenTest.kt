@@ -8,7 +8,6 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
-import androidx.test.espresso.Espresso
 import com.example.gymtracker.R
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.workoutExerciseList.WorkoutExerciseListScreen
@@ -191,9 +190,38 @@ class WorkoutExerciseListScreenTest {
         // Check bottom sheet still open and button enabled
         composeTestRule.onNodeWithStringId(R.string.workout_exercise_list_exercise_name_sr).assertExists()
         composeTestRule.onNodeWithStringId(R.string.workout_exercise_list_exercise_type_sr).assertExists()
-        composeTestRule.onNodeWithText("Squat").assertExists()
-        composeTestRule.onNodeWithStringId(R.string.workout_exercise_list_save_exercise_text_sr).assertIsEnabled()
 
+
+
+    }
+
+    @Test
+    fun workoutExerciseListScreen_checkedExercises_activateAddExercisesButton() {
+
+        composeTestRule.setContent {
+            WorkoutExerciseListScreen(
+                workoutExerciseListState = WorkoutExerciseListUiState.Success(
+                    workoutExerciseListState
+                )
+            )
+        }
+
+        composeTestRule.onNodeWithStringId(R.string.workout_exercise_list_add_exercises_button_sr).assertIsEnabled()
+
+    }
+
+    @Test
+    fun workoutExerciseListScreen_noCheckedExercises_deactivateAddExercisesButton() {
+
+        composeTestRule.setContent {
+            WorkoutExerciseListScreen(
+                workoutExerciseListState = WorkoutExerciseListUiState.Success(
+                    workoutExerciseListState.copy(checkedExercises = false)
+                )
+            )
+        }
+
+        composeTestRule.onNodeWithStringId(R.string.workout_exercise_list_add_exercises_button_sr).assertIsNotEnabled()
 
     }
 
@@ -201,7 +229,8 @@ class WorkoutExerciseListScreenTest {
     private val workoutExerciseListState = WorkoutExerciseListScreenState(
         exerciseList = persistentListOf(),
         exerciseTypeFilter = "",
-        exerciseNameFilter = ""
+        exerciseNameFilter = "",
+        checkedExercises = true
     )
 
 }

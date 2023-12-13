@@ -270,6 +270,7 @@
                 <map>
                   <entry key="Duration" value="90" />
                   <entry key="Pixel_4_XL_API_33" value="120" />
+                  <entry key="Pixel_7_Pro_API_33" value="120" />
                   <entry key="Tests" value="360" />
                   <entry key="Xiaomi Redmi Note 9 Pro" value="120" />
                 </map>
@@ -336,6 +337,7 @@
                 <map>
                   <entry key="Duration" value="195" />
                   <entry key="Pixel_4_XL_API_33" value="224" />
+                  <entry key="Pixel_7_Pro_API_33" value="120" />
                   <entry key="Tests" value="501" />
                 </map>
               </option>
@@ -557,6 +559,7 @@
                 <map>
                   <entry key="Duration" value="195" />
                   <entry key="Pixel_4_XL_API_33" value="224" />
+                  <entry key="Pixel_7_Pro_API_33" value="120" />
                   <entry key="Tests" value="465" />
                   <entry key="Xiaomi Redmi Note 9 Pro" value="120" />
                 </map>
@@ -571,6 +574,19 @@
                 <map>
                   <entry key="Duration" value="90" />
                   <entry key="Pixel_4_XL_API_33" value="120" />
+                  <entry key="Tests" value="360" />
+                </map>
+              </option>
+            </AndroidTestResultsTableState>
+          </value>
+        </entry>
+        <entry key="467505359">
+          <value>
+            <AndroidTestResultsTableState>
+              <option name="preferredColumnWidths">
+                <map>
+                  <entry key="Duration" value="90" />
+                  <entry key="Pixel_7_Pro_API_33" value="120" />
                   <entry key="Tests" value="360" />
                 </map>
               </option>
