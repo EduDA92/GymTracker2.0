@@ -31,9 +31,6 @@ class WorkoutDiaryViewModel @Inject constructor(
     val workoutId: Long = savedStateHandle["workoutId"] ?: 0L
 
 
-    private val _showEditWorkoutNameField = MutableStateFlow(false)
-    val showEditWorkoutNameField = _showEditWorkoutNameField.asStateFlow()
-
     val workoutDiaryUiState =
         workoutRepository.observeFullWorkoutFromId(workoutId).map { workoutAndExercises ->
 
@@ -66,12 +63,6 @@ class WorkoutDiaryViewModel @Inject constructor(
             SharingStarted.WhileSubscribed(),
             WorkoutDiaryUiState.Loading
         )
-
-    fun updateShowEditWorkoutNameFieldState() {
-        _showEditWorkoutNameField.update {
-            !it
-        }
-    }
 
 
     fun updateWorkoutName(workoutName: String) {

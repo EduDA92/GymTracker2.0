@@ -3,6 +3,8 @@ package com.example.gymtracker
 
 
 import androidx.compose.ui.test.assertIsEnabled
+import androidx.compose.ui.test.hasClickAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -78,7 +80,11 @@ class IntegrationTests {
         composeTestRule.onNodeWithStringId(R.string.workout_exercise_list_save_exercise_text_sr).performClick()
 
         // tap on exercise and add it to the workout
-        composeTestRule.onNodeWithText("Squat").performClick()
+        composeTestRule.onNode(
+            hasText("Squat") and
+            hasText("Legs") and
+            hasClickAction()
+        ).performClick()
         composeTestRule.onNodeWithStringId(R.string.workout_exercise_list_add_exercises_button_sr).assertIsEnabled()
         composeTestRule.onNodeWithStringId(R.string.workout_exercise_list_add_exercises_button_sr).performClick()
 

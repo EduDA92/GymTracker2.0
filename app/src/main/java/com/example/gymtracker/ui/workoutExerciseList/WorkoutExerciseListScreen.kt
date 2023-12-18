@@ -2,7 +2,6 @@ package com.example.gymtracker.ui.workoutExerciseList
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,11 +14,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -38,6 +35,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -46,6 +44,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -141,6 +140,7 @@ fun WorkoutExerciseListScreen(
     val exerciseTypeList = remember { ExerciseType.entries.toImmutableList() }
 
 
+
     val showScrollTopButton by remember {
         derivedStateOf {
             listState.firstVisibleItemIndex > 0
@@ -155,7 +155,6 @@ fun WorkoutExerciseListScreen(
         }
 
         is WorkoutExerciseListUiState.Success -> {
-
 
             Column(
                 modifier = modifier.fillMaxSize(),
@@ -214,11 +213,17 @@ fun WorkoutExerciseListScreen(
                     }
 
                     /* This will show button to scroll to the top */
-                    this@Column.AnimatedVisibility(visible = showScrollTopButton) {
-                        Button(
+                    this@Column.AnimatedVisibility(
+                        visible = showScrollTopButton,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(
+                                bottom = 40.dp,
+                                end = dimensionResource(id = R.dimen.large_db)
+                            )
+                    ) {
+                        OutlinedIconButton(
                             onClick = { scope.launch { listState.animateScrollToItem(0) } },
-                            shape = CircleShape,
-                            modifier = Modifier.align(Alignment.BottomEnd)
                         ) {
                             Icon(
                                 imageVector = Icons.Rounded.KeyboardArrowUp,
@@ -229,7 +234,9 @@ fun WorkoutExerciseListScreen(
 
                     Button(
                         onClick = { addExercisesToWorkout() },
-                        modifier = Modifier.align(Alignment.BottomCenter),
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 40.dp),
                         enabled = workoutExerciseListState.state.checkedExercises
                     ) {
                         Text(text = stringResource(id = R.string.workout_exercise_list_add_exercises_button_sr))
@@ -487,7 +494,7 @@ fun ExerciseItem(
 
     Surface(modifier = modifier
         .fillMaxWidth()
-        .clickable { updateExerciseToCheckedList(exerciseId) }) {
+        , onClick = { updateExerciseToCheckedList(exerciseId) }) {
         Row(verticalAlignment = Alignment.CenterVertically) {
 
             Column(

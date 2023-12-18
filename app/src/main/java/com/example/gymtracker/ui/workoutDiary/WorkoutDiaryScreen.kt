@@ -79,14 +79,11 @@ fun WorkoutDiaryRoute(
 ) {
 
     val workoutDiaryUiState by viewModel.workoutDiaryUiState.collectAsStateWithLifecycle()
-    val workoutNameEditFieldState by viewModel.showEditWorkoutNameField.collectAsStateWithLifecycle()
 
     WorkoutDiaryScreen(
         modifier = modifier,
         workoutDiaryUiState = workoutDiaryUiState,
-        workoutNameEditFieldState = workoutNameEditFieldState,
         updateWorkoutName = viewModel::updateWorkoutName,
-        updateWorkoutNameEditFieldState = viewModel::updateShowEditWorkoutNameFieldState,
         addExercise = navigateToExerciseList,
         deleteExercise = viewModel::deleteExerciseFromWorkout,
         onBackClick = onBackClick,
@@ -101,9 +98,7 @@ fun WorkoutDiaryRoute(
 fun WorkoutDiaryScreen(
     modifier: Modifier = Modifier,
     workoutDiaryUiState: WorkoutDiaryUiState,
-    workoutNameEditFieldState: Boolean,
     updateWorkoutName: (String) -> Unit = {},
-    updateWorkoutNameEditFieldState: () -> Unit = {},
     addExercise: (Long) -> Unit = {},
     deleteExercise: (Long, LocalDate, Long) -> Unit = { _, _, _ -> },
     copyWorkout: () -> Unit = {},
@@ -113,6 +108,11 @@ fun WorkoutDiaryScreen(
     updateExerciseSetIsCompleted: (Long, Boolean) -> Unit = { _, _ -> },
     updateExerciseSetData: (Long, Int, Float) -> Unit = { _, _, _ -> }
 ) {
+
+
+    var workoutNameEditFieldState by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     when (workoutDiaryUiState) {
         WorkoutDiaryUiState.Loading -> {
@@ -135,7 +135,7 @@ fun WorkoutDiaryScreen(
                         workoutName = workoutDiaryUiState.diary.workoutName,
                         showEditWorkoutNameField = workoutNameEditFieldState,
                         updateWorkoutName = updateWorkoutName,
-                        updateWorkoutNameEditFieldState = updateWorkoutNameEditFieldState,
+                        updateWorkoutNameEditFieldState = { workoutNameEditFieldState = !workoutNameEditFieldState },
                         onBackClick = onBackClick
                     )
                 }
@@ -671,6 +671,5 @@ fun WorkoutDiaryScreenPreview() {
     WorkoutDiaryScreen(
         modifier = Modifier,
         workoutDiaryUiState = state,
-        workoutNameEditFieldState = false
     )
 }

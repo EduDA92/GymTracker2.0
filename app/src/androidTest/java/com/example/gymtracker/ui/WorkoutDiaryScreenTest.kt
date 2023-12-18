@@ -4,6 +4,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.StateRestorationTester
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import com.example.gymtracker.ui.workoutDiary.WorkoutDiary
@@ -30,7 +31,7 @@ class WorkoutDiaryScreenTest {
     fun workoutDiaryScreen_loadingState_showsLoading(){
 
         composeTestRule.setContent {
-            WorkoutDiaryScreen(workoutDiaryUiState = WorkoutDiaryUiState.Loading, workoutNameEditFieldState = false)
+            WorkoutDiaryScreen(workoutDiaryUiState = WorkoutDiaryUiState.Loading)
         }
 
         composeTestRule.onNodeWithStringId(R.string.loading_data_sr)
@@ -41,10 +42,10 @@ class WorkoutDiaryScreenTest {
     fun workoutDiaryScreen_whenWorkoutEditFieldStateIsFalse_TitleWithEditIconIsPresent(){
 
         composeTestRule.setContent {
-            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState, workoutNameEditFieldState = false)
+            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState)
         }
 
-        /* Check for the WorkoutName set in the testState and the content Description of the edit icon */
+        /* By default state is false so check for the WorkoutName set in the testState and the content Description of the edit icon */
         composeTestRule.onNodeWithText(workoutName).assertExists()
         composeTestRule.onNodeWithContentDescription(R.string.workout_title_edit_sr).assertExists()
 
@@ -54,9 +55,11 @@ class WorkoutDiaryScreenTest {
     fun workoutDiaryScreen_whenWorkoutEditFieldStateIsTrue_editTextFieldIsPresent(){
 
         composeTestRule.setContent {
-            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState, workoutNameEditFieldState = true)
+            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState)
         }
 
+        // Click button to make edit field appear
+        composeTestRule.onNodeWithContentDescription(R.string.workout_title_edit_sr).performClick()
         composeTestRule.onNodeWithContentDescription(R.string.workout_title_edit_field_cd).assertExists()
 
     }
@@ -67,10 +70,11 @@ class WorkoutDiaryScreenTest {
         val restorationTester = StateRestorationTester(composeTestRule)
 
         restorationTester.setContent {
-            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState, workoutNameEditFieldState = true)
+            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState)
         }
 
         // Clean edittext title, reps and weight
+        composeTestRule.onNodeWithContentDescription(R.string.workout_title_edit_sr).performClick() // Open title edit field
         composeTestRule.onNodeWithContentDescription(R.string.workout_title_edit_field_cd).assertExists()
         composeTestRule.onNodeWithContentDescription(R.string.workout_title_edit_field_cd).performTextClearance()
         composeTestRule.onNodeWithContentDescription(R.string.workout_diary_weight_edit_text_cd).assertExists()
@@ -99,7 +103,7 @@ class WorkoutDiaryScreenTest {
     fun workoutDiaryScreen_whenSetIsNotCompleted_editTextsAndCorrectIconIsShown(){
 
         composeTestRule.setContent {
-            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState, workoutNameEditFieldState = true)
+            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState)
         }
 
         /* Assert Exercise Name is present and the assert edit text and incomplete button are present */
@@ -115,7 +119,7 @@ class WorkoutDiaryScreenTest {
     fun workoutDiaryScreen_whenSetIsCompleted_TextsAndCorrectIconIsShown(){
 
         composeTestRule.setContent {
-            WorkoutDiaryScreen(workoutDiaryUiState = completeWorkoutDiaryUiState, workoutNameEditFieldState = true)
+            WorkoutDiaryScreen(workoutDiaryUiState = completeWorkoutDiaryUiState)
         }
 
         /* Assert Exercise Name is present and the assert texts and complete button are present */
