@@ -44,7 +44,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -71,7 +70,6 @@ import com.example.gymtracker.R
 import com.example.gymtracker.ui.commonComposables.LoadingState
 import com.example.gymtracker.ui.model.Exercise
 import com.example.gymtracker.ui.model.ExerciseType
-import com.example.gymtracker.ui.utils.recomposeHighlighter
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -139,15 +137,11 @@ fun WorkoutExerciseListScreen(
     val scope = rememberCoroutineScope()
     val exerciseTypeList = remember { ExerciseType.entries.toImmutableList() }
 
-
-
     val showScrollTopButton by remember {
         derivedStateOf {
             listState.firstVisibleItemIndex > 0
         }
     }
-
-
 
     when (workoutExerciseListState) {
         WorkoutExerciseListUiState.Loading -> {
@@ -161,7 +155,7 @@ fun WorkoutExerciseListScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
-                WorkoutExerciseListTopAppBar(onBackClick = onBackClick)
+               WorkoutExerciseListTopAppBar(onBackClick = onBackClick)
 
                 SearchFilterBar(
                     searchedExerciseName = workoutExerciseListState.state.exerciseNameFilter,
@@ -172,6 +166,7 @@ fun WorkoutExerciseListScreen(
                     updateExerciseTypeFilter = updateExerciseTypeFilter,
                     clearExerciseTypeFilter = clearExerciseTypeFilter
                 )
+
                 Box(modifier = Modifier.fillMaxSize()) {
 
                     LazyColumn(
@@ -183,21 +178,18 @@ fun WorkoutExerciseListScreen(
 
                         items(
                             items = workoutExerciseListState.state.exerciseList,
-                            key = { item: ExerciseState -> item.exercise.id })
-                        {
-
+                            key = { item: ExerciseState -> item.exercise.id },
+                            contentType = {it.exercise})
+                        {exercise ->
                             ExerciseItem(
-                                exerciseId = it.exercise.id,
-                                exerciseName = it.exercise.name,
-                                exerciseType = it.exercise.type.name,
-                                isChecked = it.isChecked,
-                                updateExerciseToCheckedList = updateExerciseToCheckedList,
-                                modifier = Modifier
-                                    .animateItemPlacement()
-                                    .recomposeHighlighter()
+                                exerciseState = exercise,
+                                /* This remember will prevent the recomposition of every item when only one changes
+                                * to checked/unchecked */
+                                updateExerciseToCheckedList = remember{updateExerciseToCheckedList},
                             )
 
                         }
+
 
                         // Create exercise button
                         item {
@@ -485,16 +477,13 @@ fun SearchFilterBar(
 @Composable
 fun ExerciseItem(
     modifier: Modifier = Modifier,
-    exerciseId: Long,
-    exerciseName: String,
-    exerciseType: String,
-    isChecked: Boolean,
-    updateExerciseToCheckedList: (Long) -> Unit = {}
+    exerciseState: ExerciseState,
+    updateExerciseToCheckedList: (Long) -> Unit = {},
 ) {
 
     Surface(modifier = modifier
         .fillMaxWidth()
-        , onClick = { updateExerciseToCheckedList(exerciseId) }) {
+        , onClick = { updateExerciseToCheckedList(exerciseState.exercise.id) }) {
         Row(verticalAlignment = Alignment.CenterVertically) {
 
             Column(
@@ -503,18 +492,18 @@ fun ExerciseItem(
                     .weight(5f)
             ) {
                 Text(
-                    text = exerciseName,
+                    text = exerciseState.exercise.name,
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = exerciseType,
+                    text = exerciseState.exercise.type.name,
                     fontStyle = FontStyle.Italic,
                     fontSize = 14.sp
                 )
             }
 
-            if (isChecked) {
+            if (exerciseState.isChecked) {
                 Icon(
                     imageVector = Icons.Rounded.CheckCircle,
                     contentDescription = "test",
@@ -553,16 +542,6 @@ fun WorkoutExerciseListTopAppBar(
     }
 
 }
-
-/*@Preview
-@Composable
-fun ExerciseNameCreationPreview() {
-
-    ExerciseNameCreation(
-        exerciseTypeList = ExerciseType.entries.toImmutableList(),
-    )
-
-}*/
 
 
 @Preview
