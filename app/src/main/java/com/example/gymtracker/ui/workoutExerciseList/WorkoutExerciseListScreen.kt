@@ -184,7 +184,8 @@ fun WorkoutExerciseListScreen(
                             ExerciseItem(
                                 exerciseState = exercise,
                                 /* This remember will prevent the recomposition of every item when only one changes
-                                * to checked/unchecked */
+                                * to checked/unchecked, i think this is because the viewmodel is unstable and so the
+                                * lambdas even tho are passed as method reference are unstable too. */
                                 updateExerciseToCheckedList = remember{updateExerciseToCheckedList},
                             )
 

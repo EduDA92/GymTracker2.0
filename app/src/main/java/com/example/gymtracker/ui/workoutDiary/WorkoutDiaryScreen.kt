@@ -75,6 +75,7 @@ fun WorkoutDiaryRoute(
     modifier: Modifier = Modifier,
     viewModel: WorkoutDiaryViewModel = hiltViewModel(),
     navigateToExerciseList: (Long) -> Unit = {},
+    navigateToCopyWorkout: (Long) -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
 
@@ -84,7 +85,8 @@ fun WorkoutDiaryRoute(
         modifier = modifier,
         workoutDiaryUiState = workoutDiaryUiState,
         updateWorkoutName = viewModel::updateWorkoutName,
-        addExercise = navigateToExerciseList,
+        navigateToExerciseList = navigateToExerciseList,
+        navigateToCopyWorkout = navigateToCopyWorkout,
         deleteExercise = viewModel::deleteExerciseFromWorkout,
         onBackClick = onBackClick,
         deleteExerciseSet = viewModel::deleteExerciseSet,
@@ -99,9 +101,9 @@ fun WorkoutDiaryScreen(
     modifier: Modifier = Modifier,
     workoutDiaryUiState: WorkoutDiaryUiState,
     updateWorkoutName: (String) -> Unit = {},
-    addExercise: (Long) -> Unit = {},
+    navigateToExerciseList: (Long) -> Unit = {},
+    navigateToCopyWorkout: (Long) -> Unit = {},
     deleteExercise: (Long, LocalDate, Long) -> Unit = { _, _, _ -> },
-    copyWorkout: () -> Unit = {},
     onBackClick: () -> Unit = {},
     deleteExerciseSet: (Long) -> Unit = {},
     addExerciseSet: (Long, LocalDate) -> Unit = { _, _ -> },
@@ -135,7 +137,9 @@ fun WorkoutDiaryScreen(
                         workoutName = workoutDiaryUiState.diary.workoutName,
                         showEditWorkoutNameField = workoutNameEditFieldState,
                         updateWorkoutName = updateWorkoutName,
-                        updateWorkoutNameEditFieldState = { workoutNameEditFieldState = !workoutNameEditFieldState },
+                        updateWorkoutNameEditFieldState = {
+                            workoutNameEditFieldState = !workoutNameEditFieldState
+                        },
                         onBackClick = onBackClick
                     )
                 }
@@ -171,13 +175,13 @@ fun WorkoutDiaryScreen(
                             )
                     ) {
                         Button(
-                            onClick = { addExercise(workoutDiaryUiState.diary.workoutId) },
+                            onClick = { navigateToExerciseList(workoutDiaryUiState.diary.workoutId) },
                             shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp)),
                             modifier = Modifier.weight(3f)
                         ) {
                             Text(text = stringResource(id = R.string.add_exercise_button))
                         }
-                        IconButton(onClick = copyWorkout) {
+                        IconButton(onClick = { navigateToCopyWorkout(workoutDiaryUiState.diary.workoutId) }) {
                             Icon(
                                 painterResource(id = R.drawable.outline_file_copy_24),
                                 contentDescription = stringResource(id = R.string.copy_workout_button_sr)
@@ -380,7 +384,10 @@ fun ExerciseAndSets(
                                             innerTextField()
                                         }
                                     },
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                                    keyboardOptions = KeyboardOptions(
+                                        keyboardType = KeyboardType.Number,
+                                        imeAction = ImeAction.Done
+                                    ),
                                     modifier = Modifier
                                         .weight(2f)
                                         .requiredSize(width = 56.dp, height = 46.dp)
@@ -409,7 +416,10 @@ fun ExerciseAndSets(
                                             innerTextField()
                                         }
                                     },
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
+                                    keyboardOptions = KeyboardOptions(
+                                        keyboardType = KeyboardType.Number,
+                                        imeAction = ImeAction.Done
+                                    ),
                                     modifier = Modifier
                                         .weight(2f)
                                         .requiredSize(width = 56.dp, height = 46.dp)

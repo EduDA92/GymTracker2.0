@@ -84,4 +84,19 @@ class NavigationTest {
 
     }
 
+    @Test
+    fun gymTrackerNavHost_navigateToCopyWorkoutScreen(){
+
+        composeTestRule.onNodeWithStringId(R.string.create_workout_button_sr).performClick()
+
+        composeTestRule.waitForIdle()
+
+        navController.assertCurrentRouteName("workoutDiaryRoute/{workoutId}")
+
+        composeTestRule.onNodeWithContentDescription(R.string.copy_workout_button_sr).performClick()
+
+        navController.assertCurrentRouteName("workoutCopyRoute/{workoutId}")
+
+    }
+
 }

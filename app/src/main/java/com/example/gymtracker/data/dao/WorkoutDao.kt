@@ -21,6 +21,10 @@ interface WorkoutDao {
     fun observeFullWorkout(workoutDate: LocalDate): Flow<WorkoutWithExercisesAndSets?>
 
     @Transaction
+    @Query("SELECT * FROM workout WHERE workout.date LIKE :workoutDate")
+    suspend fun getFullWorkout(workoutDate: LocalDate): WorkoutWithExercisesAndSets?
+
+    @Transaction
     @Query("SELECT * FROM workout WHERE workout.id LIKE :workoutId")
     fun observeFullWorkoutFromId(workoutId: Long): Flow<WorkoutWithExercisesAndSets>
 

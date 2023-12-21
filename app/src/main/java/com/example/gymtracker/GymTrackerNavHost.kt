@@ -5,6 +5,8 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.example.gymtracker.ui.workoutCopy.navigation.navigateToWorkoutCopy
+import com.example.gymtracker.ui.workoutCopy.navigation.workoutCopyScreen
 import com.example.gymtracker.ui.workoutSummary.navigation.workoutScreenSummaryRoute
 import com.example.gymtracker.ui.workoutSummary.navigation.workoutSummaryScreen
 import com.example.gymtracker.ui.workoutDiary.navigation.navigateToWorkoutDiary
@@ -28,10 +30,13 @@ fun GymTrackerNavHost(
 
         workoutDiaryScreen(
             onBackClick = navController::popBackStack,
-            navigateToExerciseList = navController::navigateToWorkoutExerciseList
+            navigateToExerciseList = navController::navigateToWorkoutExerciseList,
+            navigateToCopyWorkout = navController::navigateToWorkoutCopy
         )
 
         workoutExerciseListScreen(onBackClick = navController::popBackStack)
+
+        workoutCopyScreen(onBackClick = navController::popBackStack)
 
     }
 

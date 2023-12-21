@@ -20,6 +20,8 @@ class TestWorkoutDao(workouts: List<WorkoutEntity>, fullWorkout: WorkoutWithExer
 
     override fun observeFullWorkoutFromId(workoutId: Long): Flow<WorkoutWithExercisesAndSets> = fullWorkoutStream
 
+    override suspend fun getFullWorkout(workoutDate: LocalDate): WorkoutWithExercisesAndSets? = null
+
     override suspend fun upsertWorkout(workout: WorkoutEntity): Long {
         _workouts.removeIf{it.id == workout.id}
         _workouts.add(workout)

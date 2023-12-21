@@ -24,6 +24,9 @@ class TestWorkoutRepository : WorkoutRepository {
     override fun observeFullWorkoutFromId(workoutId: Long): Flow<WorkoutAndExercises>  =
         workoutAndExercisesFromIdFlow
 
+    override suspend fun getFullWorkout(workoutDate: LocalDate): WorkoutAndExercises? =
+        null
+
     /* Helper method to control the workout returned by the observeFullWorkout */
     suspend fun emitWorkoutAndExercises(workoutAndExercises: WorkoutAndExercises?) =
         workoutAndExercisesFlow.emit(workoutAndExercises)

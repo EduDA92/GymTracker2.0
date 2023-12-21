@@ -25,6 +25,10 @@ class DefaultWorkoutRepository @Inject constructor(private val workoutDao: Worko
             it?.toExternalModel()
         }
 
+    override suspend fun getFullWorkout(workoutDate: LocalDate): WorkoutAndExercises? =
+        workoutDao.getFullWorkout(workoutDate)?.toExternalModel()
+
+
     override fun observeFullWorkoutFromId(workoutId: Long): Flow<WorkoutAndExercises> =
         workoutDao.observeFullWorkoutFromId(workoutId).map {
             it.toExternalModel()
