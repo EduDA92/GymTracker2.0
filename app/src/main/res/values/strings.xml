@@ -55,4 +55,6 @@
     <string name="workout_exercise_list_add_exercises_button_sr">Add Exercises</string>
     <string name="workout_copy_series_number_sr">%1$d Series</string>
     <string name="copy_workout_copy_button_sr">Copy Workout</string>
+    <string name="workout_exercise_List_title_sr">Exercises</string>
+    <string name="workout_copy_title_sr">Copy Workout</string>
 </resources>

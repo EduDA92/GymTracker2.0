@@ -205,7 +205,7 @@ fun WorkoutCopyScreenTopAppBar(
         }
 
         Text(
-            text = "Exercises",
+            text = stringResource(id = R.string.workout_copy_title_sr),
             fontSize = 20.sp,
             modifier = Modifier
                 .padding(start = dimensionResource(id = R.dimen.small_dp))
