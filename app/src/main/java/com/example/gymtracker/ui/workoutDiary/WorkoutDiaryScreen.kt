@@ -33,6 +33,7 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -76,6 +77,7 @@ fun WorkoutDiaryRoute(
     viewModel: WorkoutDiaryViewModel = hiltViewModel(),
     navigateToExerciseList: (Long) -> Unit = {},
     navigateToCopyWorkout: (Long) -> Unit = {},
+    navigateToWorkoutPlateCalculator: () -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
 
@@ -87,6 +89,7 @@ fun WorkoutDiaryRoute(
         updateWorkoutName = viewModel::updateWorkoutName,
         navigateToExerciseList = navigateToExerciseList,
         navigateToCopyWorkout = navigateToCopyWorkout,
+        navigateToWorkoutPlateCalculator = navigateToWorkoutPlateCalculator,
         deleteExercise = viewModel::deleteExerciseFromWorkout,
         onBackClick = onBackClick,
         deleteExerciseSet = viewModel::deleteExerciseSet,
@@ -103,6 +106,7 @@ fun WorkoutDiaryScreen(
     updateWorkoutName: (String) -> Unit = {},
     navigateToExerciseList: (Long) -> Unit = {},
     navigateToCopyWorkout: (Long) -> Unit = {},
+    navigateToWorkoutPlateCalculator: () -> Unit = {},
     deleteExercise: (Long, LocalDate, Long) -> Unit = { _, _, _ -> },
     onBackClick: () -> Unit = {},
     deleteExerciseSet: (Long) -> Unit = {},
@@ -123,74 +127,100 @@ fun WorkoutDiaryScreen(
 
         is WorkoutDiaryUiState.Success -> {
 
-            // TODO ADD HERE ANIMATED ITEM PLACEMENT
-            LazyColumn(
+            Box(
                 modifier = modifier
                     .fillMaxSize()
-                    .padding(top = dimensionResource(id = R.dimen.small_dp))
-                    .wrapContentWidth(Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.small_dp))
             ) {
 
-                item {
-                    WorkoutDiaryToolbar(
-                        workoutName = workoutDiaryUiState.diary.workoutName,
-                        showEditWorkoutNameField = workoutNameEditFieldState,
-                        updateWorkoutName = updateWorkoutName,
-                        updateWorkoutNameEditFieldState = {
-                            workoutNameEditFieldState = !workoutNameEditFieldState
-                        },
-                        onBackClick = onBackClick
-                    )
-                }
+                LazyColumn(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .padding(top = dimensionResource(id = R.dimen.small_dp))
+                        .wrapContentWidth(Alignment.CenterHorizontally),
+                    verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.small_dp))
+                ) {
 
-                items(
-                    items = workoutDiaryUiState.diary.exercisesWithReps,
-                    key = { item: ExerciseAndSets -> item.exerciseId }
-                ) { item: ExerciseAndSets ->
+                    item {
+                        WorkoutDiaryToolbar(
+                            workoutName = workoutDiaryUiState.diary.workoutName,
+                            showEditWorkoutNameField = workoutNameEditFieldState,
+                            updateWorkoutName = updateWorkoutName,
+                            updateWorkoutNameEditFieldState = {
+                                workoutNameEditFieldState = !workoutNameEditFieldState
+                            },
+                            onBackClick = onBackClick
+                        )
+                    }
 
-                    ExerciseAndSets(
-                        workoutId = workoutDiaryUiState.diary.workoutId,
-                        workoutDate = workoutDiaryUiState.diary.workoutDate,
-                        exerciseId = item.exerciseId,
-                        exerciseName = item.exerciseName,
-                        exerciseSets = item.sets,
-                        deleteExercise = deleteExercise,
-                        addExerciseSet = addExerciseSet,
-                        deleteExerciseSet = deleteExerciseSet,
-                        updateExerciseSetIsCompleted = updateExerciseSetIsCompleted,
-                        updateExerciseSetData = updateExerciseSetData,
-                    )
+                    items(
+                        items = workoutDiaryUiState.diary.exercisesWithReps,
+                        key = { item: ExerciseAndSets -> item.exerciseId }
+                    ) { item: ExerciseAndSets ->
 
-                }
+                        ExerciseAndSets(
+                            workoutId = workoutDiaryUiState.diary.workoutId,
+                            workoutDate = workoutDiaryUiState.diary.workoutDate,
+                            exerciseId = item.exerciseId,
+                            exerciseName = item.exerciseName,
+                            exerciseSets = item.sets,
+                            deleteExercise = deleteExercise,
+                            addExerciseSet = addExerciseSet,
+                            deleteExerciseSet = deleteExerciseSet,
+                            updateExerciseSetIsCompleted = updateExerciseSetIsCompleted,
+                            updateExerciseSetData = updateExerciseSetData,
+                        )
 
-                /* This row contains the Add Exercise and Copy Workout buttons */
-                item {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(
-                                start = dimensionResource(id = R.dimen.small_dp),
-                                end = dimensionResource(id = R.dimen.small_dp)
-                            )
-                    ) {
-                        Button(
-                            onClick = { navigateToExerciseList(workoutDiaryUiState.diary.workoutId) },
-                            shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp)),
-                            modifier = Modifier.weight(3f)
+                    }
+
+                    /* This row contains the Add Exercise and Copy Workout buttons */
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(
+                                    start = dimensionResource(id = R.dimen.small_dp),
+                                    end = dimensionResource(id = R.dimen.small_dp)
+                                )
                         ) {
-                            Text(text = stringResource(id = R.string.add_exercise_button))
-                        }
-                        IconButton(onClick = { navigateToCopyWorkout(workoutDiaryUiState.diary.workoutId) }) {
-                            Icon(
-                                painterResource(id = R.drawable.outline_file_copy_24),
-                                contentDescription = stringResource(id = R.string.copy_workout_button_sr)
-                            )
+                            Button(
+                                onClick = { navigateToExerciseList(workoutDiaryUiState.diary.workoutId) },
+                                shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp)),
+                                modifier = Modifier.weight(3f)
+                            ) {
+                                Text(text = stringResource(id = R.string.add_exercise_button))
+                            }
+                            IconButton(onClick = { navigateToCopyWorkout(workoutDiaryUiState.diary.workoutId) }) {
+                                Icon(
+                                    painterResource(id = R.drawable.outline_file_copy_24),
+                                    contentDescription = stringResource(id = R.string.copy_workout_button_sr)
+                                )
+                            }
                         }
                     }
+
                 }
 
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.BottomCenter)
+                ) {
+
+                    OutlinedButton(
+                        onClick = { navigateToWorkoutPlateCalculator() },
+                        modifier = Modifier
+                            .padding(dimensionResource(id = R.dimen.medium_dp))
+                            .wrapContentWidth(),
+                        shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp))
+                    ) {
+                        Text(text = stringResource(id = R.string.workout_diary_plate_calculator_button_sr))
+                    }
+
+                }
+
+
             }
+
 
         }
     }

@@ -2,6 +2,7 @@ package com.example.gymtracker
 
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
@@ -96,6 +97,21 @@ class NavigationTest {
         composeTestRule.onNodeWithContentDescription(R.string.copy_workout_button_sr).performClick()
 
         navController.assertCurrentRouteName("workoutCopyRoute/{workoutId}")
+
+    }
+
+    @Test
+    fun gymTrackerNavHost_navigateToWorkoutPlateCalculatorScree(){
+
+        composeTestRule.onNodeWithStringId(R.string.create_workout_button_sr).performClick()
+
+        composeTestRule.waitForIdle()
+
+        navController.assertCurrentRouteName("workoutDiaryRoute/{workoutId}")
+
+        composeTestRule.onNodeWithStringId(R.string.workout_diary_plate_calculator_button_sr).performClick()
+
+        composeTestRule.onNodeWithText("Plate calculator")
 
     }
 

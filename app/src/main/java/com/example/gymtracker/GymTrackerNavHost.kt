@@ -13,6 +13,8 @@ import com.example.gymtracker.ui.workoutDiary.navigation.navigateToWorkoutDiary
 import com.example.gymtracker.ui.workoutDiary.navigation.workoutDiaryScreen
 import com.example.gymtracker.ui.workoutExerciseList.navigation.navigateToWorkoutExerciseList
 import com.example.gymtracker.ui.workoutExerciseList.navigation.workoutExerciseListScreen
+import com.example.gymtracker.ui.workoutPlateCalculator.navigation.navigateToWorkoutPlateCalculator
+import com.example.gymtracker.ui.workoutPlateCalculator.navigation.workoutPlateCalculatorScreen
 
 @Composable
 fun GymTrackerNavHost(
@@ -31,12 +33,15 @@ fun GymTrackerNavHost(
         workoutDiaryScreen(
             onBackClick = navController::popBackStack,
             navigateToExerciseList = navController::navigateToWorkoutExerciseList,
-            navigateToCopyWorkout = navController::navigateToWorkoutCopy
+            navigateToCopyWorkout = navController::navigateToWorkoutCopy,
+            navigateToWorkoutPlateCalculator = navController::navigateToWorkoutPlateCalculator
         )
 
         workoutExerciseListScreen(onBackClick = navController::popBackStack)
 
         workoutCopyScreen(onBackClick = navController::popBackStack)
+
+        workoutPlateCalculatorScreen(onBackClick = navController::popBackStack)
 
     }
 
