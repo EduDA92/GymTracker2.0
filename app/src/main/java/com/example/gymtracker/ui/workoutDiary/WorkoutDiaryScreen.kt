@@ -127,16 +127,16 @@ fun WorkoutDiaryScreen(
 
         is WorkoutDiaryUiState.Success -> {
 
-            Box(
+            Column(
                 modifier = modifier
                     .fillMaxSize()
             ) {
 
                 LazyColumn(
                     modifier = modifier
-                        .fillMaxSize()
                         .padding(top = dimensionResource(id = R.dimen.small_dp))
-                        .wrapContentWidth(Alignment.CenterHorizontally),
+                        .wrapContentWidth(Alignment.CenterHorizontally)
+                        .weight(1f),
                     verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.small_dp))
                 ) {
 
@@ -201,9 +201,7 @@ fun WorkoutDiaryScreen(
                 }
 
                 Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.BottomCenter)
+                    modifier = Modifier.fillMaxWidth()
                 ) {
 
                     OutlinedButton(
