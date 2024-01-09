@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 
 class PlateCalculatorTest {
 
-    val plates = setOf(25f,20f,15f,10f,5f,2.5f,1.25f,1f,0.75f,0.5f,0.25f)
+    private val plates = setOf(25f,20f,15f,10f,5f,2.5f,1.25f,1f,0.75f,0.5f,0.25f)
 
     @Test
     fun plateCalculator_weightUnderBarWeight_returnsEmptyList(){
