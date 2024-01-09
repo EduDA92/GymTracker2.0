@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -169,37 +170,56 @@ fun WorkoutExerciseListScreen(
 
                 Box(modifier = Modifier.fillMaxSize()) {
 
-                    LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        state = listState,
-                        verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.small_dp)),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                    Column(modifier = Modifier.fillMaxSize()) {
 
-                        items(
-                            items = workoutExerciseListState.state.exerciseList,
-                            key = { item: ExerciseState -> item.exercise.id },
-                            contentType = {it.exercise})
-                        {exercise ->
-                            ExerciseItem(
-                                exerciseState = exercise,
-                                /* This remember will prevent the recomposition of every item when only one changes
-                                * to checked/unchecked, i think this is because the viewmodel is unstable and so the
-                                * lambdas even tho are passed as method reference are unstable too. */
-                                updateExerciseToCheckedList = remember{updateExerciseToCheckedList},
-                            )
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f),
+                            state = listState,
+                            verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.small_dp)),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
 
+                            items(
+                                items = workoutExerciseListState.state.exerciseList,
+                                key = { item: ExerciseState -> item.exercise.id },
+                                contentType = {it.exercise})
+                            {exercise ->
+                                ExerciseItem(
+                                    exerciseState = exercise,
+                                    /* This remember will prevent the recomposition of every item when only one changes
+                                    * to checked/unchecked, i think this is because the viewmodel is unstable and so the
+                                    * lambdas even tho are passed as method reference are unstable too. */
+                                    updateExerciseToCheckedList = remember{updateExerciseToCheckedList},
+                                )
+
+                            }
+
+
+                            // Create exercise button
+                            item {
+
+                                Button(
+                                    onClick = { showBottomSheet = true },
+                                    shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp))
+                                ) {
+                                    Text(text = stringResource(id = R.string.workout_exercise_list_create_exercise_sr))
+                                }
+
+                            }
                         }
 
-
-                        // Create exercise button
-                        item {
+                        Surface(modifier = Modifier.fillMaxWidth()) {
 
                             Button(
-                                onClick = { showBottomSheet = true },
-                                shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp))
+                                onClick = { addExercisesToWorkout() },
+                                modifier = Modifier
+                                    .padding(dimensionResource(id = R.dimen.small_dp))
+                                    .wrapContentWidth(),
+                                enabled = workoutExerciseListState.state.checkedExercises
                             ) {
-                                Text(text = stringResource(id = R.string.workout_exercise_list_create_exercise_sr))
+                                Text(text = stringResource(id = R.string.workout_exercise_list_add_exercises_button_sr))
                             }
 
                         }
@@ -225,15 +245,6 @@ fun WorkoutExerciseListScreen(
                         }
                     }
 
-                    Button(
-                        onClick = { addExercisesToWorkout() },
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = 40.dp),
-                        enabled = workoutExerciseListState.state.checkedExercises
-                    ) {
-                        Text(text = stringResource(id = R.string.workout_exercise_list_add_exercises_button_sr))
-                    }
 
                 }
 
