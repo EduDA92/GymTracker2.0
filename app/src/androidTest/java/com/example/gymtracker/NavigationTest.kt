@@ -101,7 +101,7 @@ class NavigationTest {
     }
 
     @Test
-    fun gymTrackerNavHost_navigateToWorkoutPlateCalculatorScree(){
+    fun gymTrackerNavHost_navigateToWorkoutPlateCalculatorScreen(){
 
         composeTestRule.onNodeWithStringId(R.string.create_workout_button_sr).performClick()
 
@@ -111,7 +111,7 @@ class NavigationTest {
 
         composeTestRule.onNodeWithStringId(R.string.workout_diary_plate_calculator_button_sr).performClick()
 
-        composeTestRule.onNodeWithText("Plate calculator")
+        composeTestRule.onNodeWithStringId(R.string.workout_plate_calculator_title_sr).assertExists()
 
     }
 

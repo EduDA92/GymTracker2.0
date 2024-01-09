@@ -58,4 +58,6 @@
     <string name="workout_exercise_List_title_sr">Exercises</string>
     <string name="workout_copy_title_sr">Copy Workout</string>
     <string name="workout_diary_plate_calculator_button_sr">Plate Calculator</string>
+    <string name="workout_plate_calculator_title_sr">Plate calculator</string>
+    <string name="workout_plate_calulator_target_weight_sr">Target Weight</string>
 </resources>
