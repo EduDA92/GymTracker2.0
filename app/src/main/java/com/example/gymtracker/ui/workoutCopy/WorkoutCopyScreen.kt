@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -135,8 +136,9 @@ fun SelectedWorkoutInfo(
     workoutData: WorkoutAndExercises,
     copyWorkout: () -> Unit = {},
 ) {
-    Box(modifier = modifier.fillMaxSize()) {
+
         Column(
+            modifier = modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
@@ -144,7 +146,7 @@ fun SelectedWorkoutInfo(
             Divider()
 
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
+                modifier = Modifier.verticalScroll(rememberScrollState()).weight(1f),
                 verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.medium_dp))
             ) {
 
@@ -177,17 +179,17 @@ fun SelectedWorkoutInfo(
                 }
 
             }
+
+            Button(
+                onClick = { copyWorkout()}, modifier = Modifier
+                    .wrapContentHeight()
+            ) {
+                Text(text = stringResource(id = R.string.copy_workout_copy_button_sr))
+            }
         }
 
-        Button(
-            onClick = { copyWorkout()}, modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 40.dp)
-        ) {
-            Text(text = stringResource(id = R.string.copy_workout_copy_button_sr))
-        }
     }
-}
+
 
 @Composable
 fun WorkoutCopyScreenTopAppBar(
