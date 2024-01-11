@@ -60,4 +60,5 @@
     <string name="workout_diary_plate_calculator_button_sr">Plate Calculator</string>
     <string name="workout_plate_calculator_title_sr">Plate calculator</string>
     <string name="workout_plate_calulator_target_weight_sr">Target Weight</string>
+    <string name="workout_plate_screen_error_text">Can\'t fit more bars</string>
 </resources>

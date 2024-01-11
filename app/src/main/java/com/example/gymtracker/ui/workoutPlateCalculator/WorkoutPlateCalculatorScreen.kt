@@ -26,6 +26,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,7 +42,7 @@ fun WorkoutPlateCalculatorRoute(
     onBackClick: () -> Unit = {}
 ) {
 
-    WorkoutPlateCalculatorScreen(onBackClick = onBackClick)
+    WorkoutPlateCalculatorScreen(modifier = modifier, onBackClick = onBackClick)
 
 }
 
@@ -67,6 +68,8 @@ fun PlatesGraph(
 ) {
 
     val textMeasurer = rememberTextMeasurer()
+
+    val errorStringResource = stringResource(R.string.workout_plate_screen_error_text)
 
     val paddingValue = 12f
     val maxPlateValue = plateList.max()
@@ -114,39 +117,52 @@ fun PlatesGraph(
         // Draw the bars
         plateList.forEach { plateValue ->
 
-            // Plate
-            drawRoundRect(
-                color = plateColor,
-                topLeft = Offset(
-                    x = prevX,
-                    y = yAxisCenter.minus(plateValue.times(scaleFactor).div(2f))
-                ),
-                size = Size(width = plateWidth, height = plateValue.times(scaleFactor)),
-                cornerRadius
-            )
-
-            // Plate text
-            drawText(
-                textMeasurer = textMeasurer,
-                text = plateValue.toString(),
-                topLeft = Offset(
-                    x = prevX,
-                    y = yAxisCenter.plus(plateValue.times(scaleFactor).div(2))
+            if(prevX > size.width){
+                drawText(textMeasurer = textMeasurer,
+                    text = errorStringResource,
+                    topLeft = Offset(
+                        x = size.width.div(2).minus(150f),
+                        y = 0f
+                    ),
+                    style = TextStyle(
+                        color = Color.Red
+                    )
                 )
-            )
-
-            /*plate separator */
-            drawRoundRect(
-                color = barColor,
-                topLeft = Offset(
-                    x = prevX + plateWidth,
-                    y = yAxisCenter.minus(barHeight.div(2f))
-                ),
-                size = Size(width = plateSeparation, height = barHeight),
-
+            } else {
+                    // Plate
+                drawRoundRect(
+                    color = plateColor,
+                    topLeft = Offset(
+                        x = prevX,
+                        y = yAxisCenter.minus(plateValue.times(scaleFactor).div(2f))
+                    ),
+                    size = Size(width = plateWidth, height = plateValue.times(scaleFactor)),
+                    cornerRadius
                 )
 
-            prevX += plateSeparation + plateWidth
+                // Plate text
+                drawText(
+                    textMeasurer = textMeasurer,
+                    text = plateValue.toString(),
+                    topLeft = Offset(
+                        x = prevX,
+                        y = yAxisCenter.plus(plateValue.times(scaleFactor).div(2))
+                    )
+                )
+
+                /*plate separator */
+                drawRoundRect(
+                    color = barColor,
+                    topLeft = Offset(
+                        x = prevX + plateWidth,
+                        y = yAxisCenter.minus(barHeight.div(2f))
+                    ),
+                    size = Size(width = plateSeparation, height = barHeight),
+
+                    )
+
+                prevX += plateSeparation + plateWidth
+            }
 
         }
 
@@ -214,7 +230,7 @@ fun WorkoutPlateCalculatorTopAppBar(
 @Composable
 fun PlatesGraphPreview() {
     PlatesGraph(
-        plateList = persistentListOf(25f, 25f, 20f, 15f, 5f, 2.5f,1.25f),
+        plateList = persistentListOf(25f, 25f, 20f, 15f, 10f, 5f, 2.5f, 1.25f),
         barWeight = 20f
     )
 }
