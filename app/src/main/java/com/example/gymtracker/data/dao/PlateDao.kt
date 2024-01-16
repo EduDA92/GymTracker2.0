@@ -2,6 +2,7 @@ package com.example.gymtracker.data.dao
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import androidx.room.Upsert
@@ -16,6 +17,9 @@ interface PlateDao {
 
     @Upsert
     suspend fun upsertPlate(plate: PlateEntity): Long
+
+    @Insert
+    suspend fun insertAllPlates(plates: List<PlateEntity>)
 
     @Query("DELETE FROM plate WHERE id = :plateId")
     suspend fun deletePlate(plateId: Long)

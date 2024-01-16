@@ -44,6 +44,19 @@ class BarDaoTest {
     }
 
     @Test
+    fun barDao_insertAllBars_worksAsExpected() = runTest {
+
+        val barList = listOf(barEntity, barEntity.copy(id = 2), barEntity.copy(id = 3))
+
+        barDao.insertAllBars(barList)
+
+        val bars = barDao.observeBars().first()
+
+        assertEquals(barList, bars)
+
+    }
+
+    @Test
     fun barDao_updateBarIsSelected_worksAsExpected() = runTest {
 
         barDao.upsertBar(barEntity)

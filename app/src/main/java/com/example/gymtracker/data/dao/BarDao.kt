@@ -1,6 +1,7 @@
 package com.example.gymtracker.data.dao
 
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Upsert
 import com.example.gymtracker.data.model.BarEntity
@@ -14,6 +15,9 @@ interface BarDao {
 
     @Upsert
     suspend fun upsertBar(bar: BarEntity): Long
+
+    @Insert
+    suspend fun insertAllBars(barList: List<BarEntity>)
 
     @Query("DELETE FROM bar WHERE id = :barId")
     suspend fun deleteBar(barId: Long)

@@ -47,6 +47,19 @@ class PlateDaoTest {
     }
 
     @Test
+    fun plateDao_insertAllPlates_worksAsExpected() = runTest {
+
+        val plateList = listOf(plateEntity, plateEntity.copy(id = 2), plateEntity.copy(id = 3))
+
+        plateDao.insertAllPlates(plateList)
+
+        var plates = plateDao.observePlates().first()
+
+        assertEquals(plateList, plates)
+
+    }
+
+    @Test
     fun plateDao_updatePlateIsSelected_worksAsExpected() = runTest {
 
         plateDao.upsertPlate(plateEntity)
