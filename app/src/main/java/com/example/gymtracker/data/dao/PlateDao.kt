@@ -1,5 +1,6 @@
 package com.example.gymtracker.data.dao
 
+import androidx.compose.ui.text.font.FontWeight
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
@@ -21,5 +22,8 @@ interface PlateDao {
 
     @Query("UPDATE plate SET isSelected = :isPlateSelected WHERE id = :plateId")
     suspend fun updatePlateIsSelected(plateId: Long, isPlateSelected: Boolean)
+
+    @Query("SELECT EXISTS(SELECT * FROM plate WHERE weight = :weight)")
+    suspend fun checkIfPlateWeightExist(weight: Float): Boolean
 
 }

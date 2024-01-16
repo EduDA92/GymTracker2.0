@@ -65,6 +65,21 @@ class PlateDaoTest {
 
     }
 
+    @Test
+    fun plateDao_checkIfPlateWeightAlreadyExist_returnsCorrectValue() = runTest {
+
+        plateDao.upsertPlate(plateEntity)
+
+        var exist = plateDao.checkIfPlateWeightExist(22f)
+
+        assertEquals(exist, false)
+
+        exist = plateDao.checkIfPlateWeightExist(20f)
+
+        assertEquals(exist, true)
+
+    }
+
     private val plateEntity = PlateEntity(
         id = 1,
         weight = 20f,

@@ -62,6 +62,22 @@ class BarDaoTest {
 
     }
 
+    @Test
+    fun barDao_checkIfBarAlreadyExist_returnsCorrectValue() = runTest {
+
+        barDao.upsertBar(barEntity)
+
+        var exist = barDao.checkIfBarWeightExist(22f)
+
+        assertEquals(exist, false)
+
+        exist = barDao.checkIfBarWeightExist(20f)
+
+        assertEquals(exist, true)
+
+
+    }
+
     private val barEntity = BarEntity(
         id = 1,
         weight = 20f,

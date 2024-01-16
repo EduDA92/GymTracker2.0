@@ -21,4 +21,7 @@ interface BarDao {
     @Query("UPDATE bar SET isSelected = :isBarSelected WHERE id = :barId")
     suspend fun updateBarIsSelected(barId: Long, isBarSelected: Boolean)
 
+    @Query("SELECT EXISTS(SELECT * FROM bar WHERE weight = :weight)")
+    suspend fun checkIfBarWeightExist(weight: Float): Boolean
+
 }
