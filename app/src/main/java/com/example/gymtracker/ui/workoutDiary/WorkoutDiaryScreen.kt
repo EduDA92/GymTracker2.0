@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -273,10 +274,10 @@ fun ExerciseAndSets(
                 ) {
 
                     IconButton(
-                        onClick = { isDropdownMenuVisible = true },
+                        onClick = { isDropdownMenuVisible = true }
                     ) {
                         Icon(
-                            imageVector = Icons.Filled.MoreVert,
+                            painter = painterResource(id = R.drawable.baseline_more_horiz_24),
                             contentDescription = stringResource(id = R.string.exercise_dropdown_menu_sr)
                         )
                     }
@@ -301,33 +302,37 @@ fun ExerciseAndSets(
                 }
             }
 
-            /* Kg and Reps Header */
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            /* Show Kg and Reps Header only if there is sets created */
+            if (exerciseSets.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
 
-                Text(
-                    text = stringResource(id = R.string.kg_sr),
-                    fontSize = 20.sp,
-                    modifier = Modifier
-                        .weight(2f)
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                )
+                    Text(
+                        text = stringResource(id = R.string.kg_sr),
+                        fontSize = 20.sp,
+                        modifier = Modifier
+                            .weight(2f)
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                    )
 
-                Text(
-                    text = stringResource(id = R.string.reps_sr),
-                    fontSize = 20.sp,
-                    modifier = Modifier
-                        .weight(2f)
-                        .wrapContentWidth(Alignment.CenterHorizontally)
-                )
+                    Text(
+                        text = stringResource(id = R.string.reps_sr),
+                        fontSize = 20.sp,
+                        modifier = Modifier
+                            .weight(2f)
+                            .wrapContentWidth(Alignment.CenterHorizontally)
+                    )
 
-                /* Placeholder to align the Kg and Reps text properly */
-                Spacer(modifier = Modifier.weight(1f))
-                Spacer(modifier = Modifier.weight(1f))
+                    /* Placeholder to align the Kg and Reps text properly */
+                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.weight(1f))
 
 
+                }
+
+                Divider(modifier = Modifier.padding(top = dimensionResource(id = R.dimen.small_dp)))
             }
 
             /* Exercise sets, expected behaviour:
