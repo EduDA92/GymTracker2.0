@@ -59,6 +59,11 @@
     <string name="workout_copy_title_sr">Copy Workout</string>
     <string name="workout_diary_plate_calculator_button_sr">Plate Calculator</string>
     <string name="workout_plate_calculator_title_sr">Plate calculator</string>
-    <string name="workout_plate_calulator_target_weight_sr">Target Weight</string>
+    <string name="workout_plate_calulator_target_weight_sr">Target Weight: </string>
     <string name="workout_plate_screen_error_text">Can\'t fit more bars</string>
+    <string name="workout_diary_rest_timer_button_sr">Rest Timer</string>
+    <string name="workout_diary_plate_calculator_button_icon_cd">Plate calculator icon</string>
+    <string name="workout_diary_timer_button_icon_cd">Timer button icon</string>
+    <string name="workout_plate_available_plates_sr">Available Plates:</string>
+    <string name="workout_plate_available_bars_sr">Available Bars:</string>
 </resources>

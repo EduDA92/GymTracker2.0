@@ -205,14 +205,48 @@ fun WorkoutDiaryScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
 
-                    OutlinedButton(
-                        onClick = { navigateToWorkoutPlateCalculator() },
-                        modifier = Modifier
-                            .padding(dimensionResource(id = R.dimen.medium_dp))
-                            .wrapContentWidth(),
-                        shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp))
-                    ) {
-                        Text(text = stringResource(id = R.string.workout_diary_plate_calculator_button_sr))
+                    Row {
+                        OutlinedButton(
+                            onClick = { navigateToWorkoutPlateCalculator() },
+                            modifier = Modifier
+                                .padding(
+                                    start = dimensionResource(id = R.dimen.medium_dp),
+                                    top = dimensionResource(id = R.dimen.medium_dp),
+                                    bottom = dimensionResource(id = R.dimen.medium_dp),
+                                    end = dimensionResource(id = R.dimen.small_dp)
+                                )
+                                .weight(1f),
+                            shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp))
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.outline_calculate_24),
+                                contentDescription = stringResource(id = R.string.workout_diary_plate_calculator_button_icon_cd),
+                                modifier = Modifier.padding(end = dimensionResource(id = R.dimen.medium_dp))
+                            )
+                            Text(text = stringResource(id = R.string.workout_diary_plate_calculator_button_sr))
+                        }
+
+                        OutlinedButton(
+                            onClick = { /*TODO*/ },
+                            modifier = Modifier
+                                .padding(
+                                    start = dimensionResource(id = R.dimen.small_dp),
+                                    top = dimensionResource(id = R.dimen.medium_dp),
+                                    bottom = dimensionResource(id = R.dimen.medium_dp),
+                                    end = dimensionResource(id = R.dimen.medium_dp)
+                                )
+                                .weight(1f),
+                            shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp))
+                        ) {
+
+                            Icon(
+                                painter = painterResource(id = R.drawable.outline_timer_24),
+                                contentDescription = stringResource(id = R.string.workout_diary_timer_button_icon_cd),
+                                modifier = Modifier.padding(end = dimensionResource(id = R.dimen.medium_dp))
+                            )
+                            Text(text = stringResource(id = R.string.workout_diary_rest_timer_button_sr))
+
+                        }
                     }
 
                 }

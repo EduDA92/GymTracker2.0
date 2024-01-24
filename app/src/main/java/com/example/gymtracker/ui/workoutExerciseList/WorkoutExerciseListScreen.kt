@@ -418,7 +418,7 @@ fun SearchFilterBar(
         modifier = modifier
             .fillMaxWidth()
     ) {
-        FlowColumn {
+        Column{
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

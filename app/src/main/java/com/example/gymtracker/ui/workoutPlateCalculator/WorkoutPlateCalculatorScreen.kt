@@ -1,23 +1,39 @@
 package com.example.gymtracker.ui.workoutPlateCalculator
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.requiredWidth
+import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
@@ -26,37 +42,70 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gymtracker.R
+import com.example.gymtracker.ui.model.Bar
+import com.example.gymtracker.ui.model.Plate
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 
 @Composable
 fun WorkoutPlateCalculatorRoute(
     modifier: Modifier = Modifier,
+    viewModel: WorkoutPlateCalculatorViewModel = hiltViewModel(),
     onBackClick: () -> Unit = {}
 ) {
 
-    WorkoutPlateCalculatorScreen(modifier = modifier, onBackClick = onBackClick)
+    val state by viewModel.weightState.collectAsStateWithLifecycle()
+
+    WorkoutPlateCalculatorScreen(
+        modifier = modifier,
+        state = state,
+        updateWeight = viewModel::updateWeight,
+        onBackClick = onBackClick
+    )
 
 }
 
 @Composable
 fun WorkoutPlateCalculatorScreen(
     modifier: Modifier = Modifier,
+    state: WorkoutPlateCalculatorUiState,
+    updateWeight: (String) -> Unit = {},
+    updatePlateSelectedState: (Long, Boolean) -> Unit = {_,_-> },
+    updateBarSelectedState:(Long, Boolean) -> Unit = {_,_ ->},
     onBackClick: () -> Unit = {}
 ) {
 
-    Column(modifier = modifier.fillMaxSize()) {
-        WorkoutPlateCalculatorTopAppBar(onBackClick = onBackClick)
-        TargetWeight(weight = 23)
-
+    when (state) {
+        WorkoutPlateCalculatorUiState.Loading -> TODO()
+        is WorkoutPlateCalculatorUiState.Success -> {
+            Column(modifier = modifier.fillMaxSize()) {
+                WorkoutPlateCalculatorTopAppBar(onBackClick = onBackClick)
+                TargetWeight(weight = state.weightState.weight, onWeightChange = updateWeight)
+                AvailablePlates(plates = state.weightState.plateList)
+                AvailableBars(bars = state.weightState.barList)
+                PlatesGraph(
+                    modifier = Modifier.padding(dimensionResource(id = R.dimen.medium_dp)),
+                    plateList = persistentListOf(25f, 20f, 10f),
+                    barWeight = 20f
+                )
+            }
+        }
     }
+
 
 }
 
@@ -80,7 +129,7 @@ fun PlatesGraph(
     Canvas(modifier = modifier.fillMaxSize()) {
 
         val yAxisCenter = size.height.div(2)
-        val maxPlateHeight = size.height.minus(paddingValue.times(2)).times(0.6f)
+        val maxPlateHeight = size.height.minus(paddingValue.times(2)).times(0.8f)
         val scaleFactor = invMaxPlateValue.times(maxPlateHeight)
 
         // Fixed sizes for the bar, plate separation and plate width
@@ -117,8 +166,9 @@ fun PlatesGraph(
         // Draw the bars
         plateList.forEach { plateValue ->
 
-            if(prevX > size.width){
-                drawText(textMeasurer = textMeasurer,
+            if (prevX > size.width) {
+                drawText(
+                    textMeasurer = textMeasurer,
                     text = errorStringResource,
                     topLeft = Offset(
                         x = size.width.div(2).minus(150f),
@@ -129,7 +179,7 @@ fun PlatesGraph(
                     )
                 )
             } else {
-                    // Plate
+                // Plate
                 drawRoundRect(
                     color = plateColor,
                     topLeft = Offset(
@@ -170,33 +220,176 @@ fun PlatesGraph(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TargetWeight(
+fun AvailablePlates(
     modifier: Modifier = Modifier,
-    weight: Int,
-    onWeightChange: (Int) -> Unit = {}
+    plates: ImmutableList<Plate>,
+    updatePlateSelectedState: (Long, Boolean) -> Unit = { _, _ ->}
 ) {
 
-    Surface(modifier = modifier.fillMaxWidth()) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(dimensionResource(id = R.dimen.medium_dp))
+    ) {
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Text(
-                text = stringResource(id = R.string.workout_plate_calulator_target_weight_sr),
-                modifier = Modifier.weight(1f)
+                text = stringResource(id = R.string.workout_plate_available_plates_sr),
+                fontSize = 18.sp
             )
 
-            OutlinedTextField(
-                value = weight.toString(),
-                onValueChange = { weight -> onWeightChange(weight.toInt()) },
+            IconButton(
+                onClick = { /*TODO*/ },
                 modifier = Modifier
-                    .weight(3f)
-                    .wrapContentWidth(Alignment.Start)
-                    .requiredWidth(100.dp)
+                    .weight(1f)
+                    .wrapContentWidth(Alignment.End)
+            ) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = "")
+            }
+        }
+
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+        ) {
+
+            plates.forEach { plate ->
+
+                FilterChip(
+                    selected = plate.isSelected,
+                    onClick = { updatePlateSelectedState(plate.id, !plate.isSelected) },
+                    label = { Text(plate.weight.toString()) },
+                    modifier = Modifier.padding(dimensionResource(id = R.dimen.small_dp))
+                )
+
+            }
+
+        }
+
+
+    }
+
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AvailableBars(
+    modifier: Modifier = Modifier,
+    bars: ImmutableList<Bar>
+) {
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(dimensionResource(id = R.dimen.medium_dp))
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(id = R.string.workout_plate_available_bars_sr),
+                fontSize = 18.sp
             )
+
+            IconButton(
+                onClick = { /*TODO*/ },
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentWidth(Alignment.End)
+            ) {
+                Icon(imageVector = Icons.Filled.Add, contentDescription = "")
+            }
+
+        }
+
+
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .horizontalScroll(rememberScrollState())
+        ) {
+
+            bars.forEach { bar ->
+
+                FilterChip(
+                    selected = bar.isSelected,
+                    onClick = { /*TODO*/ },
+                    label = { Text(text = bar.weight.toString()) },
+                    modifier = Modifier.padding(dimensionResource(id = R.dimen.small_dp))
+                )
+
+            }
 
         }
 
     }
+
+}
+
+@Composable
+fun TargetWeight(
+    modifier: Modifier = Modifier,
+    weight: String,
+    onWeightChange: (String) -> Unit = {}
+) {
+
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+            .padding(dimensionResource(id = R.dimen.medium_dp))
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = stringResource(id = R.string.workout_plate_calulator_target_weight_sr),
+            fontSize = 18.sp
+        )
+
+        Spacer(modifier = Modifier.size(24.dp))
+
+        BasicTextField(
+            value = weight,
+            onValueChange = onWeightChange,
+            textStyle = TextStyle(
+                fontSize = 18.sp,
+                textAlign = TextAlign.Center
+            ),
+            decorationBox = { innerTextField ->
+                Box(
+                    modifier = Modifier
+                        .wrapContentHeight(Alignment.CenterVertically)
+                        .wrapContentWidth(Alignment.CenterHorizontally)
+                        .background(
+                            color = Color.LightGray,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                        .padding(4.dp)
+                ) {
+
+                    innerTextField()
+                }
+            },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
+            modifier = Modifier
+                .requiredSize(width = 56.dp, height = 46.dp)
+                .semantics { contentDescription = "weightEditTextsCd" }
+        )
+
+    }
+
 
 }
 
@@ -226,6 +419,43 @@ fun WorkoutPlateCalculatorTopAppBar(
 
 }
 
+
+@Preview
+@Composable
+fun WorkoutPlateCalculatorScreenPreview() {
+
+    val state = WorkoutPlateCalculatorUiState.Success(
+        WeightsState(
+            weight = "300.5",
+            calculatedPlateList = persistentListOf(22.5f, 20f, 10f),
+            plateList = persistentListOf(
+                Plate(1, 20f, true),
+                Plate(2, 10f, false),
+                Plate(3, 5f, false),
+                Plate(1, 20f, true),
+                Plate(2, 10f, false),
+                Plate(3, 5f, false),
+                Plate(1, 20f, true),
+                Plate(2, 10f, false),
+                Plate(3, 5f, false)
+            ),
+            barList = persistentListOf(
+                Bar(1, 20f, true),
+                Bar(2, 10f, false),
+                Bar(3, 5f, false),
+                Bar(1, 20f, true),
+                Bar(2, 10f, false),
+                Bar(3, 5f, false),
+                Bar(1, 20f, true),
+                Bar(2, 10f, false),
+                Bar(3, 5f, false)
+            )
+        )
+    )
+
+    WorkoutPlateCalculatorScreen(state = state)
+}
+
 @Preview
 @Composable
 fun PlatesGraphPreview() {
@@ -233,10 +463,4 @@ fun PlatesGraphPreview() {
         plateList = persistentListOf(25f, 25f, 20f, 15f, 10f, 5f, 2.5f, 1.25f),
         barWeight = 20f
     )
-}
-
-@Preview
-@Composable
-fun WorkoutPlateCalculatorScreenPreview() {
-    WorkoutPlateCalculatorScreen()
 }
