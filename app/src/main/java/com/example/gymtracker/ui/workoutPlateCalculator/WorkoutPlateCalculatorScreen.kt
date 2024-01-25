@@ -13,11 +13,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -27,7 +27,6 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -40,6 +39,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
@@ -56,6 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gymtracker.R
+import com.example.gymtracker.ui.commonComposables.LoadingState
 import com.example.gymtracker.ui.model.Bar
 import com.example.gymtracker.ui.model.Plate
 import kotlinx.collections.immutable.ImmutableList
@@ -84,23 +85,26 @@ fun WorkoutPlateCalculatorScreen(
     modifier: Modifier = Modifier,
     state: WorkoutPlateCalculatorUiState,
     updateWeight: (String) -> Unit = {},
-    updatePlateSelectedState: (Long, Boolean) -> Unit = {_,_-> },
-    updateBarSelectedState:(Long, Boolean) -> Unit = {_,_ ->},
+    updatePlateSelectedState: (Long, Boolean) -> Unit = { _, _ -> },
+    updateBarSelectedState: (Long, Boolean) -> Unit = { _, _ -> },
     onBackClick: () -> Unit = {}
 ) {
 
     when (state) {
-        WorkoutPlateCalculatorUiState.Loading -> TODO()
+        WorkoutPlateCalculatorUiState.Loading -> LoadingState()
         is WorkoutPlateCalculatorUiState.Success -> {
             Column(modifier = modifier.fillMaxSize()) {
                 WorkoutPlateCalculatorTopAppBar(onBackClick = onBackClick)
-                TargetWeight(weight = state.weightState.weight, onWeightChange = updateWeight)
-                AvailablePlates(plates = state.weightState.plateList)
+                TargetWeight(onWeightChangeDone = updateWeight)
+                AvailablePlates(
+                    plates = state.weightState.plateList,
+                    updatePlateSelectedState = updatePlateSelectedState
+                )
                 AvailableBars(bars = state.weightState.barList)
                 PlatesGraph(
                     modifier = Modifier.padding(dimensionResource(id = R.dimen.medium_dp)),
-                    plateList = persistentListOf(),
-                    barWeight = 0f
+                    plateList = state.weightState.calculatedPlateList,
+                    barWeight = state.weightState.barWeight
                 )
             }
         }
@@ -118,28 +122,27 @@ fun PlatesGraph(
 
     val textMeasurer = rememberTextMeasurer()
     val errorStringResource = stringResource(R.string.workout_plate_screen_error_text)
-    val noPlatesToDisplayStringResource = stringResource(id = R.string.workout_plate_screen_no_plates_text)
+    val noPlatesToDisplayStringResource =
+        stringResource(id = R.string.workout_plate_screen_no_plates_text)
     val barColor = Color.LightGray
     val plateColor = MaterialTheme.colorScheme.primary
 
     Canvas(modifier = modifier.fillMaxSize()) {
 
         // Check if there are plates to display, if not return.
-        if(plateList.isEmpty()){
+        if (plateList.isEmpty()) {
             drawText(
                 textMeasurer = textMeasurer,
                 text = noPlatesToDisplayStringResource,
                 topLeft = Offset(
-                    x = size.width.div(2).minus(150f),
-                    y = 0f
+                    x = size.width.div(2f).minus(330f),
+                    y = size.height.div(2f)
                 ),
                 style = TextStyle(
                     color = Color.Red
                 )
             )
-
             return@Canvas
-
         }
 
         val paddingValue = 12f
@@ -243,7 +246,7 @@ fun PlatesGraph(
 fun AvailablePlates(
     modifier: Modifier = Modifier,
     plates: ImmutableList<Plate>,
-    updatePlateSelectedState: (Long, Boolean) -> Unit = { _, _ ->}
+    updatePlateSelectedState: (Long, Boolean) -> Unit = { _, _ -> }
 ) {
 
     Column(
@@ -357,10 +360,14 @@ fun AvailableBars(
 @Composable
 fun TargetWeight(
     modifier: Modifier = Modifier,
-    weight: String,
-    onWeightChange: (String) -> Unit = {}
+    onWeightChangeDone: (String) -> Unit = {}
 ) {
 
+    var weight by rememberSaveable {
+        mutableStateOf("")
+    }
+
+    val focusManager = LocalFocusManager.current
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -377,7 +384,7 @@ fun TargetWeight(
 
         BasicTextField(
             value = weight,
-            onValueChange = onWeightChange,
+            onValueChange = { weight = it },
             textStyle = TextStyle(
                 fontSize = 18.sp,
                 textAlign = TextAlign.Center
@@ -400,6 +407,14 @@ fun TargetWeight(
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Done
+            ),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    if(weight.isNotEmpty()){
+                        onWeightChangeDone(weight)
+                    }
+                    focusManager.clearFocus()
+                }
             ),
             modifier = Modifier
                 .requiredSize(width = 56.dp, height = 46.dp)
@@ -445,6 +460,7 @@ fun WorkoutPlateCalculatorScreenPreview() {
     val state = WorkoutPlateCalculatorUiState.Success(
         WeightsState(
             weight = "300.5",
+            barWeight = 20f,
             calculatedPlateList = persistentListOf(22.5f, 20f, 10f),
             plateList = persistentListOf(
                 Plate(1, 20f, true),

@@ -22,7 +22,7 @@ import javax.inject.Inject
 class WorkoutPlateCalculatorViewModel @Inject constructor(private val weightsRepository: WeightsRepository) :
     ViewModel() {
 
-    private val _weight = MutableStateFlow("")
+    private val _weight = MutableStateFlow("0")
 
     private val plateList = weightsRepository.observePlates()
 
@@ -40,6 +40,7 @@ class WorkoutPlateCalculatorViewModel @Inject constructor(private val weightsRep
             WorkoutPlateCalculatorUiState.Success(
                 WeightsState(
                     weight = weight,
+                    barWeight = bar,
                     calculatedPlateList = calculatedPlates.toImmutableList(),
                     plateList = plates.toImmutableList(),
                     barList = bars.toImmutableList()
@@ -83,6 +84,7 @@ sealed interface WorkoutPlateCalculatorUiState {
 
 data class WeightsState(
     val weight: String,
+    val barWeight: Float,
     val calculatedPlateList: ImmutableList<Float>,
     val plateList: ImmutableList<Plate>,
     val barList: ImmutableList<Bar>
