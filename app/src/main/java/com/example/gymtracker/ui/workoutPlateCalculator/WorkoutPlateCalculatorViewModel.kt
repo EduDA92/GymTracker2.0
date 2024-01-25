@@ -43,8 +43,8 @@ class WorkoutPlateCalculatorViewModel @Inject constructor(private val weightsRep
                     weight = weight,
                     barWeight = bar,
                     calculatedPlateList = calculatedPlates.toImmutableList(),
-                    plateList = plates.toImmutableList(),
-                    barList = bars.toImmutableList()
+                    plateList = plates.sortedByDescending{ it.weight }.toImmutableList(),
+                    barList = bars.sortedByDescending{ it.weight }.toImmutableList()
                 )
             )
 
