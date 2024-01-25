@@ -99,8 +99,8 @@ fun WorkoutPlateCalculatorScreen(
                 AvailableBars(bars = state.weightState.barList)
                 PlatesGraph(
                     modifier = Modifier.padding(dimensionResource(id = R.dimen.medium_dp)),
-                    plateList = persistentListOf(25f, 20f, 10f),
-                    barWeight = 20f
+                    plateList = persistentListOf(),
+                    barWeight = 0f
                 )
             }
         }
@@ -117,16 +117,34 @@ fun PlatesGraph(
 ) {
 
     val textMeasurer = rememberTextMeasurer()
-
     val errorStringResource = stringResource(R.string.workout_plate_screen_error_text)
-
-    val paddingValue = 12f
-    val maxPlateValue = plateList.max()
-    val invMaxPlateValue = 1f.div(maxPlateValue)
+    val noPlatesToDisplayStringResource = stringResource(id = R.string.workout_plate_screen_no_plates_text)
     val barColor = Color.LightGray
     val plateColor = MaterialTheme.colorScheme.primary
 
     Canvas(modifier = modifier.fillMaxSize()) {
+
+        // Check if there are plates to display, if not return.
+        if(plateList.isEmpty()){
+            drawText(
+                textMeasurer = textMeasurer,
+                text = noPlatesToDisplayStringResource,
+                topLeft = Offset(
+                    x = size.width.div(2).minus(150f),
+                    y = 0f
+                ),
+                style = TextStyle(
+                    color = Color.Red
+                )
+            )
+
+            return@Canvas
+
+        }
+
+        val paddingValue = 12f
+        val maxPlateValue = plateList.max()
+        val invMaxPlateValue = 1f.div(maxPlateValue)
 
         val yAxisCenter = size.height.div(2)
         val maxPlateHeight = size.height.minus(paddingValue.times(2)).times(0.8f)
@@ -156,8 +174,8 @@ fun PlatesGraph(
             textMeasurer = textMeasurer,
             text = barWeight.toString(),
             topLeft = Offset(
-                x = 0 + paddingValue.times(2),
-                y = yAxisCenter.minus(barHeight.div(2f))
+                x = 0 + paddingValue,
+                y = yAxisCenter.plus(barHeight.div(2f))
             )
         )
 
@@ -196,7 +214,7 @@ fun PlatesGraph(
                     text = plateValue.toString(),
                     topLeft = Offset(
                         x = prevX,
-                        y = yAxisCenter.plus(plateValue.times(scaleFactor).div(2))
+                        y = yAxisCenter.plus(plateValue.times(scaleFactor).div(2f))
                     )
                 )
 

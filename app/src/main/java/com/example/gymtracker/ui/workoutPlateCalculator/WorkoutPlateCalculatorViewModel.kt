@@ -32,7 +32,7 @@ class WorkoutPlateCalculatorViewModel @Inject constructor(private val weightsRep
         combine(_weight, plateList, barList) { weight, plates, bars ->
 
             val availablePlates = plates.filter { it.isSelected }.map { it.weight }
-            val bar = bars.first { it.isSelected }.weight
+            val bar = bars.firstOrNull() { it.isSelected }?.weight ?: 20f
 
             val calculatedPlates = calculatePlates(availablePlates, bar, weight.toFloat())
 

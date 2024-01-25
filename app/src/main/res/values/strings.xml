@@ -66,4 +66,5 @@
     <string name="workout_diary_timer_button_icon_cd">Timer button icon</string>
     <string name="workout_plate_available_plates_sr">Available Plates:</string>
     <string name="workout_plate_available_bars_sr">Available Bars:</string>
+    <string name="workout_plate_screen_no_plates_text">No plates to display</string>
 </resources>
