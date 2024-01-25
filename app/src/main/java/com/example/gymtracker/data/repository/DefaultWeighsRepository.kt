@@ -2,8 +2,7 @@ package com.example.gymtracker.data.repository
 
 import com.example.gymtracker.data.dao.BarDao
 import com.example.gymtracker.data.dao.PlateDao
-import com.example.gymtracker.data.model.BarEntity
-import com.example.gymtracker.data.model.PlateEntity
+import com.example.gymtracker.data.model.asEntity
 import com.example.gymtracker.data.model.toExternalModel
 import com.example.gymtracker.ui.model.Bar
 import com.example.gymtracker.ui.model.Plate
@@ -26,17 +25,17 @@ class DefaultWeighsRepository @Inject constructor(
             it.toExternalModel()
         }
 
-    override suspend fun upsertBar(bar: BarEntity): Long =
-        barDao.upsertBar(bar)
+    override suspend fun upsertBar(bar: Bar): Long =
+        barDao.upsertBar(bar.asEntity())
 
-    override suspend fun insertAllBars(barList: List<BarEntity>) =
-        barDao.insertAllBars(barList)
+    override suspend fun insertAllBars(barList: List<Bar>) =
+        barDao.insertAllBars(barList.asEntity())
 
-    override suspend fun upsertPlate(plate: PlateEntity): Long =
-        plateDao.upsertPlate(plate)
+    override suspend fun upsertPlate(plate: Plate): Long =
+        plateDao.upsertPlate(plate.asEntity())
 
-    override suspend fun insertAllPlates(plates: List<PlateEntity>) =
-        plateDao.insertAllPlates(plates)
+    override suspend fun insertAllPlates(plates: List<Plate>) =
+        plateDao.insertAllPlates(plates.asEntity())
 
     override suspend fun deleteBar(barId: Long) =
         barDao.deleteBar(barId)

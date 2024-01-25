@@ -19,6 +19,7 @@ fun PlateEntity.toExternalModel() = Plate(
 )
 
 fun List<PlateEntity>.toExternalModel() = map(PlateEntity::toExternalModel)
+fun List<Plate>.asEntity() = map(Plate::asEntity)
 
 fun Plate.asEntity() = PlateEntity(
     id = id,

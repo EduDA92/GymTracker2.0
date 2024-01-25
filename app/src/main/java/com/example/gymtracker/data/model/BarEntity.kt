@@ -20,6 +20,8 @@ fun BarEntity.toExternalModel() = Bar(
 
 fun List<BarEntity>.toExternalModel() = map(BarEntity::toExternalModel)
 
+fun List<Bar>.asEntity() = map(Bar::asEntity)
+
 fun Bar.asEntity() = BarEntity(
     id = id,
     weight = weight,

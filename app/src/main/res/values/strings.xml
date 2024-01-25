@@ -69,7 +69,8 @@
     <string name="workout_plate_screen_no_plates_text">No need to put Plates with this weight</string>
     <string name="workout_plate_calulator_weight_edit_text_cd">weightEditTextsCd</string>
     <string name="workout_plate_calulator_plate_dialog_title">Insert Plate Weight:</string>
-    <string name="workout_plate_calulator_dialog_plate_weight_edit_text_cd">plate weight cd</string>
+    <string name="workout_plate_calulator_dialog_weight_edit_text_cd">dialog weight cd</string>
     <string name="dismiss_sr">Dismiss</string>
     <string name="confirm_sr">Confirm</string>
+    <string name="workout_plate_calulator_bar_dialog_title">Insert Bar Weight:</string>
 </resources>

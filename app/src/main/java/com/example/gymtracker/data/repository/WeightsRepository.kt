@@ -12,13 +12,13 @@ interface WeightsRepository {
 
     fun observePlates(): Flow<List<Plate>>
 
-    suspend fun upsertBar(bar: BarEntity): Long
+    suspend fun upsertBar(bar: Bar): Long
 
-    suspend fun insertAllBars(barList: List<BarEntity>)
+    suspend fun insertAllBars(barList: List<Bar>)
 
-    suspend fun upsertPlate(plate: PlateEntity): Long
+    suspend fun upsertPlate(plate: Plate): Long
 
-    suspend fun insertAllPlates(plates: List<PlateEntity>)
+    suspend fun insertAllPlates(plates: List<Plate>)
 
     suspend fun deleteBar(barId: Long)
 

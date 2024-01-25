@@ -73,12 +73,30 @@ class WorkoutPlateCalculatorViewModel @Inject constructor(private val weightsRep
 
     }
 
+    /* This one is a bit trickier than the plates case because only one bar can be selected at
+    * the same time so we need to change the prev bar selected state and the current selected one,
+    * also if the the current selected plate is already selected cannot be deselected just by taping
+    * on it. */
+    fun updateBarSelectedState(prevBarId: Long, newBarId: Long){
+
+        viewModelScope.launch {
+
+            if(prevBarId != newBarId){
+
+                weightsRepository.updateBarIsSelected(prevBarId, false)
+                weightsRepository.updateBarIsSelected(newBarId, true)
+
+            }
+        }
+
+    }
+
     fun createPlate(plateWeight: Float){
 
         viewModelScope.launch {
 
             weightsRepository.upsertPlate(
-                PlateEntity(
+                Plate(
                     weight = plateWeight,
                     isSelected = false
                 )
@@ -87,6 +105,23 @@ class WorkoutPlateCalculatorViewModel @Inject constructor(private val weightsRep
         }
 
     }
+
+    fun createBar(barWeight: Float){
+
+        viewModelScope.launch {
+
+            weightsRepository.upsertBar(
+                Bar(
+                    weight = barWeight,
+                    isSelected = false
+                )
+            )
+
+        }
+
+    }
+
+
 
 
 }

@@ -1,5 +1,6 @@
 package com.example.gymtracker.ui.workoutPlateCalculator
 
+import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -82,7 +83,10 @@ fun WorkoutPlateCalculatorRoute(
         modifier = modifier,
         state = state,
         updateWeight = viewModel::updateWeight,
+        updatePlateSelectedState = viewModel::updatePlateSelectedState,
+        updateBarSelectedState = viewModel::updateBarSelectedState,
         createPlate = viewModel::createPlate,
+        createBar = viewModel::createBar,
         onBackClick = onBackClick
     )
 
@@ -94,12 +98,17 @@ fun WorkoutPlateCalculatorScreen(
     state: WorkoutPlateCalculatorUiState,
     updateWeight: (String) -> Unit = {},
     updatePlateSelectedState: (Long, Boolean) -> Unit = { _, _ -> },
-    updateBarSelectedState: (Long, Boolean) -> Unit = { _, _ -> },
+    updateBarSelectedState: (Long, Long) -> Unit = { _, _ -> },
     createPlate: (Float) -> Unit = {},
+    createBar: (Float) -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
 
     var openCreatePlateDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var openCreateBarDialog by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -114,7 +123,11 @@ fun WorkoutPlateCalculatorScreen(
                     updatePlateSelectedState = updatePlateSelectedState,
                     openCreatePlateDialog = { openCreatePlateDialog = true }
                 )
-                AvailableBars(bars = state.weightState.barList)
+                AvailableBars(
+                    bars = state.weightState.barList,
+                    updateBarSelectedState = updateBarSelectedState,
+                    openCreateBarDialog = {openCreateBarDialog = true}
+                )
                 PlatesGraph(
                     modifier = Modifier.padding(dimensionResource(id = R.dimen.medium_dp)),
                     plateList = state.weightState.calculatedPlateList,
@@ -122,10 +135,18 @@ fun WorkoutPlateCalculatorScreen(
                 )
 
                 AnimatedVisibility(visible = openCreatePlateDialog) {
-                    PlateCreationDialog(
+                    WeightCreationDialog(
+                        dialogTitle = R.string.workout_plate_calulator_plate_dialog_title,
                         onDismissRequest = { openCreatePlateDialog = false },
                         onConfirmation = createPlate
                     )
+                }
+
+                AnimatedVisibility(visible = openCreateBarDialog) {
+                    WeightCreationDialog(dialogTitle = R.string.workout_plate_calulator_bar_dialog_title,
+                        onDismissRequest = {openCreateBarDialog = false},
+                        onConfirmation = createBar)
+                    
                 }
             }
         }
@@ -325,8 +346,12 @@ fun AvailablePlates(
 @Composable
 fun AvailableBars(
     modifier: Modifier = Modifier,
+    updateBarSelectedState: (Long, Long) -> Unit = { _, _ -> },
+    openCreateBarDialog: () -> Unit = {},
     bars: ImmutableList<Bar>
 ) {
+
+    val prevSelectedBar = bars.firstOrNull { it.isSelected }?.id ?: 0
 
     Column(
         modifier = modifier
@@ -344,7 +369,7 @@ fun AvailableBars(
             )
 
             IconButton(
-                onClick = { /*TODO*/ },
+                onClick = { openCreateBarDialog() },
                 modifier = Modifier
                     .weight(1f)
                     .wrapContentWidth(Alignment.End)
@@ -366,7 +391,7 @@ fun AvailableBars(
 
                 FilterChip(
                     selected = bar.isSelected,
-                    onClick = { /*TODO*/ },
+                    onClick = { updateBarSelectedState(prevSelectedBar, bar.id) },
                     label = { Text(text = bar.weight.toString()) },
                     modifier = Modifier.padding(dimensionResource(id = R.dimen.small_dp))
                 )
@@ -452,17 +477,17 @@ fun TargetWeight(
 }
 
 @Composable
-fun PlateCreationDialog(
+fun WeightCreationDialog(
+    @StringRes dialogTitle: Int,
     onDismissRequest: () -> Unit = {},
     onConfirmation: (Float) -> Unit = {}
 ) {
 
-    var plateWeight by rememberSaveable {
+    var currentWeight by rememberSaveable {
         mutableStateOf("0")
     }
 
-    val plateWeightEditTextCd =
-        stringResource(R.string.workout_plate_calulator_dialog_plate_weight_edit_text_cd)
+    val weightEditTextCd = stringResource(R.string.workout_plate_calulator_dialog_weight_edit_text_cd)
 
     Dialog(onDismissRequest = onDismissRequest) {
 
@@ -492,8 +517,8 @@ fun PlateCreationDialog(
                     )
 
                     BasicTextField(
-                        value = plateWeight,
-                        onValueChange = { plateWeight = it },
+                        value = currentWeight,
+                        onValueChange = { currentWeight = it },
                         textStyle = TextStyle(
                             fontSize = 18.sp,
                             textAlign = TextAlign.Center
@@ -520,7 +545,7 @@ fun PlateCreationDialog(
                         modifier = Modifier
                             .requiredSize(width = 56.dp, height = 46.dp)
                             .semantics {
-                                contentDescription = plateWeightEditTextCd
+                                contentDescription = weightEditTextCd
                             }
                     )
                 }
@@ -536,10 +561,10 @@ fun PlateCreationDialog(
 
                     TextButton(
                         onClick = {
-                            onConfirmation(plateWeight.toFloat())
+                            onConfirmation(currentWeight.toFloat())
                             onDismissRequest()
                         },
-                        enabled = plateWeight.isNotEmpty() && plateWeight != "0"
+                        enabled = currentWeight.isNotEmpty() && currentWeight != "0"
                     ) {
                         Text(stringResource(R.string.confirm_sr))
                     }
@@ -622,7 +647,7 @@ fun WorkoutPlateCalculatorScreenPreview() {
 @Composable
 fun plateCreationDialogPreview() {
 
-    PlateCreationDialog()
+    WeightCreationDialog(dialogTitle = R.string.workout_plate_calulator_plate_dialog_title)
 
 }
 
