@@ -2,6 +2,7 @@ package com.example.gymtracker.ui.workoutPlateCalculator
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gymtracker.data.model.PlateEntity
 import com.example.gymtracker.data.repository.WeightsRepository
 import com.example.gymtracker.ui.model.Bar
 import com.example.gymtracker.ui.model.Plate
@@ -68,6 +69,21 @@ class WorkoutPlateCalculatorViewModel @Inject constructor(private val weightsRep
                 plateId = plateId,
                 isPlateSelected = isSelected
             )
+        }
+
+    }
+
+    fun createPlate(plateWeight: Float){
+
+        viewModelScope.launch {
+
+            weightsRepository.upsertPlate(
+                PlateEntity(
+                    weight = plateWeight,
+                    isSelected = false
+                )
+            )
+
         }
 
     }

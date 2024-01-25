@@ -1,14 +1,17 @@
 package com.example.gymtracker.ui.workoutPlateCalculator
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -22,12 +25,14 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +44,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -53,6 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gymtracker.R
@@ -75,6 +82,7 @@ fun WorkoutPlateCalculatorRoute(
         modifier = modifier,
         state = state,
         updateWeight = viewModel::updateWeight,
+        createPlate = viewModel::createPlate,
         onBackClick = onBackClick
     )
 
@@ -87,8 +95,13 @@ fun WorkoutPlateCalculatorScreen(
     updateWeight: (String) -> Unit = {},
     updatePlateSelectedState: (Long, Boolean) -> Unit = { _, _ -> },
     updateBarSelectedState: (Long, Boolean) -> Unit = { _, _ -> },
+    createPlate: (Float) -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
+
+    var openCreatePlateDialog by rememberSaveable {
+        mutableStateOf(false)
+    }
 
     when (state) {
         WorkoutPlateCalculatorUiState.Loading -> LoadingState()
@@ -98,7 +111,8 @@ fun WorkoutPlateCalculatorScreen(
                 TargetWeight(onWeightChangeDone = updateWeight)
                 AvailablePlates(
                     plates = state.weightState.plateList,
-                    updatePlateSelectedState = updatePlateSelectedState
+                    updatePlateSelectedState = updatePlateSelectedState,
+                    openCreatePlateDialog = { openCreatePlateDialog = true }
                 )
                 AvailableBars(bars = state.weightState.barList)
                 PlatesGraph(
@@ -106,6 +120,13 @@ fun WorkoutPlateCalculatorScreen(
                     plateList = state.weightState.calculatedPlateList,
                     barWeight = state.weightState.barWeight
                 )
+
+                AnimatedVisibility(visible = openCreatePlateDialog) {
+                    PlateCreationDialog(
+                        onDismissRequest = { openCreatePlateDialog = false },
+                        onConfirmation = createPlate
+                    )
+                }
             }
         }
     }
@@ -246,6 +267,7 @@ fun PlatesGraph(
 fun AvailablePlates(
     modifier: Modifier = Modifier,
     plates: ImmutableList<Plate>,
+    openCreatePlateDialog: () -> Unit = {},
     updatePlateSelectedState: (Long, Boolean) -> Unit = { _, _ -> }
 ) {
 
@@ -265,7 +287,7 @@ fun AvailablePlates(
             )
 
             IconButton(
-                onClick = { /*TODO*/ },
+                onClick = { openCreatePlateDialog() },
                 modifier = Modifier
                     .weight(1f)
                     .wrapContentWidth(Alignment.End)
@@ -367,6 +389,8 @@ fun TargetWeight(
         mutableStateOf("")
     }
 
+    val weightEditTextCd = stringResource(R.string.workout_plate_calulator_weight_edit_text_cd)
+
     val focusManager = LocalFocusManager.current
 
     Row(
@@ -410,7 +434,7 @@ fun TargetWeight(
             ),
             keyboardActions = KeyboardActions(
                 onDone = {
-                    if(weight.isNotEmpty()){
+                    if (weight.isNotEmpty()) {
                         onWeightChangeDone(weight)
                     }
                     focusManager.clearFocus()
@@ -418,11 +442,115 @@ fun TargetWeight(
             ),
             modifier = Modifier
                 .requiredSize(width = 56.dp, height = 46.dp)
-                .semantics { contentDescription = "weightEditTextsCd" }
+                .semantics {
+                    contentDescription = weightEditTextCd
+                }
         )
 
     }
 
+}
+
+@Composable
+fun PlateCreationDialog(
+    onDismissRequest: () -> Unit = {},
+    onConfirmation: (Float) -> Unit = {}
+) {
+
+    var plateWeight by rememberSaveable {
+        mutableStateOf("0")
+    }
+
+    val plateWeightEditTextCd =
+        stringResource(R.string.workout_plate_calulator_dialog_plate_weight_edit_text_cd)
+
+    Dialog(onDismissRequest = onDismissRequest) {
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(140.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp)
+        ) {
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+
+                    Text(
+                        stringResource(R.string.workout_plate_calulator_plate_dialog_title),
+                        fontSize = 18.sp,
+                        modifier = Modifier.padding(dimensionResource(id = R.dimen.large_db))
+                    )
+
+                    BasicTextField(
+                        value = plateWeight,
+                        onValueChange = { plateWeight = it },
+                        textStyle = TextStyle(
+                            fontSize = 18.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        decorationBox = { innerTextField ->
+                            Box(
+                                modifier = Modifier
+                                    .wrapContentHeight(Alignment.CenterVertically)
+                                    .wrapContentWidth(Alignment.CenterHorizontally)
+                                    .background(
+                                        color = Color.LightGray,
+                                        shape = RoundedCornerShape(4.dp)
+                                    )
+                                    .padding(4.dp)
+                            ) {
+
+                                innerTextField()
+                            }
+                        },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done
+                        ),
+                        modifier = Modifier
+                            .requiredSize(width = 56.dp, height = 46.dp)
+                            .semantics {
+                                contentDescription = plateWeightEditTextCd
+                            }
+                    )
+                }
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+
+                    TextButton(onClick = { onDismissRequest() }) {
+                        Text(stringResource(R.string.dismiss_sr))
+                    }
+
+                    TextButton(
+                        onClick = {
+                            onConfirmation(plateWeight.toFloat())
+                            onDismissRequest()
+                        },
+                        enabled = plateWeight.isNotEmpty() && plateWeight != "0"
+                    ) {
+                        Text(stringResource(R.string.confirm_sr))
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
 
 }
 
@@ -488,6 +616,14 @@ fun WorkoutPlateCalculatorScreenPreview() {
     )
 
     WorkoutPlateCalculatorScreen(state = state)
+}
+
+@Preview
+@Composable
+fun plateCreationDialogPreview() {
+
+    PlateCreationDialog()
+
 }
 
 @Preview
