@@ -73,4 +73,6 @@
     <string name="dismiss_sr">Dismiss</string>
     <string name="confirm_sr">Confirm</string>
     <string name="workout_plate_calulator_bar_dialog_title">Insert Bar Weight:</string>
+    <string name="workout_plate_screen_add_plate_button_cd">add plate button</string>
+    <string name="workout_plate_screen_add_bar_button_cd">Add bar button</string>
 </resources>

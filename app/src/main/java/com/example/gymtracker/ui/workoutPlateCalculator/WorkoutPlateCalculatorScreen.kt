@@ -126,7 +126,7 @@ fun WorkoutPlateCalculatorScreen(
                 AvailableBars(
                     bars = state.weightState.barList,
                     updateBarSelectedState = updateBarSelectedState,
-                    openCreateBarDialog = {openCreateBarDialog = true}
+                    openCreateBarDialog = { openCreateBarDialog = true }
                 )
                 PlatesGraph(
                     modifier = Modifier.padding(dimensionResource(id = R.dimen.medium_dp)),
@@ -143,10 +143,12 @@ fun WorkoutPlateCalculatorScreen(
                 }
 
                 AnimatedVisibility(visible = openCreateBarDialog) {
-                    WeightCreationDialog(dialogTitle = R.string.workout_plate_calulator_bar_dialog_title,
-                        onDismissRequest = {openCreateBarDialog = false},
-                        onConfirmation = createBar)
-                    
+                    WeightCreationDialog(
+                        dialogTitle = R.string.workout_plate_calulator_bar_dialog_title,
+                        onDismissRequest = { openCreateBarDialog = false },
+                        onConfirmation = createBar
+                    )
+
                 }
             }
         }
@@ -313,7 +315,10 @@ fun AvailablePlates(
                     .weight(1f)
                     .wrapContentWidth(Alignment.End)
             ) {
-                Icon(imageVector = Icons.Filled.Add, contentDescription = "")
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(id = R.string.workout_plate_screen_add_plate_button_cd)
+                )
             }
         }
 
@@ -374,7 +379,10 @@ fun AvailableBars(
                     .weight(1f)
                     .wrapContentWidth(Alignment.End)
             ) {
-                Icon(imageVector = Icons.Filled.Add, contentDescription = "")
+                Icon(
+                    imageVector = Icons.Filled.Add,
+                    contentDescription = stringResource(id = R.string.workout_plate_screen_add_bar_button_cd)
+                )
             }
 
         }
@@ -487,7 +495,8 @@ fun WeightCreationDialog(
         mutableStateOf("0")
     }
 
-    val weightEditTextCd = stringResource(R.string.workout_plate_calulator_dialog_weight_edit_text_cd)
+    val weightEditTextCd =
+        stringResource(R.string.workout_plate_calulator_dialog_weight_edit_text_cd)
 
     Dialog(onDismissRequest = onDismissRequest) {
 
@@ -511,7 +520,7 @@ fun WeightCreationDialog(
                 ) {
 
                     Text(
-                        stringResource(R.string.workout_plate_calulator_plate_dialog_title),
+                        stringResource(dialogTitle),
                         fontSize = 18.sp,
                         modifier = Modifier.padding(dimensionResource(id = R.dimen.large_db))
                     )
