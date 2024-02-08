@@ -1,7 +1,6 @@
 package com.example.gymtracker
 
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -15,7 +14,6 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.example.gymtracker.ui.MainViewModel
 import com.example.gymtracker.ui.theme.GymTrackerTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint

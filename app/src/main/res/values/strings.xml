@@ -75,4 +75,7 @@
     <string name="workout_plate_calulator_bar_dialog_title">Insert Bar Weight:</string>
     <string name="workout_plate_screen_add_plate_button_cd">add plate button</string>
     <string name="workout_plate_screen_add_bar_button_cd">Add bar button</string>
+    <string name="rest_timer_channel_name">Rest Timer Channel</string>
+    <string name="rest_timer_channel_description">Rest timer notifications</string>
+    <string name="rest_timer_notification_title">Rest Timer</string>
 </resources>

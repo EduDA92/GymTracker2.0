@@ -1,5 +1,6 @@
 package com.example.gymtracker.ui.workoutDiary
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -25,10 +26,10 @@ import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.rounded.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -48,6 +49,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -61,6 +63,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gymtracker.R
@@ -118,6 +121,10 @@ fun WorkoutDiaryScreen(
 
 
     var workoutNameEditFieldState by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    var restTimerDialogState by rememberSaveable {
         mutableStateOf(false)
     }
 
@@ -201,6 +208,15 @@ fun WorkoutDiaryScreen(
 
                 }
 
+                /* Rest timer dialog */
+                when{
+                    restTimerDialogState -> {
+                        RestTimerDialog(
+                            onDismissRequest = { restTimerDialogState = false }
+                        )
+                    }
+                }
+
                 Surface(
                     modifier = Modifier.fillMaxWidth()
                 ) {
@@ -227,7 +243,7 @@ fun WorkoutDiaryScreen(
                         }
 
                         OutlinedButton(
-                            onClick = { /*TODO*/ },
+                            onClick = { restTimerDialogState = true },
                             modifier = Modifier
                                 .padding(
                                     start = dimensionResource(id = R.dimen.small_dp),
@@ -665,6 +681,56 @@ fun WorkoutDiaryToolbar(
 
 }
 
+@Composable
+fun RestTimerDialog(
+    onDismissRequest: () -> Unit = {}
+) {
+
+    val context = LocalContext.current
+    val startServiceIntent = Intent(context, RestTimerService::class.java).apply {
+        action = RestTimerService.Actions.START.toString()
+    }
+    val stopServiceIntent = Intent(context, RestTimerService::class.java).apply {
+        action = RestTimerService.Actions.STOP.toString()
+    }
+
+    Dialog(onDismissRequest = onDismissRequest) {
+
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(400.dp)
+                .padding(dimensionResource(id = R.dimen.medium_dp))
+        ) {
+
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceAround
+            ) {
+
+
+                
+                Text("TEST")
+
+                Button(onClick = {
+                    context.startService(startServiceIntent)
+                }) {
+                    Text("Start Timer")
+                }
+                
+                Button(onClick = { onDismissRequest()
+                context.startService(stopServiceIntent)}) {
+                    Text("Dismiss")
+                }
+            }
+
+
+        }
+
+    }
+
+}
 
 @Preview
 @Composable
@@ -749,4 +815,10 @@ fun WorkoutDiaryScreenPreview() {
         modifier = Modifier,
         workoutDiaryUiState = state,
     )
+}
+
+@Preview
+@Composable
+fun RestTimerDialogPreview() {
+    RestTimerDialog()
 }
