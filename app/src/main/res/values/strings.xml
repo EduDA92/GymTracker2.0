@@ -78,4 +78,6 @@
     <string name="rest_timer_channel_name">Rest Timer Channel</string>
     <string name="rest_timer_channel_description">Rest timer notifications</string>
     <string name="rest_timer_notification_title">Rest Timer</string>
+    <string name="notification_rationale_title">Notification Permission</string>
+    <string name="notification_rationale_body">In order to properly run the rest timer needs to show notifications</string>
 </resources>

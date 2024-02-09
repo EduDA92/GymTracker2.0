@@ -1,6 +1,14 @@
 package com.example.gymtracker.ui.workoutDiary
 
 import android.content.Intent
+import android.Manifest.permission.POST_NOTIFICATIONS
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -28,6 +36,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
@@ -64,6 +73,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.gymtracker.R
@@ -119,6 +130,7 @@ fun WorkoutDiaryScreen(
     updateExerciseSetData: (Long, Int, Float) -> Unit = { _, _, _ -> }
 ) {
 
+    val context = LocalContext.current
 
     var workoutNameEditFieldState by rememberSaveable {
         mutableStateOf(false)
@@ -126,6 +138,21 @@ fun WorkoutDiaryScreen(
 
     var restTimerDialogState by rememberSaveable {
         mutableStateOf(false)
+    }
+
+    var restTimerExplanationDialogState by rememberSaveable {
+        mutableStateOf(false)
+    }
+
+    /* Permission Callback */
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+
+        if (isGranted) {
+            restTimerDialogState = true
+        }
+
     }
 
     when (workoutDiaryUiState) {
@@ -209,11 +236,22 @@ fun WorkoutDiaryScreen(
                 }
 
                 /* Rest timer dialog */
-                when{
+                when {
                     restTimerDialogState -> {
                         RestTimerDialog(
                             onDismissRequest = { restTimerDialogState = false }
                         )
+                    }
+                }
+
+                /* Rest timer dialog explanation */
+                when {
+                    restTimerExplanationDialogState -> {
+                        RestTimerExplanationDialog(onConfirm = {
+                            requestPermissionLauncher.launch(POST_NOTIFICATIONS)
+                            restTimerExplanationDialogState = false
+                        },
+                            onDismiss = { restTimerExplanationDialogState = false })
                     }
                 }
 
@@ -243,7 +281,28 @@ fun WorkoutDiaryScreen(
                         }
 
                         OutlinedButton(
-                            onClick = { restTimerDialogState = true },
+                            onClick = {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                    when {
+                                        ContextCompat.checkSelfPermission(
+                                            context,
+                                            POST_NOTIFICATIONS
+                                        ) == PackageManager.PERMISSION_GRANTED -> {
+                                            restTimerDialogState = true
+                                        }
+
+                                        ActivityCompat.shouldShowRequestPermissionRationale(
+                                            context.getActivity(),
+                                            POST_NOTIFICATIONS
+                                        ) -> restTimerExplanationDialogState = true
+
+                                        else -> requestPermissionLauncher.launch(POST_NOTIFICATIONS)
+
+                                    }
+                                } else {
+                                    restTimerDialogState = true
+                                }
+                            },
                             modifier = Modifier
                                 .padding(
                                     start = dimensionResource(id = R.dimen.small_dp),
@@ -710,7 +769,6 @@ fun RestTimerDialog(
             ) {
 
 
-                
                 Text("TEST")
 
                 Button(onClick = {
@@ -718,9 +776,11 @@ fun RestTimerDialog(
                 }) {
                     Text("Start Timer")
                 }
-                
-                Button(onClick = { onDismissRequest()
-                context.startService(stopServiceIntent)}) {
+
+                Button(onClick = {
+                    onDismissRequest()
+                    context.startService(stopServiceIntent)
+                }) {
                     Text("Dismiss")
                 }
             }
@@ -731,6 +791,27 @@ fun RestTimerDialog(
     }
 
 }
+
+@Composable
+fun RestTimerExplanationDialog(
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(onDismissRequest = onDismiss,
+        title = { Text(stringResource(id = R.string.notification_rationale_title)) },
+        text = { Text(stringResource(id = R.string.notification_rationale_body)) },
+        confirmButton = {
+            Button(onClick = onConfirm) {
+                Text(stringResource(id = R.string.confirm_sr))
+            }
+        },
+        dismissButton = {
+            Button(onClick = onDismiss) {
+                Text(stringResource(id = R.string.dismiss_sr))
+            }
+        })
+}
+
 
 @Preview
 @Composable
@@ -821,4 +902,15 @@ fun WorkoutDiaryScreenPreview() {
 @Composable
 fun RestTimerDialogPreview() {
     RestTimerDialog()
+}
+
+fun Context.getActivity(): Activity {
+    var currentContext = this
+    while (currentContext is ContextWrapper) {
+        if (currentContext is Activity) {
+            return currentContext
+        }
+        currentContext = currentContext.baseContext
+    }
+    throw IllegalStateException("Permissions should be called in the context of an Activity")
 }
