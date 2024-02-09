@@ -1,4 +1,4 @@
-package com.example.gymtracker.ui
+package com.example.gymtracker
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

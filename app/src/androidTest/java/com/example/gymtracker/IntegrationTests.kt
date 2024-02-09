@@ -2,6 +2,7 @@ package com.example.gymtracker
 
 
 
+import android.content.Context
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasClickAction
 import androidx.compose.ui.test.hasText
@@ -13,14 +14,17 @@ import androidx.compose.ui.test.performImeAction
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.printToLog
+import androidx.test.core.app.ApplicationProvider
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.utils.onNodeWithContentDescription
 import com.example.gymtracker.utils.onNodeWithStringId
 import dagger.hilt.android.testing.HiltAndroidRule
 import dagger.hilt.android.testing.HiltAndroidTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.io.File
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -36,6 +40,14 @@ class IntegrationTests {
     @Before
     fun setup() {
         hiltRule.inject()
+    }
+
+    @After
+    fun removeDataStore(){
+        File(
+            ApplicationProvider.getApplicationContext<Context>().filesDir,
+            "datastore"
+        ).deleteRecursively()
     }
 
     @Test

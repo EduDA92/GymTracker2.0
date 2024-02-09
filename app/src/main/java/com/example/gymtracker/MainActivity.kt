@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import com.example.gymtracker.ui.MainViewModel
 import com.example.gymtracker.ui.theme.GymTrackerTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
