@@ -746,12 +746,11 @@ fun RestTimerDialog(
 ) {
 
     val context = LocalContext.current
-    val startServiceIntent = Intent(context, RestTimerService::class.java).apply {
-        action = RestTimerService.Actions.START.toString()
+    val testStartIntent = Intent(context, RestTimerService::class.java).apply {
+        putExtra(RestTimerService.TIMER_DURATION, 10000L)
+        putExtra(RestTimerService.TIMER_INTERVAL, 100L)
     }
-    val stopServiceIntent = Intent(context, RestTimerService::class.java).apply {
-        action = RestTimerService.Actions.STOP.toString()
-    }
+
 
     Dialog(onDismissRequest = onDismissRequest) {
 
@@ -772,14 +771,14 @@ fun RestTimerDialog(
                 Text("TEST")
 
                 Button(onClick = {
-                    context.startService(startServiceIntent)
+                    context.startService(testStartIntent)
                 }) {
                     Text("Start Timer")
                 }
 
                 Button(onClick = {
                     onDismissRequest()
-                    context.startService(stopServiceIntent)
+                    context.stopService(Intent(context, RestTimerService::class.java))
                 }) {
                     Text("Dismiss")
                 }
