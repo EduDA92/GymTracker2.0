@@ -30,7 +30,7 @@
         </activity>
 
         <service
-            android:name=".ui.workoutDiary.RestTimerService"
+            android:name=".ui.workoutDiary.services.RestTimerService"
             android:foregroundServiceType="specialUse"
             android:exported="false">
         </service>

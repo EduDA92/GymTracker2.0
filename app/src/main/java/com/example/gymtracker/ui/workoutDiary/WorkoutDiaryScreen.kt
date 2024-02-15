@@ -82,6 +82,7 @@ import com.example.gymtracker.ui.commonComposables.LoadingState
 import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
 import com.example.gymtracker.ui.model.ExerciseType
+import com.example.gymtracker.ui.workoutDiary.services.RestTimerService
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import java.time.LocalDate
@@ -239,7 +240,8 @@ fun WorkoutDiaryScreen(
                 when {
                     restTimerDialogState -> {
                         RestTimerDialog(
-                            onDismissRequest = { restTimerDialogState = false }
+                            onDismissRequest = { restTimerDialogState = false },
+                            workoutId = workoutDiaryUiState.diary.workoutId
                         )
                     }
                 }
@@ -742,13 +744,15 @@ fun WorkoutDiaryToolbar(
 
 @Composable
 fun RestTimerDialog(
-    onDismissRequest: () -> Unit = {}
+    onDismissRequest: () -> Unit = {},
+    workoutId: Long
 ) {
 
     val context = LocalContext.current
     val testStartIntent = Intent(context, RestTimerService::class.java).apply {
-        putExtra(RestTimerService.TIMER_DURATION, 10000L)
+        putExtra(RestTimerService.TIMER_DURATION, 100000L)
         putExtra(RestTimerService.TIMER_INTERVAL, 100L)
+        putExtra(RestTimerService.WORKOUT_ID, workoutId)
     }
 
 
@@ -766,7 +770,6 @@ fun RestTimerDialog(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceAround
             ) {
-
 
                 Text("TEST")
 
@@ -900,7 +903,7 @@ fun WorkoutDiaryScreenPreview() {
 @Preview
 @Composable
 fun RestTimerDialogPreview() {
-    RestTimerDialog()
+    RestTimerDialog(workoutId = 1)
 }
 
 fun Context.getActivity(): Activity {

@@ -136,6 +136,7 @@ class WorkoutSummaryViewModel @Inject constructor(
         }
     }
 
+    /* TODO: Delete also the sets created within the workout when deleting the workout */
     fun deleteWorkout(workoutId: Long) {
         viewModelScope.launch {
             workoutRepository.deleteWorkout(workoutId)

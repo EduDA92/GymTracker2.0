@@ -1,5 +1,6 @@
 package com.example.gymtracker.ui.workoutSummary
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -49,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -67,6 +69,7 @@ import com.example.gymtracker.R
 import com.example.gymtracker.ui.commonComposables.LoadingState
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.theme.GymTrackerTheme
+import com.example.gymtracker.ui.workoutDiary.services.RestTimerService
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf
@@ -234,6 +237,8 @@ fun WorkoutSummaryCard(
     deleteWorkout: (Long) -> Unit = {}
 ) {
 
+    val context = LocalContext.current
+
     var isDropdownMenuVisible by rememberSaveable {
         mutableStateOf(false)
     }
@@ -295,7 +300,16 @@ fun WorkoutSummaryCard(
                                 color = Color.Red
                             )
                         },
+
+                        /* The Rest timer foreground service has the content intent to navigate to the workout
+                        * that created such rest timer, there is the possibility for the user to delete that workout
+                        * with the foreground service still running that leads to crashes if the user tries to
+                        * navigate to a non-existing workout.
+                        * In order to solve that easily just remove the service when the workout is deleted, if
+                        * there is no service running nothing will happen.*/
+
                         onClick = {
+                            context.stopService(Intent(context, RestTimerService::class.java))
                             deleteWorkout(workoutId)
                             isDropdownMenuVisible = false
                         })
@@ -389,6 +403,7 @@ fun WorkoutSummaryCard(
 
 
 }
+
 @Composable
 fun ExerciseDistributionCard(
     modifier: Modifier = Modifier,
