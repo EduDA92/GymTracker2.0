@@ -2,7 +2,9 @@ package com.example.gymtracker.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
 import com.example.gymtracker.data.repository.ExerciseSetRepository
+import com.example.gymtracker.data.repository.TimerServiceRepository
 import com.example.gymtracker.testdoubles.repository.TestExerciseSetRepository
+import com.example.gymtracker.testdoubles.repository.TestTimerRepository
 import com.example.gymtracker.testdoubles.repository.TestWorkoutRepository
 import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
@@ -31,35 +33,47 @@ class WorkoutDiaryViewModelTest {
 
     private lateinit var workoutRepository: TestWorkoutRepository
     private lateinit var exerciseSetRepository: ExerciseSetRepository
+    private lateinit var timerServiceRepository: TimerServiceRepository
     private lateinit var viewModel: WorkoutDiaryViewModel
 
     @Before
     fun init() {
         workoutRepository = TestWorkoutRepository()
         exerciseSetRepository = TestExerciseSetRepository()
-        viewModel = WorkoutDiaryViewModel(workoutRepository,exerciseSetRepository, SavedStateHandle(mapOf("workoutId" to 1L)))
+        timerServiceRepository = TestTimerRepository()
+        viewModel = WorkoutDiaryViewModel(
+            workoutRepository,
+            exerciseSetRepository,
+            timerServiceRepository,
+            SavedStateHandle(mapOf("workoutId" to 1L))
+        )
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     @Test
-    fun workoutDiaryViewModel_workoutDiaryUiStateValue_filtersSetsByDateAndDataIsCorrect() = runTest{
+    fun workoutDiaryViewModel_workoutDiaryUiStateValue_filtersSetsByDateAndDataIsCorrect() =
+        runTest {
 
-        val filteredList = exerciseAndSets.map {
-             it.copy(
-                 sets = it.sets.filter { it.date == LocalDate.now() }.toImmutableList()
-             )
+            val filteredList = exerciseAndSets.map {
+                it.copy(
+                    sets = it.sets.filter { it.date == LocalDate.now() }.toImmutableList()
+                )
+            }
+
+            val collectJob =
+                launch(UnconfinedTestDispatcher(testScheduler)) { viewModel.workoutDiaryUiState.collect() }
+
+            workoutRepository.emitWorkoutAndExercisesFromId(fullWorkout)
+
+            val state = viewModel.workoutDiaryUiState.value
+
+            assertEquals(
+                filteredList,
+                (state as WorkoutDiaryUiState.Success).diary.exercisesWithReps
+            )
+
+            collectJob.cancel()
         }
-
-        val collectJob = launch(UnconfinedTestDispatcher(testScheduler)){viewModel.workoutDiaryUiState.collect()}
-
-        workoutRepository.emitWorkoutAndExercisesFromId(fullWorkout)
-
-        val state = viewModel.workoutDiaryUiState.value
-
-        assertEquals(filteredList, (state as WorkoutDiaryUiState.Success).diary.exercisesWithReps)
-
-        collectJob.cancel()
-    }
 
 
     private val exerciseAndSets = persistentListOf<ExerciseAndSets>(
@@ -169,8 +183,7 @@ class WorkoutDiaryViewModelTest {
                     weight = 90.5f,
                     date = LocalDate.now(),
                     isCompleted = true
-                )
-                ,
+                ),
                 ExerciseSet(
                     id = 12,
                     exerciseId = 1,
@@ -209,8 +222,7 @@ class WorkoutDiaryViewModelTest {
                     weight = 90.5f,
                     date = LocalDate.now().plusDays(1),
                     isCompleted = true
-                )
-                ,
+                ),
                 ExerciseSet(
                     id = 12,
                     exerciseId = 1,

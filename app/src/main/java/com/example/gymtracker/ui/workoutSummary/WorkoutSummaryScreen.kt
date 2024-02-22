@@ -69,7 +69,7 @@ import com.example.gymtracker.R
 import com.example.gymtracker.ui.commonComposables.LoadingState
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.theme.GymTrackerTheme
-import com.example.gymtracker.ui.workoutDiary.services.RestTimerService
+import com.example.gymtracker.services.RestTimerService
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.persistentListOf

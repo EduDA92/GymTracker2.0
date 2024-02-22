@@ -3,7 +3,7 @@ package com.example.gymtracker
 import android.app.Application
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import com.example.gymtracker.ui.workoutDiary.services.RestTimerService
+import com.example.gymtracker.services.RestTimerService
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp

@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.content.pm.PackageManager
 import android.os.Build
+import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -82,7 +83,7 @@ import com.example.gymtracker.ui.commonComposables.LoadingState
 import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
 import com.example.gymtracker.ui.model.ExerciseType
-import com.example.gymtracker.ui.workoutDiary.services.RestTimerService
+import com.example.gymtracker.services.RestTimerService
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import java.time.LocalDate
@@ -98,10 +99,12 @@ fun WorkoutDiaryRoute(
 ) {
 
     val workoutDiaryUiState by viewModel.workoutDiaryUiState.collectAsStateWithLifecycle()
+    val timerState by viewModel.timerState.collectAsStateWithLifecycle()
 
     WorkoutDiaryScreen(
         modifier = modifier,
         workoutDiaryUiState = workoutDiaryUiState,
+        timerState = timerState,
         updateWorkoutName = viewModel::updateWorkoutName,
         navigateToExerciseList = navigateToExerciseList,
         navigateToCopyWorkout = navigateToCopyWorkout,
@@ -119,6 +122,7 @@ fun WorkoutDiaryRoute(
 fun WorkoutDiaryScreen(
     modifier: Modifier = Modifier,
     workoutDiaryUiState: WorkoutDiaryUiState,
+    timerState: TimerState,
     updateWorkoutName: (String) -> Unit = {},
     navigateToExerciseList: (Long) -> Unit = {},
     navigateToCopyWorkout: (Long) -> Unit = {},
@@ -241,6 +245,7 @@ fun WorkoutDiaryScreen(
                     restTimerDialogState -> {
                         RestTimerDialog(
                             onDismissRequest = { restTimerDialogState = false },
+                            timerState = timerState,
                             workoutId = workoutDiaryUiState.diary.workoutId
                         )
                     }
@@ -745,11 +750,12 @@ fun WorkoutDiaryToolbar(
 @Composable
 fun RestTimerDialog(
     onDismissRequest: () -> Unit = {},
+    timerState: TimerState,
     workoutId: Long
 ) {
 
     val context = LocalContext.current
-    val testStartIntent = Intent(context, RestTimerService::class.java).apply {
+    val startServiceIntent = Intent(context, RestTimerService::class.java).apply {
         putExtra(RestTimerService.TIMER_DURATION, 100000L)
         putExtra(RestTimerService.TIMER_INTERVAL, 100L)
         putExtra(RestTimerService.WORKOUT_ID, workoutId)
@@ -771,10 +777,11 @@ fun RestTimerDialog(
                 verticalArrangement = Arrangement.SpaceAround
             ) {
 
-                Text("TEST")
+                Text(timerState.timerValue.toString())
+                Text(timerState.timerState.toString())
 
                 Button(onClick = {
-                    context.startService(testStartIntent)
+                    context.startService(startServiceIntent)
                 }) {
                     Text("Start Timer")
                 }
@@ -897,13 +904,14 @@ fun WorkoutDiaryScreenPreview() {
     WorkoutDiaryScreen(
         modifier = Modifier,
         workoutDiaryUiState = state,
+        timerState = TimerState(0, false),
     )
 }
 
 @Preview
 @Composable
 fun RestTimerDialogPreview() {
-    RestTimerDialog(workoutId = 1)
+    RestTimerDialog(workoutId = 1, timerState = TimerState(0, false))
 }
 
 fun Context.getActivity(): Activity {

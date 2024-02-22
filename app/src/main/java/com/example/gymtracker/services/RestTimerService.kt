@@ -1,36 +1,40 @@
-package com.example.gymtracker.ui.workoutDiary.services
+package com.example.gymtracker.services
 
 import android.app.ForegroundServiceStartNotAllowedException
 import android.app.Notification
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.Service
 import android.app.TaskStackBuilder
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.os.Build
 import android.os.CountDownTimer
-import android.os.IBinder
-import android.util.Log
 import androidx.core.net.toUri
+import androidx.lifecycle.LifecycleService
+import androidx.lifecycle.lifecycleScope
 import com.example.gymtracker.MainActivity
 import com.example.gymtracker.R
+import com.example.gymtracker.data.repository.TimerServiceRepository
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class RestTimerService : Service() {
+
+@AndroidEntryPoint
+class RestTimerService : LifecycleService() {
+
+    //Inject repository
+    @Inject
+    lateinit var timerServiceRepository: TimerServiceRepository
 
     private lateinit var timer: CountDownTimer
     private lateinit var notificationManager: NotificationManager
     private lateinit var notificationBuilder: Notification.Builder
 
-    override fun onBind(p0: Intent?): IBinder? {
-        return null
-    }
-
     override fun onCreate() {
         super.onCreate()
         notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationBuilder = Notification.Builder(this, REST_TIMER_CHANNEL_ID)
-
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -41,21 +45,31 @@ class RestTimerService : Service() {
 
         if (intent?.action == STOP_ACTION) {
             timer.cancel()
+            // Update timer state to stop
+            timerServiceRepository.onTimerStateChange(false)
+            //Change timer value to 0
+            timerServiceRepository.onTimerTick(0)
             stopSelf()
         } else {
 
             timer = object : CountDownTimer(timerDuration!!, timerInterval!!) {
 
                 override fun onTick(p0: Long) {
+                    timerServiceRepository.onTimerTick(p0)
                     updateNotification(p0)
                 }
 
                 override fun onFinish() {
+                    // stop timer
+                    timerServiceRepository.onTimerStateChange(false)
+                    timerServiceRepository.onTimerTick(0)
                     stopSelf()
                 }
             }
 
             startForeground(workoutId!!)
+            // Timer started
+            timerServiceRepository.onTimerStateChange(true)
             timer.start()
 
         }
@@ -64,8 +78,10 @@ class RestTimerService : Service() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         timer.cancel()
+        timerServiceRepository.onTimerStateChange(false)
+        timerServiceRepository.onTimerTick(0)
+        super.onDestroy()
     }
 
     private fun updateNotification(timer: Long) {

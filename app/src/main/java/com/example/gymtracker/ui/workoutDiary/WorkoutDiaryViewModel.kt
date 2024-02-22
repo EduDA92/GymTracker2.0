@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gymtracker.data.repository.ExerciseSetRepository
+import com.example.gymtracker.data.repository.TimerServiceRepository
 import com.example.gymtracker.data.repository.WorkoutRepository
 import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
@@ -13,6 +14,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -24,9 +26,25 @@ import javax.inject.Inject
 class WorkoutDiaryViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
     private val exerciseSetRepository: ExerciseSetRepository,
+    private val timerServiceRepository: TimerServiceRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
+    val timerState = combine(
+        timerServiceRepository.isTimerRunning,
+        timerServiceRepository.timerTick
+    ) { isTimerRunning, currentTimerValue ->
+
+        TimerState(
+            timerValue = currentTimerValue,
+            timerState = isTimerRunning
+        )
+
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(),
+        TimerState(0, false)
+    )
 
     val workoutId: Long = savedStateHandle["workoutId"] ?: 0L
 
@@ -43,7 +61,8 @@ class WorkoutDiaryViewModel @Inject constructor(
                         exerciseId = exerciseAndSets.exerciseId,
                         exerciseName = exerciseAndSets.exerciseName,
                         exerciseType = exerciseAndSets.exerciseType,
-                        sets = exerciseAndSets.sets.filter { it.date == workoutAndExercises.workoutDate }.toImmutableList()
+                        sets = exerciseAndSets.sets.filter { it.date == workoutAndExercises.workoutDate }
+                            .toImmutableList()
                     )
                 )
 
@@ -142,6 +161,11 @@ sealed interface WorkoutDiaryUiState {
     data class Success(val diary: WorkoutDiary) : WorkoutDiaryUiState
     object Loading : WorkoutDiaryUiState
 }
+
+data class TimerState(
+    val timerValue: Long,
+    val timerState: Boolean
+)
 
 data class WorkoutDiary(
     val workoutId: Long,

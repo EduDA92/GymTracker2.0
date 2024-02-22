@@ -15,6 +15,7 @@ import com.example.gymtracker.R
 import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
 import com.example.gymtracker.ui.model.ExerciseType
+import com.example.gymtracker.ui.workoutDiary.TimerState
 import com.example.gymtracker.utils.onNodeWithContentDescription
 import kotlinx.collections.immutable.persistentListOf
 import org.junit.Rule
@@ -31,7 +32,7 @@ class WorkoutDiaryScreenTest {
     fun workoutDiaryScreen_loadingState_showsLoading(){
 
         composeTestRule.setContent {
-            WorkoutDiaryScreen(workoutDiaryUiState = WorkoutDiaryUiState.Loading)
+            WorkoutDiaryScreen(workoutDiaryUiState = WorkoutDiaryUiState.Loading, timerState = timerState)
         }
 
         composeTestRule.onNodeWithStringId(R.string.loading_data_sr)
@@ -42,7 +43,7 @@ class WorkoutDiaryScreenTest {
     fun workoutDiaryScreen_whenWorkoutEditFieldStateIsFalse_TitleWithEditIconIsPresent(){
 
         composeTestRule.setContent {
-            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState)
+            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState, timerState = timerState)
         }
 
         /* By default state is false so check for the WorkoutName set in the testState and the content Description of the edit icon */
@@ -55,7 +56,7 @@ class WorkoutDiaryScreenTest {
     fun workoutDiaryScreen_whenWorkoutEditFieldStateIsTrue_editTextFieldIsPresent(){
 
         composeTestRule.setContent {
-            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState)
+            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState, timerState = timerState)
         }
 
         // Click button to make edit field appear
@@ -70,7 +71,7 @@ class WorkoutDiaryScreenTest {
         val restorationTester = StateRestorationTester(composeTestRule)
 
         restorationTester.setContent {
-            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState)
+            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState, timerState = timerState)
         }
 
         // Clean edittext title, reps and weight
@@ -103,7 +104,7 @@ class WorkoutDiaryScreenTest {
     fun workoutDiaryScreen_whenSetIsNotCompleted_editTextsAndCorrectIconIsShown(){
 
         composeTestRule.setContent {
-            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState)
+            WorkoutDiaryScreen(workoutDiaryUiState = workoutDiaryUiState, timerState = timerState)
         }
 
         /* Assert Exercise Name is present and the assert edit text and incomplete button are present */
@@ -119,7 +120,7 @@ class WorkoutDiaryScreenTest {
     fun workoutDiaryScreen_whenSetIsCompleted_TextsAndCorrectIconIsShown(){
 
         composeTestRule.setContent {
-            WorkoutDiaryScreen(workoutDiaryUiState = completeWorkoutDiaryUiState)
+            WorkoutDiaryScreen(workoutDiaryUiState = completeWorkoutDiaryUiState, timerState = timerState)
         }
 
         /* Assert Exercise Name is present and the assert texts and complete button are present */
@@ -158,6 +159,8 @@ class WorkoutDiaryScreenTest {
             )
         )
     )
+
+    private val timerState = TimerState(0L, false)
 
     private val completeWorkoutDiaryUiState = WorkoutDiaryUiState.Success(
         WorkoutDiary(
