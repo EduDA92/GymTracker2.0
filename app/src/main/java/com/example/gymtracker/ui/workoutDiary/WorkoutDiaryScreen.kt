@@ -110,12 +110,42 @@ fun WorkoutDiaryRoute(
         navigateToExerciseList = navigateToExerciseList,
         navigateToCopyWorkout = navigateToCopyWorkout,
         navigateToWorkoutPlateCalculator = navigateToWorkoutPlateCalculator,
-        deleteExercise = remember { { workoutId, workoutDate, exerciseId -> viewModel.deleteExerciseFromWorkout(workoutId, workoutDate, exerciseId) } },
+        deleteExercise = remember {
+            { workoutId, workoutDate, exerciseId ->
+                viewModel.deleteExerciseFromWorkout(
+                    workoutId,
+                    workoutDate,
+                    exerciseId
+                )
+            }
+        },
         onBackClick = onBackClick,
         deleteExerciseSet = remember { { viewModel.deleteExerciseSet(it) } },
-        addExerciseSet = remember { { exerciseId, workoutDate -> viewModel.addExerciseSet(exerciseId, workoutDate) } },
-        updateExerciseSetIsCompleted = remember { { exerciseSetId, isCompleted -> viewModel.updateExerciseSetIsCompleted(exerciseSetId, isCompleted) } },
-        updateExerciseSetData = remember { { exerciseSetId, setReps, setWeight -> viewModel.updateExerciseSetData(exerciseSetId, setReps, setWeight) } }
+        addExerciseSet = remember {
+            { exerciseId, workoutDate ->
+                viewModel.addExerciseSet(
+                    exerciseId,
+                    workoutDate
+                )
+            }
+        },
+        updateExerciseSetIsCompleted = remember {
+            { exerciseSetId, isCompleted ->
+                viewModel.updateExerciseSetIsCompleted(
+                    exerciseSetId,
+                    isCompleted
+                )
+            }
+        },
+        updateExerciseSetData = remember {
+            { exerciseSetId, setReps, setWeight ->
+                viewModel.updateExerciseSetData(
+                    exerciseSetId,
+                    setReps,
+                    setWeight
+                )
+            }
+        }
     )
 }
 
@@ -224,13 +254,19 @@ fun WorkoutDiaryScreen(
                                 )
                         ) {
                             Button(
-                                onClick = remember{ {navigateToExerciseList(workoutDiaryUiState.diary.workoutId)} },
+                                onClick = remember { { navigateToExerciseList(workoutDiaryUiState.diary.workoutId) } },
                                 shape = RoundedCornerShape(dimensionResource(id = R.dimen.medium_dp)),
                                 modifier = Modifier.weight(3f)
                             ) {
                                 Text(text = stringResource(id = R.string.add_exercise_button))
                             }
-                            IconButton(onClick = remember {{ navigateToCopyWorkout(workoutDiaryUiState.diary.workoutId) }}) {
+                            IconButton(onClick = remember {
+                                {
+                                    navigateToCopyWorkout(
+                                        workoutDiaryUiState.diary.workoutId
+                                    )
+                                }
+                            }) {
                                 Icon(
                                     painterResource(id = R.drawable.outline_file_copy_24),
                                     contentDescription = stringResource(id = R.string.copy_workout_button_sr)
@@ -313,7 +349,8 @@ fun WorkoutDiaryScreen(
                                     } else {
                                         restTimerDialogState = true
                                     }
-                                }},
+                                }
+                            },
                             modifier = Modifier
                                 .padding(
                                     start = dimensionResource(id = R.dimen.small_dp),
@@ -462,8 +499,6 @@ fun ExerciseAndSets(
             *
             * TODO = ALL SETS SHOULD BE MARKED AS COMPLETED WHEN ENDING THE WORKOUT*/
 
-
-            /* This maybe need optimization later */
             exerciseSets.forEach { exerciseSet ->
 
                 key(exerciseSet.id) {
@@ -707,10 +742,9 @@ fun WorkoutDiaryToolbar(
             .height(56.dp)
             .fillMaxWidth()
     ) {
+        Box{
 
-        Row(verticalAlignment = Alignment.CenterVertically) {
-
-            IconButton(onClick = onBackClick, modifier = Modifier.weight(1f)) {
+            IconButton(onClick = onBackClick, modifier.align(Alignment.CenterStart)) {
                 Icon(
                     imageVector = Icons.Rounded.ArrowBack,
                     contentDescription = stringResource(id = R.string.back_button_cd)
@@ -736,10 +770,10 @@ fun WorkoutDiaryToolbar(
                             }
                         },
                         modifier = Modifier
-                            .weight(8f)
                             .semantics {
                                 contentDescription = textFieldContentDescription
                             }
+                            .align(Alignment.Center)
                             .padding(
                                 start = dimensionResource(id = R.dimen.small_dp),
                                 end = dimensionResource(id = R.dimen.small_dp)
@@ -749,8 +783,8 @@ fun WorkoutDiaryToolbar(
 
                 false -> {
                     Row(
-                        modifier = Modifier.weight(8f),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.align(Alignment.Center)
                     ) {
                         Text(
                             text = workoutName,
@@ -767,6 +801,11 @@ fun WorkoutDiaryToolbar(
 
                 }
             }
+
+            // TODO: workout timer
+            Text("Timer", modifier = Modifier.align(Alignment.CenterEnd).padding(dimensionResource(id = R.dimen.medium_dp)))
+
+
         }
     }
 
