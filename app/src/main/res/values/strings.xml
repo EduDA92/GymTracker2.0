@@ -80,4 +80,7 @@
     <string name="rest_timer_notification_title">Rest Timer</string>
     <string name="notification_rationale_title">Notification Permission</string>
     <string name="notification_rationale_body">In order to properly run the rest timer needs to show notifications</string>
+    <string name="rest_timer_dialog_title">Rest Timer</string>
+    <string name="rest_timer_dialog_close_button_sr">Close button</string>
+    <string name="rest_timer_dialog_common_timers_title">Common Timers</string>
 </resources>

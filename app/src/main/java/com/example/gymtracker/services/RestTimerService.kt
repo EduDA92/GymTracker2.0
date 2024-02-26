@@ -15,6 +15,7 @@ import androidx.lifecycle.lifecycleScope
 import com.example.gymtracker.MainActivity
 import com.example.gymtracker.R
 import com.example.gymtracker.data.repository.TimerServiceRepository
+import com.example.gymtracker.ui.utils.toTimer
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -89,7 +90,7 @@ class RestTimerService : LifecycleService() {
         val notification = notificationBuilder
             .setSmallIcon(R.drawable.outline_timer_24)
             .setContentTitle(getString(R.string.rest_timer_notification_title))
-            .setContentText(timer.toString())
+            .setContentText(timer.toTimer())
             .setOnlyAlertOnce(true)
             .build()
 

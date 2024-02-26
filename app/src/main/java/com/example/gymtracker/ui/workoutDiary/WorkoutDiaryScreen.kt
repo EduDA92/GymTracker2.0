@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -22,10 +23,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -36,13 +39,17 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.ArrowBack
+import androidx.compose.material.icons.rounded.Clear
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
@@ -53,6 +60,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -70,6 +78,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -85,6 +94,8 @@ import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.services.RestTimerService
+import com.example.gymtracker.ui.utils.CommonRestTimers
+import com.example.gymtracker.ui.utils.toTimer
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import java.time.LocalDate
@@ -283,6 +294,7 @@ fun WorkoutDiaryScreen(
                         RestTimerDialog(
                             onDismissRequest = { restTimerDialogState = false },
                             timerState = timerState,
+                            commonTimers = CommonRestTimers.restTimers,
                             workoutId = workoutDiaryUiState.diary.workoutId
                         )
                     }
@@ -742,7 +754,7 @@ fun WorkoutDiaryToolbar(
             .height(56.dp)
             .fillMaxWidth()
     ) {
-        Box{
+        Box {
 
             IconButton(onClick = onBackClick, modifier.align(Alignment.CenterStart)) {
                 Icon(
@@ -803,7 +815,11 @@ fun WorkoutDiaryToolbar(
             }
 
             // TODO: workout timer
-            Text("Timer", modifier = Modifier.align(Alignment.CenterEnd).padding(dimensionResource(id = R.dimen.medium_dp)))
+            Text(
+                "Timer", modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .padding(dimensionResource(id = R.dimen.medium_dp))
+            )
 
 
         }
@@ -811,19 +827,20 @@ fun WorkoutDiaryToolbar(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RestTimerDialog(
     onDismissRequest: () -> Unit = {},
     timerState: TimerState,
+    commonTimers: ImmutableList<Long>,
     workoutId: Long
 ) {
 
-    val context = LocalContext.current
-    val startServiceIntent = Intent(context, RestTimerService::class.java).apply {
-        putExtra(RestTimerService.TIMER_DURATION, 100000L)
-        putExtra(RestTimerService.TIMER_INTERVAL, 100L)
-        putExtra(RestTimerService.WORKOUT_ID, workoutId)
+    var timerDuration by rememberSaveable {
+        mutableStateOf("60")
     }
+
+    val context = LocalContext.current
 
 
     Dialog(onDismissRequest = onDismissRequest) {
@@ -834,28 +851,150 @@ fun RestTimerDialog(
                 .height(400.dp)
                 .padding(dimensionResource(id = R.dimen.medium_dp))
         ) {
-
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceAround
+            // dialog top bar
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(dimensionResource(id = R.dimen.medium_dp))
             ) {
 
-                Text(timerState.timerValue.toString())
-                Text(timerState.timerState.toString())
+                Text(
+                    text = stringResource(id = R.string.rest_timer_dialog_title),
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.align(Alignment.Center)
+                )
 
-                Button(onClick = {
-                    context.startService(startServiceIntent)
-                }) {
-                    Text("Start Timer")
+                IconButton(
+                    onClick = { onDismissRequest() },
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Clear,
+                        contentDescription = stringResource(id = R.string.rest_timer_dialog_close_button_sr)
+                    )
+                }
+            }
+
+            when (timerState.timerState) {
+
+                true -> {
+
+                    Text(timerState.timerValue.toTimer())
+
+                    Button(onClick = {
+                        context.stopService(Intent(context, RestTimerService::class.java))
+                    }) {
+                        Text("Cancel Timer")
+                    }
                 }
 
-                Button(onClick = {
-                    onDismissRequest()
-                    context.stopService(Intent(context, RestTimerService::class.java))
-                }) {
-                    Text("Dismiss")
+                false -> {
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        // Common timers
+                        Text(
+                            text = stringResource(id = R.string.rest_timer_dialog_common_timers_title),
+                            fontSize = 20.sp,
+                            modifier = Modifier.padding(dimensionResource(id = R.dimen.medium_dp))
+                        )
+
+                        Row(
+                            modifier = Modifier
+                                .padding(dimensionResource(id = R.dimen.medium_dp))
+                                .horizontalScroll(
+                                    rememberScrollState()
+                                )
+                        ) {
+
+                            commonTimers.forEach { timer ->
+
+                                FilterChip(
+                                    selected = false,
+                                    onClick = { timerDuration = timer.div(1000).toString() },
+                                    label = { Text(timer.toTimer()) },
+                                    modifier = Modifier.padding(dimensionResource(id = R.dimen.small_dp))
+                                )
+
+                            }
+
+                        }
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+
+                            IconButton(onClick = {
+                                // Control to prevent negative time
+                                if(timerDuration.toInt().minus(10) >= 0){
+                                    timerDuration = timerDuration.toInt().minus(10).toString()
+                                }
+
+                            }) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.round_horizontal_rule_24),
+                                    contentDescription = ""
+                                )
+                            }
+                            BasicTextField(
+                                value = timerDuration,
+                                onValueChange = { timerDuration = it },
+                                textStyle = TextStyle(
+                                    fontSize = 18.sp,
+                                    textAlign = TextAlign.Center
+                                ),
+                                decorationBox = { innerTextField ->
+                                    Box(
+                                        modifier = Modifier
+                                            .wrapContentHeight(Alignment.CenterVertically)
+                                            .wrapContentWidth(Alignment.CenterHorizontally)
+                                            .background(
+                                                color = Color.LightGray,
+                                                shape = RoundedCornerShape(4.dp)
+                                            )
+                                            .padding(4.dp)
+                                    ) {
+
+                                        innerTextField()
+                                    }
+                                },
+                                keyboardOptions = KeyboardOptions(
+                                    keyboardType = KeyboardType.Number,
+                                    imeAction = ImeAction.Done
+                                ),
+                                modifier = Modifier
+                                    .requiredSize(width = 80.dp, height = 70.dp)
+                                    .semantics { contentDescription = "weightEditTextsCd " }
+                            )
+                            IconButton(onClick = { timerDuration = timerDuration.toInt().plus(10).toString() }) {
+                                Icon(imageVector = Icons.Rounded.Add, contentDescription = "")
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.size(12.dp))
+
+                        Button(onClick = {
+
+                            val startServiceIntent = Intent(context, RestTimerService::class.java).apply {
+                                putExtra(RestTimerService.TIMER_DURATION, timerDuration.toLong().times(1000))
+                                putExtra(RestTimerService.TIMER_INTERVAL, 500L)
+                                putExtra(RestTimerService.WORKOUT_ID, workoutId)
+                            }
+
+                            context.startService(startServiceIntent)
+                        }, enabled = timerDuration != "") {
+                            Text("Start Timer")
+                        }
+                    }
+
+
                 }
+
             }
 
 
@@ -975,7 +1114,11 @@ fun WorkoutDiaryScreenPreview() {
 @Preview
 @Composable
 fun RestTimerDialogPreview() {
-    RestTimerDialog(workoutId = 1, timerState = TimerState(0, false))
+    RestTimerDialog(
+        workoutId = 1,
+        commonTimers = CommonRestTimers.restTimers,
+        timerState = TimerState(0, false)
+    )
 }
 
 fun Context.getActivity(): Activity {
