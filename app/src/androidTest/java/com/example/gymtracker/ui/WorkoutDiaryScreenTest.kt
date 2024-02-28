@@ -15,6 +15,7 @@ import com.example.gymtracker.R
 import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
 import com.example.gymtracker.ui.model.ExerciseType
+import com.example.gymtracker.ui.workoutDiary.RestTimerDialog
 import com.example.gymtracker.ui.workoutDiary.TimerState
 import com.example.gymtracker.utils.onNodeWithContentDescription
 import kotlinx.collections.immutable.persistentListOf
@@ -133,6 +134,37 @@ class WorkoutDiaryScreenTest {
 
     }
 
+    @Test
+    fun workoutDiaryScreen_TimerNotActiveState_ShowsCorrectLayout(){
+
+        composeTestRule.setContent {
+            RestTimerDialog(timerState = timerState, commonTimers = persistentListOf(60000), workoutId = 1)
+        }
+
+        /* Chech for incative timer layout*/
+        composeTestRule.onNodeWithStringId(R.string.rest_timer_dialog_common_timers_title).assertExists()
+
+        // check for 01:00 min text
+        composeTestRule.onNodeWithText("01:00").assertExists()
+
+        // check for 60s default text
+        composeTestRule.onNodeWithText("60").assertExists()
+
+        composeTestRule.onNodeWithStringId(R.string.rest_timer_dialog_start_timer_sr).assertExists()
+
+    }
+
+    @Test
+    fun workoutDiaryScreen_TimerActiveState_ShowsCorrectLayout(){
+        composeTestRule.setContent {
+            RestTimerDialog(timerState = timerState.copy(timerState = true), commonTimers = persistentListOf(60000), workoutId = 1)
+        }
+
+        // CHeck for cancel timer button
+        composeTestRule.onNodeWithStringId(R.string.rest_timer_dialog_cancel_timer_sr).assertExists()
+
+    }
+
     private val workoutName = "Test Workout"
 
     private val workoutDiaryUiState = WorkoutDiaryUiState.Success(
@@ -160,7 +192,7 @@ class WorkoutDiaryScreenTest {
         )
     )
 
-    private val timerState = TimerState(0L, false)
+    private val timerState = TimerState(0L, 0,false)
 
     private val completeWorkoutDiaryUiState = WorkoutDiaryUiState.Success(
         WorkoutDiary(

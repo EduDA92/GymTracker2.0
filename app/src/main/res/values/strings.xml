@@ -83,4 +83,9 @@
     <string name="rest_timer_dialog_title">Rest Timer</string>
     <string name="rest_timer_dialog_close_button_sr">Close button</string>
     <string name="rest_timer_dialog_common_timers_title">Common Timers</string>
+    <string name="rest_timer_dialog_time_input_sr">Rest Timer Input</string>
+    <string name="rest_timer_dialog_increase_time_sr">Increase timer</string>
+    <string name="rest_timer_dialog_decrease_time_sr">decrease timer</string>
+    <string name="rest_timer_dialog_start_timer_sr">Start Timer</string>
+    <string name="rest_timer_dialog_cancel_timer_sr">Cancel Timer</string>
 </resources>

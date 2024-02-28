@@ -1,10 +1,13 @@
 package com.example.gymtracker.viewmodel
 
 import androidx.lifecycle.SavedStateHandle
+import com.example.gymtracker.data.repository.DefaultUserPreferencesRepository
 import com.example.gymtracker.data.repository.ExerciseSetRepository
 import com.example.gymtracker.data.repository.TimerServiceRepository
+import com.example.gymtracker.data.repository.UserPreferencesRepository
 import com.example.gymtracker.testdoubles.repository.TestExerciseSetRepository
 import com.example.gymtracker.testdoubles.repository.TestTimerRepository
+import com.example.gymtracker.testdoubles.repository.TestUserPreferencesRepository
 import com.example.gymtracker.testdoubles.repository.TestWorkoutRepository
 import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
@@ -35,16 +38,19 @@ class WorkoutDiaryViewModelTest {
     private lateinit var exerciseSetRepository: ExerciseSetRepository
     private lateinit var timerServiceRepository: TimerServiceRepository
     private lateinit var viewModel: WorkoutDiaryViewModel
+    private lateinit var userPreferencesRepository: UserPreferencesRepository
 
     @Before
     fun init() {
         workoutRepository = TestWorkoutRepository()
         exerciseSetRepository = TestExerciseSetRepository()
         timerServiceRepository = TestTimerRepository()
+        userPreferencesRepository = TestUserPreferencesRepository()
         viewModel = WorkoutDiaryViewModel(
             workoutRepository,
             exerciseSetRepository,
             timerServiceRepository,
+            userPreferencesRepository,
             SavedStateHandle(mapOf("workoutId" to 1L))
         )
     }

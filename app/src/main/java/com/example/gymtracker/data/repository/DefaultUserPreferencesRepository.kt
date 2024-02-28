@@ -15,13 +15,20 @@ class DefaultUserPreferencesRepository @Inject constructor(private val dataStore
     override val userData: Flow<UserPreferences> = dataStore.data.map { preferences ->
 
         val firstTimeLog = preferences[UserPreferencesKeys.IS_FIRST_TIME_LOG] ?: true
+        val savedTimerDuration = preferences[UserPreferencesKeys.SAVED_TIMER_DURATION] ?: 0L
 
-        UserPreferences(firstTimeLog)
+        UserPreferences(firstTimeLog, savedTimerDuration)
     }
 
     override suspend fun updateUserFirstTimeLog() {
         dataStore.edit { preferences ->
             preferences[UserPreferencesKeys.IS_FIRST_TIME_LOG] = false
+        }
+    }
+
+    override suspend fun updateSavedTimerDuration(duration: Long) {
+        dataStore.edit {preferences ->
+             preferences[UserPreferencesKeys.SAVED_TIMER_DURATION] = duration
         }
     }
 }

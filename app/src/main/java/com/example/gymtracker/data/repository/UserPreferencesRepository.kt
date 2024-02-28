@@ -8,4 +8,5 @@ interface UserPreferencesRepository {
     val userData: Flow<UserPreferences>
 
     suspend fun updateUserFirstTimeLog()
+    suspend fun updateSavedTimerDuration(duration: Long)
 }

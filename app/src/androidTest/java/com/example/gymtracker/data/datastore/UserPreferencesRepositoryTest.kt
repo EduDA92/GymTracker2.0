@@ -51,7 +51,8 @@ class UserPreferencesRepositoryTest {
 
 
     private val expectedUserPrefs = UserPreferences(
-        firstTimeLog = true
+        firstTimeLog = true,
+        savedTimerDuration = 0L
     )
 
 }

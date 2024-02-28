@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gymtracker.data.repository.ExerciseSetRepository
 import com.example.gymtracker.data.repository.TimerServiceRepository
+import com.example.gymtracker.data.repository.UserPreferencesRepository
 import com.example.gymtracker.data.repository.WorkoutRepository
 import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
@@ -27,23 +28,26 @@ class WorkoutDiaryViewModel @Inject constructor(
     private val workoutRepository: WorkoutRepository,
     private val exerciseSetRepository: ExerciseSetRepository,
     private val timerServiceRepository: TimerServiceRepository,
+    private val userPreferencesRepository: UserPreferencesRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     val timerState = combine(
         timerServiceRepository.isTimerRunning,
-        timerServiceRepository.timerTick
-    ) { isTimerRunning, currentTimerValue ->
+        timerServiceRepository.timerTick,
+        userPreferencesRepository.userData
+    ) { isTimerRunning, currentTimerValue, userData ->
 
         TimerState(
             timerValue = currentTimerValue,
+            savedTimerValue = userData.savedTimerDuration,
             timerState = isTimerRunning
         )
 
     }.stateIn(
         viewModelScope,
         SharingStarted.WhileSubscribed(),
-        TimerState(0, false)
+        TimerState(0, 0,false)
     )
 
     val workoutId: Long = savedStateHandle["workoutId"] ?: 0L
@@ -153,6 +157,16 @@ class WorkoutDiaryViewModel @Inject constructor(
 
     }
 
+    fun updateTimerDuration(timerDuration: Long){
+
+        viewModelScope.launch {
+
+            userPreferencesRepository.updateSavedTimerDuration(timerDuration)
+
+        }
+
+    }
+
 
 }
 
@@ -164,6 +178,7 @@ sealed interface WorkoutDiaryUiState {
 
 data class TimerState(
     val timerValue: Long,
+    val savedTimerValue: Long,
     val timerState: Boolean
 )
 

@@ -10,6 +10,7 @@ import android.os.Build
 import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -52,6 +53,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -68,6 +70,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
@@ -156,6 +160,11 @@ fun WorkoutDiaryRoute(
                     setWeight
                 )
             }
+        },
+        updateTimerDuration = remember {
+            {
+                viewModel.updateTimerDuration(it)
+            }
         }
     )
 }
@@ -174,7 +183,8 @@ fun WorkoutDiaryScreen(
     deleteExerciseSet: (Long) -> Unit = {},
     addExerciseSet: (Long, LocalDate) -> Unit = { _, _ -> },
     updateExerciseSetIsCompleted: (Long, Boolean) -> Unit = { _, _ -> },
-    updateExerciseSetData: (Long, Int, Float) -> Unit = { _, _, _ -> }
+    updateExerciseSetData: (Long, Int, Float) -> Unit = { _, _, _ -> },
+    updateTimerDuration: (Long) -> Unit = {}
 ) {
 
     val context = LocalContext.current
@@ -295,7 +305,8 @@ fun WorkoutDiaryScreen(
                             onDismissRequest = { restTimerDialogState = false },
                             timerState = timerState,
                             commonTimers = CommonRestTimers.restTimers,
-                            workoutId = workoutDiaryUiState.diary.workoutId
+                            workoutId = workoutDiaryUiState.diary.workoutId,
+                            updateTimerDuration = updateTimerDuration
                         )
                     }
                 }
@@ -696,7 +707,8 @@ fun ExerciseSetItem(
                     updateExerciseSetIsCompleted(exerciseSet.id, true)
                 }
             },
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            enabled = weight != "" && reps != ""
         ) {
             when (exerciseSet.isCompleted) {
                 true -> {
@@ -830,18 +842,23 @@ fun WorkoutDiaryToolbar(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RestTimerDialog(
-    onDismissRequest: () -> Unit = {},
     timerState: TimerState,
     commonTimers: ImmutableList<Long>,
-    workoutId: Long
+    workoutId: Long,
+    onDismissRequest: () -> Unit = {},
+    updateTimerDuration: (Long) -> Unit = {}
 ) {
 
+    // Timer duration in seconds.
     var timerDuration by rememberSaveable {
         mutableStateOf("60")
     }
 
+    val primaryColor = MaterialTheme.colorScheme.primary
+
     val context = LocalContext.current
 
+    val timerInputSr = stringResource(id = R.string.rest_timer_dialog_time_input_sr)
 
     Dialog(onDismissRequest = onDismissRequest) {
 
@@ -878,17 +895,62 @@ fun RestTimerDialog(
 
             when (timerState.timerState) {
 
+                /* Timer running */
                 true -> {
+                    Column(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
 
-                    Text(timerState.timerValue.toTimer())
+                        Box{
 
-                    Button(onClick = {
-                        context.stopService(Intent(context, RestTimerService::class.java))
-                    }) {
-                        Text("Cancel Timer")
+                            Canvas(modifier = Modifier.size(200.dp)) {
+
+                                // Background circle
+                                drawArc(
+                                    color = Color.LightGray,
+                                    startAngle = 0f,
+                                    sweepAngle = 360f,
+                                    false,
+                                    style = Stroke(30f)
+                                )
+
+                                // Top circle that will move with the time.
+                                drawArc(
+                                    color = primaryColor,
+                                    startAngle = 270f,
+                                    sweepAngle = 360f.times(
+                                        /* This formula calculates the % of the total time, use the time saved in shared preferences
+                                        * because there is the possibility to exit and re-enter the app via the notification so any value
+                                        * stored within the composable scope will be lost. */
+                                        ((timerState.timerValue.times(100f)).div(timerState.savedTimerValue)).div(100f)
+                                    ),
+                                    false,
+                                    style = Stroke(30f)
+                                )
+
+                            }
+
+                            Text(
+                                text = timerState.timerValue.toTimer(),
+                                fontSize = 30.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.size(dimensionResource(id = R.dimen.large_db)))
+
+                        Button(onClick = {
+                            context.stopService(Intent(context, RestTimerService::class.java))
+                        }) {
+                            Text(stringResource(id = R.string.rest_timer_dialog_cancel_timer_sr))
+                        }
                     }
                 }
 
+                /* Timer not running */
                 false -> {
                     Column(
                         modifier = Modifier.fillMaxWidth(),
@@ -912,6 +974,8 @@ fun RestTimerDialog(
 
                             commonTimers.forEach { timer ->
 
+                                /* Timer durations are in Milis and timerDuration field is in seconds,
+                                * so convert before saving. */
                                 FilterChip(
                                     selected = false,
                                     onClick = { timerDuration = timer.div(1000).toString() },
@@ -931,14 +995,16 @@ fun RestTimerDialog(
 
                             IconButton(onClick = {
                                 // Control to prevent negative time
-                                if(timerDuration.toInt().minus(10) >= 0){
+                                if (timerDuration.toInt().minus(10) >= 0) {
                                     timerDuration = timerDuration.toInt().minus(10).toString()
                                 }
 
                             }) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.round_horizontal_rule_24),
-                                    contentDescription = ""
+                                    contentDescription = stringResource(
+                                        id = R.string.rest_timer_dialog_decrease_time_sr
+                                    )
                                 )
                             }
                             BasicTextField(
@@ -969,10 +1035,19 @@ fun RestTimerDialog(
                                 ),
                                 modifier = Modifier
                                     .requiredSize(width = 80.dp, height = 70.dp)
-                                    .semantics { contentDescription = "weightEditTextsCd " }
+                                    .semantics {
+                                        contentDescription = timerInputSr
+                                    }
                             )
-                            IconButton(onClick = { timerDuration = timerDuration.toInt().plus(10).toString() }) {
-                                Icon(imageVector = Icons.Rounded.Add, contentDescription = "")
+                            IconButton(onClick = {
+                                timerDuration = timerDuration.toInt().plus(10).toString()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Add,
+                                    contentDescription = stringResource(
+                                        id = R.string.rest_timer_dialog_increase_time_sr
+                                    )
+                                )
                             }
                         }
 
@@ -980,15 +1055,20 @@ fun RestTimerDialog(
 
                         Button(onClick = {
 
-                            val startServiceIntent = Intent(context, RestTimerService::class.java).apply {
-                                putExtra(RestTimerService.TIMER_DURATION, timerDuration.toLong().times(1000))
-                                putExtra(RestTimerService.TIMER_INTERVAL, 500L)
-                                putExtra(RestTimerService.WORKOUT_ID, workoutId)
-                            }
+                            val startServiceIntent =
+                                Intent(context, RestTimerService::class.java).apply {
+                                    putExtra(
+                                        RestTimerService.TIMER_DURATION,
+                                        timerDuration.toLong().times(1000) // timer in seconds so convert to milis
+                                    )
+                                    putExtra(RestTimerService.TIMER_INTERVAL, 1000L)
+                                    putExtra(RestTimerService.WORKOUT_ID, workoutId)
+                                }
 
                             context.startService(startServiceIntent)
+                            updateTimerDuration(timerDuration.toLong().times(1000)) // timer in seconds so convert to milis
                         }, enabled = timerDuration != "") {
-                            Text("Start Timer")
+                            Text(stringResource(id = R.string.rest_timer_dialog_start_timer_sr))
                         }
                     }
 
@@ -1107,7 +1187,17 @@ fun WorkoutDiaryScreenPreview() {
     WorkoutDiaryScreen(
         modifier = Modifier,
         workoutDiaryUiState = state,
-        timerState = TimerState(0, false),
+        timerState = TimerState(0,0, false),
+    )
+}
+
+@Preview
+@Composable
+fun RestTimerDialogFalseStatePreview() {
+    RestTimerDialog(
+        workoutId = 1,
+        commonTimers = CommonRestTimers.restTimers,
+        timerState = TimerState(0,0, false)
     )
 }
 
@@ -1117,7 +1207,7 @@ fun RestTimerDialogPreview() {
     RestTimerDialog(
         workoutId = 1,
         commonTimers = CommonRestTimers.restTimers,
-        timerState = TimerState(0, false)
+        timerState = TimerState(0,0, true)
     )
 }
 
