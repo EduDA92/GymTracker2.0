@@ -111,6 +111,7 @@ fun WorkoutDiaryRoute(
     navigateToExerciseList: (Long) -> Unit = {},
     navigateToCopyWorkout: (Long) -> Unit = {},
     navigateToWorkoutPlateCalculator: () -> Unit = {},
+    navigateToExerciseHistory: (Long) -> Unit = {},
     onBackClick: () -> Unit = {}
 ) {
 
@@ -125,6 +126,7 @@ fun WorkoutDiaryRoute(
         navigateToExerciseList = navigateToExerciseList,
         navigateToCopyWorkout = navigateToCopyWorkout,
         navigateToWorkoutPlateCalculator = navigateToWorkoutPlateCalculator,
+        navigateToExerciseHistory = navigateToExerciseHistory,
         deleteExercise = remember {
             { workoutId, workoutDate, exerciseId ->
                 viewModel.deleteExerciseFromWorkout(
@@ -178,6 +180,7 @@ fun WorkoutDiaryScreen(
     navigateToExerciseList: (Long) -> Unit = {},
     navigateToCopyWorkout: (Long) -> Unit = {},
     navigateToWorkoutPlateCalculator: () -> Unit = {},
+    navigateToExerciseHistory: (Long) -> Unit = {},
     deleteExercise: (Long, LocalDate, Long) -> Unit = { _, _, _ -> },
     onBackClick: () -> Unit = {},
     deleteExerciseSet: (Long) -> Unit = {},
@@ -260,6 +263,7 @@ fun WorkoutDiaryScreen(
                             deleteExerciseSet = deleteExerciseSet,
                             updateExerciseSetIsCompleted = updateExerciseSetIsCompleted,
                             updateExerciseSetData = updateExerciseSetData,
+                            navigateToExerciseHistory = navigateToExerciseHistory
                         )
 
                     }
@@ -418,7 +422,8 @@ fun ExerciseAndSets(
     addExerciseSet: (Long, LocalDate) -> Unit = { _, _ -> },
     deleteExerciseSet: (Long) -> Unit = {},
     updateExerciseSetData: (Long, Int, Float) -> Unit = { _, _, _ -> },
-    updateExerciseSetIsCompleted: (Long, Boolean) -> Unit
+    updateExerciseSetIsCompleted: (Long, Boolean) -> Unit,
+    navigateToExerciseHistory: (Long) -> Unit = {},
 ) {
 
     var isDropdownMenuVisible by rememberSaveable {
@@ -554,7 +559,7 @@ fun ExerciseAndSets(
                 }
 
                 TextButton(
-                    onClick = { /*TODO*/ },
+                    onClick = { navigateToExerciseHistory(exerciseId) },
                     modifier = Modifier
                         .weight(1f)
                         .wrapContentWidth(Alignment.End)

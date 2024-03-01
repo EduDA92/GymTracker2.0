@@ -21,6 +21,7 @@ fun NavGraphBuilder.workoutDiaryScreen(
     navigateToExerciseList: (Long) -> Unit = {},
     navigateToCopyWorkout: (Long) -> Unit = {},
     navigateToWorkoutPlateCalculator: () -> Unit = {},
+    navigateToExerciseHistory: (Long) -> Unit = {},
 ) {
     composable(
         route = "workoutDiaryRoute/{$workoutIdArg}",
@@ -34,7 +35,8 @@ fun NavGraphBuilder.workoutDiaryScreen(
             onBackClick = onBackClick,
             navigateToExerciseList = navigateToExerciseList,
             navigateToCopyWorkout = navigateToCopyWorkout,
-            navigateToWorkoutPlateCalculator = navigateToWorkoutPlateCalculator
+            navigateToWorkoutPlateCalculator = navigateToWorkoutPlateCalculator,
+            navigateToExerciseHistory = navigateToExerciseHistory
         )
 
     }
