@@ -4,6 +4,7 @@ import com.example.gymtracker.data.dao.ExerciseSetDao
 import com.example.gymtracker.data.model.asEntity
 import com.example.gymtracker.data.model.toExternalModel
 import com.example.gymtracker.ui.model.ExerciseSet
+import com.example.gymtracker.ui.model.HistoryItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
@@ -14,6 +15,9 @@ class DefaultExerciseSetRepository @Inject constructor(private val exerciseSetDa
 
     override fun observeExerciseSets(): Flow<List<ExerciseSet>> =
         exerciseSetDao.observeExerciseSets().map { it.toExternalModel() }
+
+    override fun observeExerciseSetHistory(exerciseId: Long): Flow<List<HistoryItem>> =
+        exerciseSetDao.getExerciseSetHistory(exerciseId).map { it.toExternalModel() }
 
     override suspend fun upsertExerciseSet(exerciseSet: ExerciseSet): Long =
         exerciseSetDao.upsertExerciseSet(exerciseSet.asEntity())

@@ -1,13 +1,17 @@
 package com.example.gymtracker.data.repository
 
 
+import com.example.gymtracker.data.model.ExerciseSetHistoryItem
 import com.example.gymtracker.ui.model.ExerciseSet
+import com.example.gymtracker.ui.model.HistoryItem
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
 interface ExerciseSetRepository {
 
     fun observeExerciseSets(): Flow<List<ExerciseSet>>
+
+    fun observeExerciseSetHistory(exerciseId: Long): Flow<List<HistoryItem>>
 
     suspend fun upsertExerciseSet(exerciseSet: ExerciseSet): Long
 

@@ -2,8 +2,10 @@ package com.example.gymtracker.testdoubles.dao
 
 import com.example.gymtracker.data.dao.ExerciseSetDao
 import com.example.gymtracker.data.model.ExerciseSetEntity
+import com.example.gymtracker.data.model.ExerciseSetHistoryItem
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.flow
 import java.time.LocalDate
 
 class TestExerciseSetDao(exerciseSetList: List<ExerciseSetEntity>): ExerciseSetDao {
@@ -43,6 +45,10 @@ class TestExerciseSetDao(exerciseSetList: List<ExerciseSetEntity>): ExerciseSetD
 
     override suspend fun getExerciseSetIdList(exerciseId: Long, date: LocalDate): List<Long> {
         return emptyList()
+    }
+
+    override fun getExerciseSetHistory(exerciseId: Long): Flow<List<ExerciseSetHistoryItem>> = flow{
+        emptyList<ExerciseSetHistoryItem>()
     }
 
     override suspend fun deleteExerciseSets(idList: List<Long>) {

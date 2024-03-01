@@ -6,6 +6,9 @@ import androidx.test.core.app.ApplicationProvider
 import com.example.gymtracker.data.GymTrackerDatabase
 import com.example.gymtracker.data.model.ExerciseEntity
 import com.example.gymtracker.data.model.ExerciseSetEntity
+import com.example.gymtracker.data.model.ExerciseSetHistoryItem
+import com.example.gymtracker.data.model.WorkoutEntity
+import com.example.gymtracker.data.model.WorkoutExerciseCrossRef
 import com.example.gymtracker.ui.model.ExerciseType
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -19,6 +22,7 @@ class ExerciseSetDaoTest {
     private lateinit var db: GymTrackerDatabase
     private lateinit var exerciseDao: ExerciseDao
     private lateinit var exerciseSetDao: ExerciseSetDao
+    private lateinit var workoutDao: WorkoutDao
 
     @Before
     fun createDb() {
@@ -29,6 +33,7 @@ class ExerciseSetDaoTest {
         ).build()
         exerciseDao = db.exerciseDao()
         exerciseSetDao = db.exerciseSetDao()
+        workoutDao = db.workoutDao()
     }
 
     @Test
@@ -108,10 +113,47 @@ class ExerciseSetDaoTest {
 
     }
 
+    @Test
+    fun exerciseSetDao_getExerciseSetHistory_returnsCorrectData() = runTest {
+
+        workoutDao.upsertWorkout(workoutEntity1)
+        workoutDao.upsertWorkout(workoutEntity2)
+
+        exerciseDao.upsertExercise(testExerciseEntity)
+
+        workoutDao.upsertWorkoutExerciseCrossRef(WorkoutExerciseCrossRef(workoutId = 1, exerciseId = 1))
+        workoutDao.upsertWorkoutExerciseCrossRef(WorkoutExerciseCrossRef(workoutId = 2, exerciseId = 1))
+
+        exerciseSetDao.upsertExerciseSet(testExerciseSet)
+        exerciseSetDao.upsertExerciseSet(testExerciseSet2)
+        exerciseSetDao.upsertExerciseSet(testExerciseSet3)
+
+        val daoListOfHistoryItems = exerciseSetDao.getExerciseSetHistory(1).first()
+
+        assertEquals(listOfHistoryItems, daoListOfHistoryItems)
+
+    }
+
     private val testExerciseEntity = ExerciseEntity(
         id = 1,
         name = "Deadlift",
         type = ExerciseType.Legs.name
+    )
+
+    private val workoutEntity1 = WorkoutEntity(
+        id = 1,
+        name = "Push",
+        date = LocalDate.now(),
+        duration = 0L,
+        isCompleted = true
+    )
+
+    private val workoutEntity2 = WorkoutEntity(
+        id = 2,
+        name = "Pull",
+        date = LocalDate.now().plusDays(1),
+        duration = 0L,
+        isCompleted = true
     )
 
     private val testExerciseSet = ExerciseSetEntity(
@@ -139,5 +181,29 @@ class ExerciseSetDaoTest {
         weight = 100f,
         date = LocalDate.now().plusDays(1),
         isCompleted = false
+    )
+
+    private val listOfHistoryItems = listOf<ExerciseSetHistoryItem>(
+        ExerciseSetHistoryItem(
+            workoutName = "Push",
+            exerciseName = "Deadlift",
+            exerciseSetReps = 12,
+            exerciseSetWeight = 100f,
+            exerciseSetDate = LocalDate.now()
+        ),
+        ExerciseSetHistoryItem(
+            workoutName = "Push",
+            exerciseName = "Deadlift",
+            exerciseSetReps = 12,
+            exerciseSetWeight = 100f,
+            exerciseSetDate = LocalDate.now()
+        ),
+        ExerciseSetHistoryItem(
+            workoutName = "Pull",
+            exerciseName = "Deadlift",
+            exerciseSetReps = 12,
+            exerciseSetWeight = 100f,
+            exerciseSetDate = LocalDate.now().plusDays(1)
+        )
     )
 }

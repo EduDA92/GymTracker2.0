@@ -40,7 +40,7 @@ interface WorkoutDao {
     @Query("Update workout SET duration = :workoutDuration WHERE workout.id = :workoutId")
     suspend fun updateWorkoutDuration(workoutId: Long, workoutDuration: Long)
 
-    @Query("Update workout Set name =:workoutName WHERE workout.id = :workoutId")
+    @Query("Update workout Set workoutName =:workoutName WHERE workout.id = :workoutId")
     suspend fun updateWorkoutName(workoutId: Long, workoutName: String)
 
     @Upsert

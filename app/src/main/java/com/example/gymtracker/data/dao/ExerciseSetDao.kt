@@ -3,6 +3,7 @@ package com.example.gymtracker.data.dao
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import com.example.gymtracker.data.model.ExerciseSetHistoryItem
 import com.example.gymtracker.data.model.ExerciseSetEntity
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -31,4 +32,10 @@ interface ExerciseSetDao {
     @Query("DELETE FROM exerciseSet WHERE id IN (:idList)")
     suspend fun deleteExerciseSets(idList: List<Long>)
 
+    @Query("SELECT exerciseSet.reps, exerciseSet.weight, exerciseSet.date, exercise.name, workout.WorkoutName FROM exerciseSet " +
+            "INNER JOIN exercise ON exerciseSet.exerciseId = exercise.id " +
+            "INNER JOIN workoutexercisecrossref ON exercise.id = workoutexercisecrossref.exerciseId " +
+            "INNER JOIN workout ON workoutexercisecrossref.workoutId = workout.id " +
+            "WHERE exercise.id LIKE :exerciseId AND exerciseSet.date LIKE workout.date")
+    fun getExerciseSetHistory(exerciseId: Long): Flow<List<ExerciseSetHistoryItem>>
 }
