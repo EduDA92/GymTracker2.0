@@ -88,4 +88,9 @@
     <string name="rest_timer_dialog_decrease_time_sr">decrease timer</string>
     <string name="rest_timer_dialog_start_timer_sr">Start Timer</string>
     <string name="rest_timer_dialog_cancel_timer_sr">Cancel Timer</string>
+    <string name="exercise_history_history_item_sets_title">Sets</string>
+    <string name="exercise_history_history_item_completed_title">Completed</string>
+    <string name="exercise_history_history_item_set_pair_sr">%1$.1f kg x %2$d reps</string>
+    <string name="exercise_history_Tab_History_title">History</string>
+    <string name="exercise_history_Tab_Charts_title">Charts</string>
 </resources>
