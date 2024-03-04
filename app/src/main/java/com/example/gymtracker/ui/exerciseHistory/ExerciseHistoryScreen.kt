@@ -128,7 +128,7 @@ fun ExerciseHistoryScreen(
 
                         0 -> {
                             LazyColumn(
-                                modifier = Modifier.padding(top = dimensionResource(id = R.dimen.small_dp)),
+                                modifier = Modifier.padding(top = dimensionResource(id = R.dimen.small_dp)).fillMaxSize(),
                                 verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.small_dp))
                             ) {
 
