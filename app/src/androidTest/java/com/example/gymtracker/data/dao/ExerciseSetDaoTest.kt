@@ -134,6 +134,21 @@ class ExerciseSetDaoTest {
 
     }
 
+    @Test
+    fun exerciseSetDao_deleteExerciseFromData_deletesSelectedDateTests() = runTest {
+
+        exerciseDao.upsertExercise(testExerciseEntity)
+        exerciseSetDao.upsertExerciseSet(testExerciseSet)
+        exerciseSetDao.upsertExerciseSet(testExerciseSet2)
+        exerciseSetDao.upsertExerciseSet(testExerciseSet3)
+
+        exerciseSetDao.deleteExerciseSetFromDate(LocalDate.now())
+
+        val exerciseSetList = exerciseSetDao.observeExerciseSets().first()
+
+        assertEquals(listOf(testExerciseSet3), exerciseSetList)
+    }
+
     private val testExerciseEntity = ExerciseEntity(
         id = 1,
         name = "Deadlift",

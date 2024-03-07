@@ -20,6 +20,9 @@ interface ExerciseSetDao {
     @Query("DELETE FROM exerciseSet WHERE exerciseSet.id LIKE :exerciseSetId")
     suspend fun deleteExerciseSet(exerciseSetId: Long)
 
+    @Query("DELETE FROM exerciseSet WHERE exerciseSet.date LIKE :date")
+    suspend fun deleteExerciseSetFromDate(date: LocalDate)
+
     @Query("Update exerciseSet SET reps = :setReps, weight = :setWeight WHERE id = :exerciseSetId")
     suspend fun updateExerciseSetData(exerciseSetId: Long, setReps: Int, setWeight: Float)
 

@@ -1,6 +1,8 @@
 package com.example.gymtracker.viewmodel
 
 
+import com.example.gymtracker.data.repository.ExerciseSetRepository
+import com.example.gymtracker.testdoubles.repository.TestExerciseSetRepository
 import com.example.gymtracker.testdoubles.repository.TestWorkoutRepository
 import com.example.gymtracker.ui.model.ExerciseAndSets
 import com.example.gymtracker.ui.model.ExerciseSet
@@ -31,12 +33,14 @@ class WorkoutSummaryViewModelTest {
     val mainDispatcherRule = MainDispatcherRule()
 
     private lateinit var repository: TestWorkoutRepository
+    private lateinit var exerciseSetRepository: TestExerciseSetRepository
     private lateinit var viewModel: WorkoutSummaryViewModel
 
     @Before
     fun init() {
         repository = TestWorkoutRepository()
-        viewModel = WorkoutSummaryViewModel(repository)
+        exerciseSetRepository = TestExerciseSetRepository()
+        viewModel = WorkoutSummaryViewModel(repository, exerciseSetRepository)
     }
 
     /* When there is workout data for the current date the state should be WorkoutSummaryUiState.Success*/

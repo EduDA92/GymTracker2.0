@@ -2,6 +2,7 @@ package com.example.gymtracker.ui.workoutSummary
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gymtracker.data.repository.ExerciseSetRepository
 import com.example.gymtracker.data.repository.WorkoutRepository
 import com.example.gymtracker.ui.model.ExerciseType
 import com.example.gymtracker.ui.model.Workout
@@ -27,7 +28,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class WorkoutSummaryViewModel @Inject constructor(
-    private val workoutRepository: WorkoutRepository
+    private val workoutRepository: WorkoutRepository,
+    private val exerciseSetRepository: ExerciseSetRepository
 ) : ViewModel() {
     
 
@@ -136,10 +138,10 @@ class WorkoutSummaryViewModel @Inject constructor(
         }
     }
 
-    /* TODO: Delete also the sets created within the workout when deleting the workout */
     fun deleteWorkout(workoutId: Long) {
         viewModelScope.launch {
             workoutRepository.deleteWorkout(workoutId)
+            exerciseSetRepository.deleteExerciseSetFromDate(date.value)
         }
     }
 

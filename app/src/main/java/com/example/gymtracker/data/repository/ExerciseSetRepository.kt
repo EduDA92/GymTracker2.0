@@ -17,6 +17,8 @@ interface ExerciseSetRepository {
 
     suspend fun deleteExerciseSet(exerciseSetId: Long)
 
+    suspend fun deleteExerciseSetFromDate(date: LocalDate)
+
     suspend fun updateCompleteExerciseSet(exerciseSetId: Long, isExerciseSetCompleted: Boolean)
 
     suspend fun updateExerciseSetData(exerciseSetId: Long, setReps: Int, setWeight: Float)

@@ -28,6 +28,11 @@ class TestExerciseSetDao(exerciseSetList: List<ExerciseSetEntity>): ExerciseSetD
         exercisesStream.emit(_exerciseSetList)
     }
 
+    override suspend fun deleteExerciseSetFromDate(date: LocalDate) {
+        _exerciseSetList.removeIf { it.date == date }
+        exercisesStream.emit(_exerciseSetList)
+    }
+
     override suspend fun updateCompleteExerciseSet(
         exerciseSetId: Long,
         isExerciseSetCompleted: Boolean

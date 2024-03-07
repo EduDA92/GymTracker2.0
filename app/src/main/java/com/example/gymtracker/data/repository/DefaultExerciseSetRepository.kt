@@ -25,6 +25,9 @@ class DefaultExerciseSetRepository @Inject constructor(private val exerciseSetDa
     override suspend fun deleteExerciseSet(exerciseSetId: Long) =
         exerciseSetDao.deleteExerciseSet(exerciseSetId)
 
+    override suspend fun deleteExerciseSetFromDate(date: LocalDate) =
+        exerciseSetDao.deleteExerciseSetFromDate(date)
+
     override suspend fun updateCompleteExerciseSet(
         exerciseSetId: Long,
         isExerciseSetCompleted: Boolean

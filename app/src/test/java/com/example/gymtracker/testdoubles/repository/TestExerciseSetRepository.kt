@@ -28,6 +28,10 @@ class TestExerciseSetRepository: ExerciseSetRepository {
         /* no op */
     }
 
+    override suspend fun deleteExerciseSetFromDate(date: LocalDate) {
+        /* no op */
+    }
+
     override suspend fun updateCompleteExerciseSet(
         exerciseSetId: Long,
         isExerciseSetCompleted: Boolean

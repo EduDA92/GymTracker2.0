@@ -112,21 +112,21 @@ class ExerciseHistoryViewModelTest {
         exerciseName = "Squat",
         setHistoryList = persistentListOf(
             SetHistoryItem(
-                workoutName = "Monday Workout",
-                workoutDate = LocalDate.now(),
-                setHistory = persistentListOf(
-                    SetHistory(10,100f),
-                    SetHistory(10,100f),
-                    SetHistory(10,100f)
-                )
-            ),
-            SetHistoryItem(
                 workoutName = "Tuesday Workout",
                 workoutDate = LocalDate.now().plusDays(1),
                 setHistory = persistentListOf(
                     SetHistory(15,150f),
                     SetHistory(15,150f),
                     SetHistory(15,150f)
+                )
+            ),
+            SetHistoryItem(
+                workoutName = "Monday Workout",
+                workoutDate = LocalDate.now(),
+                setHistory = persistentListOf(
+                    SetHistory(10,100f),
+                    SetHistory(10,100f),
+                    SetHistory(10,100f)
                 )
             )
         )
