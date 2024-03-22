@@ -6,24 +6,30 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.text.TextMeasurer
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.gymtracker.R
+import androidx.compose.ui.unit.sp
 import com.example.gymtracker.ui.theme.GymTrackerTheme
 import com.example.gymtracker.ui.utils.calculateAxisInterval
 import com.example.gymtracker.ui.utils.normalizeValue
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toPersistentMap
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun LineChart(
@@ -31,26 +37,41 @@ fun LineChart(
     data: ImmutableMap<Float, Float>
 ) {
 
+    /* Text properties */
+    val textMeasurer = rememberTextMeasurer()
+    val textStyle = TextStyle(
+        fontSize = 12.sp,
+        color = Color.Gray,
+
+    )
+
     Box(modifier = modifier) {
 
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(dimensionResource(id = R.dimen.large_db))
         ) {
 
-            if(data.isEmpty()){
+            if (data.isEmpty()) {
                 return@Canvas
             }
 
-            val xAxisMaxAmplitude = size.width
-            val yAxisMaxAmplitude = size.height
-            val xAxisInterval = calculateAxisInterval(data.keys.max(), data.keys.min(), 10)
-            val yAxisInterval = calculateAxisInterval(data.values.max(), data.values.min(), 10)
+            val padding = 100f
+
+            val xAxisMaxAmplitude = size.width.minus(padding.times(2))
+            val yAxisMaxAmplitude = size.height.minus(padding.times(2))
+            val xAxisInterval = calculateAxisInterval(data.keys.max(), data.keys.min(), 6)
+            val yAxisInterval = calculateAxisInterval(data.values.max(), data.values.min(), 6)
 
             // Create the path and move it to the origin of coordinates
             val dotsPath = Path()
-            dotsPath.moveTo(0f, yAxisMaxAmplitude)
+            dotsPath.moveTo(padding, yAxisMaxAmplitude.plus(padding))
+
+            drawXAxisGrid(xAxisMaxAmplitude, xAxisInterval, padding, textMeasurer, textStyle)
+            drawYAxisGrid(yAxisMaxAmplitude, yAxisInterval, padding, textMeasurer, textStyle)
+
+            drawAxis(padding)
+
 
             data.forEach { value ->
 
@@ -66,7 +87,8 @@ fun LineChart(
                         xAxisInterval.max(),
                         xAxisInterval.min()
                     )
-                )
+                ).plus(padding)
+
                 val yCoordinate = yAxisMaxAmplitude.minus(
                     yAxisMaxAmplitude.times(
                         normalizeValue(
@@ -75,7 +97,7 @@ fun LineChart(
                             yAxisInterval.min()
                         )
                     )
-                )
+                ).plus(padding)
 
                 // Move the path to each point
                 dotsPath.lineTo(xCoordinate, yCoordinate)
@@ -92,13 +114,9 @@ fun LineChart(
 
             }
 
-            drawXAxisGrid(xAxisMaxAmplitude, xAxisInterval)
-            drawYAxisGrid(yAxisMaxAmplitude, yAxisInterval)
-
-            drawAxis()
-
             // Draw the path connecting each point
             drawPath(path = dotsPath, color = Color.Black, style = Stroke(width = 3f))
+
 
         }
 
@@ -107,42 +125,66 @@ fun LineChart(
 }
 
 // Axis have to go from min to max
-fun DrawScope.drawAxis() {
+fun DrawScope.drawAxis(padding: Float) {
 
     // Y axis
     drawLine(
-        start = Offset(x = 0f, y = size.height),
-        end = Offset(x = 0f, y = 0f),
+        start = Offset(x = padding, y = size.height.minus(padding)),
+        end = Offset(x = padding, y = padding),
         color = Color.Black,
         strokeWidth = 3f
     )
 
     // X axis
     drawLine(
-        start = Offset(x = 0f, y = size.height),
-        end = Offset(x = size.width, y = size.height),
+        start = Offset(x = padding, y = size.height.minus(padding)),
+        end = Offset(x = size.width.minus(padding), y = size.height.minus(padding)),
         color = Color.Black,
         strokeWidth = 3f
     )
 
 }
 
-fun DrawScope.drawXAxisGrid(xAxisMaxAmplitude: Float, xAxisIntervals: List<Float>){
+fun DrawScope.drawXAxisGrid(
+    xAxisMaxAmplitude: Float,
+    xAxisIntervals: List<Float>,
+    padding: Float,
+    textMeasurer: TextMeasurer,
+    textStyle: TextStyle
+) {
 
-    xAxisIntervals.forEach {value ->
+    val dateTimeFormatter = DateTimeFormatter.ofPattern("dd/LLL")
+
+
+    xAxisIntervals.forEach { value ->
+
+        val textSize = textMeasurer.measure(LocalDate.ofEpochDay(value.toLong()).format(dateTimeFormatter),textStyle)
+
+        drawText(
+            textMeasurer = textMeasurer,
+            text = LocalDate.ofEpochDay(value.toLong()).format(dateTimeFormatter),
+            style = textStyle,
+            topLeft = Offset(
+                x = xAxisMaxAmplitude.times(
+                    normalizeValue(value, xAxisIntervals.max(), xAxisIntervals.min())
+                ).plus(padding).minus(textSize.size.width.times(0.5f)),
+                y = size.height.minus(padding).plus(textSize.size.height.times(0.3f))
+            )
+        )
+
 
         drawLine(
             start = Offset(
                 x = xAxisMaxAmplitude.times(
                     normalizeValue(value, xAxisIntervals.max(), xAxisIntervals.min())
-                ),
-                y = size.height
+                ).plus(padding),
+                y = size.height.minus(padding)
             ),
             end = Offset(
                 x = xAxisMaxAmplitude.times(
                     normalizeValue(value, xAxisIntervals.max(), xAxisIntervals.min())
-                ),
-                y = 0f
+                ).plus(padding),
+                y = padding
             ),
             color = Color.LightGray,
             strokeWidth = 3f
@@ -152,22 +194,60 @@ fun DrawScope.drawXAxisGrid(xAxisMaxAmplitude: Float, xAxisIntervals: List<Float
 
 }
 
-fun DrawScope.drawYAxisGrid(yAxisMaxAmplitude: Float, yAxisIntervals: List<Float>){
+fun DrawScope.drawYAxisGrid(
+    yAxisMaxAmplitude: Float,
+    yAxisIntervals: List<Float>,
+    padding: Float,
+    textMeasurer: TextMeasurer,
+    textStyle: TextStyle
+) {
 
     yAxisIntervals.forEach { value ->
 
+        val textSize = textMeasurer.measure(value.toInt().toString(), textStyle)
+
+        drawText(
+            textMeasurer = textMeasurer,
+            text = value.toInt().toString(),
+            style = textStyle,
+            topLeft = Offset(
+                x = padding.minus(textSize.size.width.times(1.2f)),
+                y = yAxisMaxAmplitude.minus(
+                    yAxisMaxAmplitude.times(
+                        normalizeValue(
+                            value,
+                            yAxisIntervals.max(),
+                            yAxisIntervals.min()
+                        )
+                    )
+                ).plus(padding).minus(textSize.size.height.times(0.5f))
+            )
+        )
+
         drawLine(
             start = Offset(
-                x = 0f,
+                x = padding,
                 y = yAxisMaxAmplitude.minus(
-                    yAxisMaxAmplitude.times(normalizeValue(value, yAxisIntervals.max(), yAxisIntervals.min()))
-                )
+                    yAxisMaxAmplitude.times(
+                        normalizeValue(
+                            value,
+                            yAxisIntervals.max(),
+                            yAxisIntervals.min()
+                        )
+                    )
+                ).plus(padding)
             ),
             end = Offset(
-                x = size.width,
+                x = size.width.minus(padding),
                 y = yAxisMaxAmplitude.minus(
-                    yAxisMaxAmplitude.times(normalizeValue(value, yAxisIntervals.max(), yAxisIntervals.min()))
-                )
+                    yAxisMaxAmplitude.times(
+                        normalizeValue(
+                            value,
+                            yAxisIntervals.max(),
+                            yAxisIntervals.min()
+                        )
+                    )
+                ).plus(padding)
             ),
             color = Color.LightGray,
             strokeWidth = 3f
@@ -185,22 +265,24 @@ fun LineChartPreview() {
 
         // TEst data
         val data = mutableMapOf(
-            LocalDate.now().minusDays(1).toEpochDay().toFloat() to 0f,
-            LocalDate.now().toEpochDay().toFloat() to 1f,
-            LocalDate.now().plusDays(1).toEpochDay().toFloat() to 2f,
-            LocalDate.now().plusDays(2).toEpochDay().toFloat() to 3f,
-            LocalDate.now().plusDays(3).toEpochDay().toFloat() to 4f,
-            LocalDate.now().plusDays(4).toEpochDay().toFloat() to 5f,
-            LocalDate.now().plusDays(5).toEpochDay().toFloat() to 6f,
-            LocalDate.now().plusDays(6).toEpochDay().toFloat() to 7f,
-            LocalDate.now().plusDays(7).toEpochDay().toFloat() to 8f,
-            LocalDate.now().plusDays(8).toEpochDay().toFloat() to 9f,
-            LocalDate.now().plusDays(9).toEpochDay().toFloat() to 10f,
-            LocalDate.now().plusDays(30).toEpochDay().toFloat() to 12f,
-            LocalDate.now().plusDays(60).toEpochDay().toFloat() to 13f,
-            LocalDate.now().plusDays(120).toEpochDay().toFloat() to 15f,
-            LocalDate.now().plusDays(240).toEpochDay().toFloat() to 17f,
-            LocalDate.now().plusDays(360).toEpochDay().toFloat() to 20f,
+            LocalDate.now().toEpochDay().toFloat() to 65.6f,
+            LocalDate.now().plusDays(1).toEpochDay().toFloat() to 72.5f,
+            LocalDate.now().plusDays(2).toEpochDay().toFloat() to 88.5f,
+            LocalDate.now().plusDays(3).toEpochDay().toFloat() to 99.8f,
+            LocalDate.now().plusDays(4).toEpochDay().toFloat() to 105.6f,
+            LocalDate.now().plusDays(5).toEpochDay().toFloat() to 88.76f,
+            LocalDate.now().plusDays(6).toEpochDay().toFloat() to 124.56f,
+            LocalDate.now().plusDays(7).toEpochDay().toFloat() to 156.78f,
+            LocalDate.now().plusDays(8).toEpochDay().toFloat() to 169.02f,
+            LocalDate.now().plusDays(9).toEpochDay().toFloat() to 25.56f,
+            LocalDate.now().plusDays(10).toEpochDay().toFloat() to 47.8f,
+            LocalDate.now().plusDays(11).toEpochDay().toFloat() to 156.98f,
+            LocalDate.now().plusDays(12).toEpochDay().toFloat() to 33.45f,
+            LocalDate.now().plusDays(13).toEpochDay().toFloat() to 23.55f,
+            LocalDate.now().plusDays(14).toEpochDay().toFloat() to 156.57f,
+            LocalDate.now().plusDays(15).toEpochDay().toFloat() to 200.89f,
+            LocalDate.now().plusDays(20).toEpochDay().toFloat() to 300.45f,
+            LocalDate.now().plusDays(30).toEpochDay().toFloat() to 67.45f,
         )
 
         LineChart(
