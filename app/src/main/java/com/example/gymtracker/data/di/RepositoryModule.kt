@@ -20,35 +20,35 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-interface RepositoryModule {
+abstract class RepositoryModule {
 
     @Binds
-    fun bindsWorkoutRepository(
+    abstract fun bindsWorkoutRepository(
         workoutRepository: DefaultWorkoutRepository
     ): WorkoutRepository
 
     @Binds
-    fun bindsExerciseRepository(
+    abstract fun bindsExerciseRepository(
         exerciseRepository: DefaultExerciseRepository
     ): ExerciseRepository
 
     @Binds
-    fun bindsExerciseSetRepository(
+    abstract fun bindsExerciseSetRepository(
         exerciseSetRepository: DefaultExerciseSetRepository
     ): ExerciseSetRepository
 
     @Binds
-    fun bindsWeighsRepository(
+    abstract fun bindsWeighsRepository(
         weightsRepository: DefaultWeighsRepository
     ): WeightsRepository
 
     @Binds
-    fun bindsUserPreferencesRepository(
+    abstract fun bindsUserPreferencesRepository(
         preferencesRepository: DefaultUserPreferencesRepository
     ): UserPreferencesRepository
 
     @Binds
-    fun bindsTimerServiceRepository(
+    abstract fun bindsTimerServiceRepository(
         timerServiceRepository: DefaultTimerServiceRepository
     ): TimerServiceRepository
 
