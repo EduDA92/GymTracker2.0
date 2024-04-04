@@ -197,9 +197,8 @@ fun ExerciseHistoryItem(
                 )
                 Text(
                     stringResource(id = R.string.exercise_history_history_item_completed_title),
-                    modifier.weight(1f)
+                    modifier.weight(2f)
                 )
-                Spacer(modifier = Modifier.weight(1f))
             }
 
             Divider()
@@ -219,9 +218,8 @@ fun ExerciseHistoryItem(
                             item.reps
                         ),
                         modifier = Modifier
-                            .weight(1f)
+                            .weight(2f)
                     )
-                    Spacer(modifier = Modifier.weight(1f))
                 }
                 if (index < (exerciseHistoryItem.setHistory.size - 1)) {
                     Divider()
