@@ -2,17 +2,34 @@ package com.example.gymtracker.ui.commonComposables
 
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.DrawStyle
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
@@ -20,9 +37,12 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.gymtracker.R
 import com.example.gymtracker.ui.theme.GymTrackerTheme
 import com.example.gymtracker.ui.utils.calculateAxisInterval
+import com.example.gymtracker.ui.utils.calculateNearestPoint
 import com.example.gymtracker.ui.utils.normalizeValue
+import com.example.gymtracker.ui.utils.toCoordinates
 import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toPersistentMap
 import java.time.LocalDate
@@ -36,19 +56,44 @@ fun LineChart(
     yAxisFormatter: (Int) -> String = { value -> value.toString() }
 ) {
 
+    val color = MaterialTheme.colorScheme.primary
+
+    var selectedWeightCoordinate by rememberSaveable {
+        mutableStateOf(Pair(0f, 0f))
+    }
+
+    var weight by rememberSaveable {
+        mutableStateOf(0f)
+    }
+
+    var tapGestureOffset  by remember {
+        mutableStateOf(Offset(0f,0f))
+    }
+
     /* Text properties */
     val textMeasurer = rememberTextMeasurer()
     val textStyle = TextStyle(
         fontSize = 12.sp,
         color = Color.Gray,
-
         )
+    val graphTextStyle = TextStyle(
+        fontSize = 12.sp,
+        color = color
+    )
+
+    val selectedWeightSr = stringResource(id = R.string.exercise_history_chart_selected_weight_sr, weight)
 
     Box(modifier = modifier) {
+
 
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
+                .pointerInput(Unit) {
+                    detectTapGestures {
+                        tapGestureOffset = it
+                    }
+                }
         ) {
 
             if (data.isEmpty()) {
@@ -66,56 +111,111 @@ fun LineChart(
             val dotsPath = Path()
             dotsPath.moveTo(padding, yAxisMaxAmplitude.plus(padding))
 
-            drawXAxisGrid(xAxisMaxAmplitude, xAxisInterval, padding, textMeasurer, textStyle, xAxisFormatter)
-            drawYAxisGrid(yAxisMaxAmplitude, yAxisInterval, padding, textMeasurer, textStyle, yAxisFormatter)
+            drawXAxisGrid(
+                xAxisMaxAmplitude,
+                xAxisInterval,
+                padding,
+                textMeasurer,
+                textStyle,
+                xAxisFormatter
+            )
+            drawYAxisGrid(
+                yAxisMaxAmplitude,
+                yAxisInterval,
+                padding,
+                textMeasurer,
+                textStyle,
+                yAxisFormatter
+            )
 
             drawAxis(padding)
 
+            val coordinates = data.toCoordinates(
+                xAxisMaxAmplitude = xAxisMaxAmplitude,
+                xAxisMax = xAxisInterval.max().toFloat(),
+                xAxisMin = xAxisInterval.min().toFloat(),
+                yAxisMaxAmplitude = yAxisMaxAmplitude,
+                yAxisMax = yAxisInterval.max().toFloat(),
+                yAxisMin = yAxisInterval.min().toFloat(),
+                padding = padding
+            )
 
-            data.forEach { value ->
+            /*xTapPosition = coordinates.keys.first()
+            yTapPosition = coordinates.values.first()*/
 
-                /* The points will be drawn based on the normalized value between [0-1].
-               * The X coordinate will be the Width times the normalized value, the higher the value the greater the distance
-               * from the start of the canvas.
-               * The Y coordinate is calculated a bit different, first calculate the % of max height(like the X axis)
-               * and then subtract this from maxHeight again so the higher the value the closest to the top of the canvas*/
-
-                val xCoordinate = xAxisMaxAmplitude.times(
-                    normalizeValue(
-                        value.key,
-                        xAxisInterval.max().toFloat(),
-                        xAxisInterval.min().toFloat()
-                    )
-                ).plus(padding)
-
-                val yCoordinate = yAxisMaxAmplitude.minus(
-                    yAxisMaxAmplitude.times(
-                        normalizeValue(
-                            value.value,
-                            yAxisInterval.max().toFloat(),
-                            yAxisInterval.min().toFloat()
-                        )
-                    )
-                ).plus(padding)
+            coordinates.forEach { value ->
 
                 // Move the path to each point
-                dotsPath.lineTo(xCoordinate, yCoordinate)
+                dotsPath.lineTo(value.key, value.value)
 
                 drawCircle(
                     color = Color.Black,
                     center = Offset(
-                        x = xCoordinate,
-                        y = yCoordinate,
+                        x = value.key,
+                        y = value.value,
                     ),
                     radius = 5f
                 )
-
 
             }
 
             // Draw the path connecting each point
             drawPath(path = dotsPath, color = Color.Black, style = Stroke(width = 2f))
 
+            selectedWeightCoordinate = tapGestureOffset.calculateNearestPoint(coordinates = coordinates)
+
+            /* If there is a valid weight selected draw a text on top of the point with the selected weight */
+            if(selectedWeightCoordinate != Pair(0f, 0f)){
+
+                val coordinatesPosition = coordinates.keys.indexOf(selectedWeightCoordinate.first)
+                weight = data.values.elementAt(coordinatesPosition)
+
+
+                // Text data
+                val textSize = textMeasurer.measure(selectedWeightSr, graphTextStyle)
+
+                drawCircle(
+                    color = color,
+                    center = Offset(
+                        x = selectedWeightCoordinate.first,
+                        y = selectedWeightCoordinate.second
+                    ),
+                    radius = 5f
+                )
+
+                /* TextBox and text */
+                
+                drawRoundRect(
+                    color = Color.White,
+                    topLeft = Offset(
+                        x = selectedWeightCoordinate.first.minus(textSize.size.width.div(2)).minus(5f),
+                        y = selectedWeightCoordinate.second.minus(textSize.size.height.times(1.2f)).minus(5f)
+                    ),
+                    size = Size(width = textSize.size.width.toFloat().plus(10f), height = textSize.size.height.toFloat().plus(10f)),
+                    cornerRadius = CornerRadius(10f, 10f)
+                )
+                drawRoundRect(
+                    color = color,
+                    topLeft = Offset(
+                        x = selectedWeightCoordinate.first.minus(textSize.size.width.div(2)).minus(5f),
+                        y = selectedWeightCoordinate.second.minus(textSize.size.height.times(1.2f)).minus(5f)
+                    ),
+                    size = Size(width = textSize.size.width.toFloat().plus(10f), height = textSize.size.height.toFloat().plus(10f)),
+                    style = Stroke(width = 3f),
+                    cornerRadius = CornerRadius(10f, 10f)
+                )
+
+                drawText(
+                    textMeasurer = textMeasurer,
+                    text = selectedWeightSr,
+                    topLeft = Offset(
+                        x = selectedWeightCoordinate.first.minus(textSize.size.width.div(2)),
+                        y = selectedWeightCoordinate.second.minus(textSize.size.height.times(1.2f))
+                    ),
+                    style = graphTextStyle
+                )
+
+            }
 
         }
 
@@ -278,7 +378,7 @@ fun LineChartPreview() {
 
         // TEst data
         val data = mutableMapOf(
-            LocalDate.now().toEpochDay().toFloat() to 0f,
+            LocalDate.now().toEpochDay().toFloat() to 55f,
             LocalDate.now().plusDays(1).toEpochDay().toFloat() to 72.5f,
             LocalDate.now().plusDays(2).toEpochDay().toFloat() to 88.5f,
             LocalDate.now().plusDays(3).toEpochDay().toFloat() to 99.8f,
