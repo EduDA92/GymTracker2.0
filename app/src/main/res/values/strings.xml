@@ -93,6 +93,5 @@
     <string name="exercise_history_history_item_set_pair_sr">%1$.1f kg x %2$d reps</string>
     <string name="exercise_history_Tab_History_title">History</string>
     <string name="exercise_history_Tab_Charts_title">Charts</string>
-    <string name="exercise_history_chart_selected_weight_sr">%1$.2f kg</string>
     <string name="line_chart_no_data">No data available</string>
 </resources>
