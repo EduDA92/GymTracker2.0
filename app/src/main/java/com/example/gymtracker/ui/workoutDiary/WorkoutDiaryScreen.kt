@@ -831,13 +831,6 @@ fun WorkoutDiaryToolbar(
                 }
             }
 
-            // TODO: workout timer
-            Text(
-                "Timer", modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .padding(dimensionResource(id = R.dimen.medium_dp))
-            )
-
 
         }
     }
