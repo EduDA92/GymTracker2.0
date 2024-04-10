@@ -53,20 +53,31 @@ import kotlin.math.roundToInt
 fun LineChart(
     modifier: Modifier = Modifier,
     data: ImmutableMap<Float, Float>,
+    chartTitle: String = "",
+    xAxisLabel: String = "",
+    yAxisLabel: String = "",
     xAxisFormatter: (Int) -> String = { value -> value.toString() },
     yAxisFormatter: (Int) -> String = { value -> value.toString() }
 ) {
 
     val color = MaterialTheme.colorScheme.primary
 
-    var selectedWeightCoordinate by rememberSaveable {
+    /* Selected  data coordinate that correspond to the nearest coordinate to the tapGestureOffset */
+    var selectedCoordinate by rememberSaveable {
         mutableStateOf(Pair(0f, 0f))
     }
 
-    var weight by rememberSaveable {
+    /* Current selected yAxisValue that corresponds to the selected coordinate */
+    var yAxisValue by rememberSaveable {
         mutableStateOf(0f)
     }
 
+    /* Current selected xAxisValue that corresponds to the selected coordinate */
+    var xAxisValue by rememberSaveable {
+        mutableStateOf(0f)
+    }
+
+    /* Coordinate of the current tap gesture */
     var tapGestureOffset by remember {
         mutableStateOf(Offset(0f, 0f))
     }
@@ -81,9 +92,11 @@ fun LineChart(
         fontSize = 12.sp,
         color = color
     )
+    val chartTitleTextStyle = TextStyle(
+        fontSize = 14.sp,
+        color = color
+    )
 
-    val selectedWeightSr =
-        stringResource(id = R.string.exercise_history_chart_selected_weight_sr, weight)
     val noDataSr = stringResource(id = R.string.line_chart_no_data)
 
     Box(modifier = modifier) {
@@ -132,7 +145,7 @@ fun LineChart(
             } else {
                 calculateAxisInterval(data.keys.max(), data.keys.min(), numIntervals)
             }
-            val yAxisInterval = if(data.size < numIntervals){
+            val yAxisInterval = if (data.size < numIntervals) {
                 data.values.map { it.roundToInt() }
             } else {
                 calculateAxisInterval(data.values.max(), data.values.min(), numIntervals)
@@ -161,6 +174,45 @@ fun LineChart(
 
             drawAxis(padding)
 
+            // Chart title
+            val chartTitleSize = textMeasurer.measure(chartTitle, chartTitleTextStyle)
+            drawText(
+                textMeasurer = textMeasurer,
+                text = chartTitle,
+                topLeft = Offset(
+                    x = size.width.div(2).minus(chartTitleSize.size.width.div(2)),
+                    y = chartTitleSize.size.height.toFloat()
+                ),
+                style = chartTitleTextStyle
+            )
+
+
+            // Axis Labels
+            // X Axis Label
+            val xLabelTextSize = textMeasurer.measure(xAxisLabel, graphTextStyle)
+            drawText(
+                textMeasurer = textMeasurer,
+                text = xAxisLabel,
+                topLeft = Offset(
+                    x = size.width.div(2).minus(xLabelTextSize.size.width.div(2)),
+                    y = size.height.minus(xLabelTextSize.size.height.times(1.4f))
+                ),
+                style = graphTextStyle
+            )
+
+            // Y Axis Label
+            val yAxisLabelSize = textMeasurer.measure(yAxisLabel, graphTextStyle)
+            drawText(
+                textMeasurer = textMeasurer,
+                text = yAxisLabel,
+                topLeft = Offset(
+                    x = padding.minus(yAxisLabelSize.size.width),
+                    y = yAxisLabelSize.size.height.toFloat(),
+                ),
+                style = graphTextStyle
+            )
+
+
             val coordinates = data.toCoordinates(
                 xAxisMaxAmplitude = xAxisMaxAmplitude,
                 xAxisMax = xAxisInterval.max().toFloat(),
@@ -170,9 +222,6 @@ fun LineChart(
                 yAxisMin = yAxisInterval.min().toFloat(),
                 padding = padding
             )
-
-            /*xTapPosition = coordinates.keys.first()
-            yTapPosition = coordinates.values.first()*/
 
             coordinates.forEach { value ->
 
@@ -193,24 +242,32 @@ fun LineChart(
             // Draw the path connecting each point
             drawPath(path = dotsPath, color = Color.Black, style = Stroke(width = 2f))
 
-            selectedWeightCoordinate =
+            selectedCoordinate =
                 tapGestureOffset.calculateNearestPoint(coordinates = coordinates)
 
             /* If there is a valid weight selected draw a text on top of the point with the selected weight */
-            if (selectedWeightCoordinate != Pair(0f, 0f)) {
 
-                val coordinatesPosition = coordinates.keys.indexOf(selectedWeightCoordinate.first)
-                weight = data.values.elementAt(coordinatesPosition)
+            if (selectedCoordinate != Pair(0f, 0f)) {
 
+                val coordinatesPosition = coordinates.keys.indexOf(selectedCoordinate.first)
+                yAxisValue = data.values.elementAt(coordinatesPosition)
+                xAxisValue = data.keys.elementAt(coordinatesPosition)
 
+                val selectedPointText = buildString {
+                    append(yAxisValue)
+                    append(" ")
+                    append(yAxisLabel)
+                    append(" \n")
+                    append(xAxisFormatter(xAxisValue.toInt()))
+                }
                 // Text data
-                val textSize = textMeasurer.measure(selectedWeightSr, graphTextStyle)
+                val textSize = textMeasurer.measure(selectedPointText, graphTextStyle)
 
                 drawCircle(
                     color = color,
                     center = Offset(
-                        x = selectedWeightCoordinate.first,
-                        y = selectedWeightCoordinate.second
+                        x = selectedCoordinate.first,
+                        y = selectedCoordinate.second
                     ),
                     radius = 5f
                 )
@@ -220,9 +277,9 @@ fun LineChart(
                 drawRoundRect(
                     color = Color.White,
                     topLeft = Offset(
-                        x = selectedWeightCoordinate.first.minus(textSize.size.width.div(2))
+                        x = selectedCoordinate.first.minus(textSize.size.width.div(2))
                             .minus(5f),
-                        y = selectedWeightCoordinate.second.minus(textSize.size.height.times(1.2f))
+                        y = selectedCoordinate.second.minus(textSize.size.height.times(1.2f))
                             .minus(5f)
                     ),
                     size = Size(
@@ -234,9 +291,9 @@ fun LineChart(
                 drawRoundRect(
                     color = color,
                     topLeft = Offset(
-                        x = selectedWeightCoordinate.first.minus(textSize.size.width.div(2))
+                        x = selectedCoordinate.first.minus(textSize.size.width.div(2))
                             .minus(5f),
-                        y = selectedWeightCoordinate.second.minus(textSize.size.height.times(1.2f))
+                        y = selectedCoordinate.second.minus(textSize.size.height.times(1.2f))
                             .minus(5f)
                     ),
                     size = Size(
@@ -249,10 +306,10 @@ fun LineChart(
 
                 drawText(
                     textMeasurer = textMeasurer,
-                    text = selectedWeightSr,
+                    text = selectedPointText,
                     topLeft = Offset(
-                        x = selectedWeightCoordinate.first.minus(textSize.size.width.div(2)),
-                        y = selectedWeightCoordinate.second.minus(textSize.size.height.times(1.2f))
+                        x = selectedCoordinate.first.minus(textSize.size.width.div(2)).plus(5f),
+                        y = selectedCoordinate.second.minus(textSize.size.height.times(1.2f))
                     ),
                     style = graphTextStyle
                 )
@@ -276,11 +333,25 @@ fun DrawScope.drawAxis(padding: Float) {
         strokeWidth = 3f
     )
 
+    drawLine(
+        start = Offset(x = size.width.minus(padding), y = size.height.minus(padding)),
+        end = Offset(x = size.width.minus(padding), y = padding),
+        color = Color.LightGray,
+        strokeWidth = 3f
+    )
+
     // X axis
     drawLine(
         start = Offset(x = padding, y = size.height.minus(padding)),
         end = Offset(x = size.width.minus(padding), y = size.height.minus(padding)),
         color = Color.Black,
+        strokeWidth = 3f
+    )
+
+    drawLine(
+        start = Offset(x = padding, y = padding),
+        end = Offset(x = size.width.minus(padding), y = padding),
+        color = Color.LightGray,
         strokeWidth = 3f
     )
 
@@ -443,6 +514,9 @@ fun LineChartPreview() {
                 .fillMaxWidth()
                 .height(300.dp),
             data = data.toPersistentMap(),
+            chartTitle = "Rep Max",
+            xAxisLabel = "Day of Week",
+            yAxisLabel = "Kg",
             xAxisFormatter = {
                 LocalDate.ofEpochDay(it.toLong()).format(DateTimeFormatter.ofPattern("dd/LLL"))
             }
@@ -457,8 +531,28 @@ fun DataSizeSmallerThanIntervalSizeLineChartPreview() {
 
         val data = mutableMapOf(
             LocalDate.now().toEpochDay().toFloat() to 55f,
-           /* LocalDate.now().plusDays(1).toEpochDay().toFloat() to 72.5f,
-            LocalDate.now().plusDays(2).toEpochDay().toFloat() to 88.5f,*/
+            LocalDate.now().plusDays(1).toEpochDay().toFloat() to 72.5f,
+            LocalDate.now().plusDays(2).toEpochDay().toFloat() to 88.5f,
+        )
+        LineChart(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(300.dp),
+            data = data.toPersistentMap(),
+            xAxisFormatter = {
+                LocalDate.ofEpochDay(it.toLong()).format(DateTimeFormatter.ofPattern("dd/LLL"))
+            }
+        )
+    }
+}
+
+@Preview
+@Composable
+fun OnlyOneValueLineChartPreview() {
+    GymTrackerTheme {
+
+        val data = mutableMapOf(
+            0f to 0f,
         )
         LineChart(
             modifier = Modifier
