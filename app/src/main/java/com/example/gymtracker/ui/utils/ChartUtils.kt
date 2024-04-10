@@ -51,7 +51,12 @@ fun Offset.calculateNearestPoint(coordinates: Map<Float, Float>): Pair<Float, Fl
 
 /* Function to calculate the normalized value between min and max value */
 fun normalizeValue(value: Float, maxValue: Float, minValue: Float): Float {
-    return ((value - minValue) / (maxValue - minValue))
+    // If there is only one value to normalize return 0.5 so it will appear in the middle of the chart
+    return if(maxValue == minValue){
+        0.5f
+    } else {
+        ((value - minValue) / (maxValue - minValue))
+    }
 }
 
 /* Function to calculate the desired interval between two values */
