@@ -56,6 +56,14 @@ class TestExerciseSetDao(exerciseSetList: List<ExerciseSetEntity>): ExerciseSetD
         emptyList<ExerciseSetHistoryItem>()
     }
 
+    override fun getExerciseSetHistoryFromDates(
+        exerciseId: Long,
+        actualDate: LocalDate,
+        finalDate: LocalDate
+    ): Flow<List<ExerciseSetHistoryItem>> = flow{
+        emptyList<ExerciseSetHistoryItem>()
+    }
+
     override suspend fun deleteExerciseSets(idList: List<Long>) {
         /* No-op */
     }
