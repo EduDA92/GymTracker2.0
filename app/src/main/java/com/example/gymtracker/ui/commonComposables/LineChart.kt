@@ -131,15 +131,15 @@ fun LineChart(
             val xAxisMaxAmplitude = size.width.minus(padding.times(2))
             val yAxisMaxAmplitude = size.height.minus(padding.times(2))
 
-            /* In order to avoid unexpected errors if the size of the data is smaller than the size of
-            * the interval just draw the data itself no interval calculation needed. */
+            /* In order to avoid NaN error calculating the interval if the size of the data is
+            one just pass the data itself as interval */
 
-            val xAxisInterval = if (data.size < numIntervals) {
+            val xAxisInterval = if (data.size == 1) {
                 data.keys.map { it.roundToInt() }
             } else {
                 calculateAxisInterval(data.keys.max(), data.keys.min(), numIntervals)
             }
-            val yAxisInterval = if (data.size < numIntervals) {
+            val yAxisInterval = if (data.size == 1) {
                 data.values.map { it.roundToInt() }
             } else {
                 calculateAxisInterval(data.values.max(), data.values.min(), numIntervals)
@@ -524,8 +524,8 @@ fun DataSizeSmallerThanIntervalSizeLineChartPreview() {
     GymTrackerTheme {
 
         val data = mutableMapOf(
-            LocalDate.now().toEpochDay().toFloat() to 55f,
-            LocalDate.now().plusDays(1).toEpochDay().toFloat() to 72.5f,
+            LocalDate.now().toEpochDay().toFloat() to 60f,
+            LocalDate.now().plusDays(1).toEpochDay().toFloat() to 88.3f,
             LocalDate.now().plusDays(2).toEpochDay().toFloat() to 88.5f,
         )
         LineChart(
