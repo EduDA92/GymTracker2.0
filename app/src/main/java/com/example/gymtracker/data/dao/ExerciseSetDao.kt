@@ -41,13 +41,4 @@ interface ExerciseSetDao {
             "INNER JOIN workout ON workoutexercisecrossref.workoutId = workout.id " +
             "WHERE exercise.id LIKE :exerciseId AND exerciseSet.date LIKE workout.date")
     fun getExerciseSetHistory(exerciseId: Long): Flow<List<ExerciseSetHistoryItem>>
-
-    @Query("SELECT exerciseSet.reps, exerciseSet.weight, exerciseSet.date, exercise.name, workout.WorkoutName FROM exerciseSet " +
-            "INNER JOIN exercise ON exerciseSet.exerciseId = exercise.id " +
-            "INNER JOIN workoutexercisecrossref ON exercise.id = workoutexercisecrossref.exerciseId " +
-            "INNER JOIN workout ON workoutexercisecrossref.workoutId = workout.id " +
-            "WHERE exercise.id LIKE :exerciseId AND exerciseSet.date BETWEEN :finalDate AND :actualDate")
-    fun getExerciseSetHistoryFromDates(exerciseId: Long, actualDate: LocalDate, finalDate: LocalDate): Flow<List<ExerciseSetHistoryItem>>
-
-
 }

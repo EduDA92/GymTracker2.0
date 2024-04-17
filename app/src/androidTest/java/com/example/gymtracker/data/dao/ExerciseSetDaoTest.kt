@@ -93,19 +93,19 @@ class ExerciseSetDaoTest {
 
         val listOfIds = exerciseSetDao.getExerciseSetIdList(1, LocalDate.now())
 
-        assertEquals(listOf(3L, 4L), listOfIds)
+        assertEquals(listOf(3L,4L), listOfIds)
 
     }
 
     @Test
-    fun exerciseSetDao_deleteExerciseSets_deletesCorrectly() = runTest {
+    fun exerciseSetDao_deleteExerciseSets_deletesCorrectly() = runTest{
 
         exerciseDao.upsertExercise(testExerciseEntity)
         exerciseSetDao.upsertExerciseSet(testExerciseSet)
         exerciseSetDao.upsertExerciseSet(testExerciseSet2)
         exerciseSetDao.upsertExerciseSet(testExerciseSet3)
 
-        exerciseSetDao.deleteExerciseSets(listOf(3L, 4L))
+        exerciseSetDao.deleteExerciseSets(listOf(3L,4L))
 
         val listOfIds = exerciseSetDao.getExerciseSetIdList(1, LocalDate.now())
 
@@ -121,18 +121,8 @@ class ExerciseSetDaoTest {
 
         exerciseDao.upsertExercise(testExerciseEntity)
 
-        workoutDao.upsertWorkoutExerciseCrossRef(
-            WorkoutExerciseCrossRef(
-                workoutId = 1,
-                exerciseId = 1
-            )
-        )
-        workoutDao.upsertWorkoutExerciseCrossRef(
-            WorkoutExerciseCrossRef(
-                workoutId = 2,
-                exerciseId = 1
-            )
-        )
+        workoutDao.upsertWorkoutExerciseCrossRef(WorkoutExerciseCrossRef(workoutId = 1, exerciseId = 1))
+        workoutDao.upsertWorkoutExerciseCrossRef(WorkoutExerciseCrossRef(workoutId = 2, exerciseId = 1))
 
         exerciseSetDao.upsertExerciseSet(testExerciseSet)
         exerciseSetDao.upsertExerciseSet(testExerciseSet2)
@@ -157,40 +147,6 @@ class ExerciseSetDaoTest {
         val exerciseSetList = exerciseSetDao.observeExerciseSets().first()
 
         assertEquals(listOf(testExerciseSet3), exerciseSetList)
-    }
-
-    @Test
-    fun exerciseSetDao_getExerciseSetHistoryFromDates_filtersDatesAccordingly() = runTest {
-
-        workoutDao.upsertWorkout(workoutEntity1)
-        exerciseDao.upsertExercise(testExerciseEntity)
-        workoutDao.upsertWorkoutExerciseCrossRef(
-            WorkoutExerciseCrossRef(
-                workoutId = 1,
-                exerciseId = 1
-            )
-        )
-
-        exerciseSetDao.upsertExerciseSet(testExerciseSet)
-        exerciseSetDao.upsertExerciseSet(testExerciseSet4)
-        exerciseSetDao.upsertExerciseSet(testExerciseSet5)
-
-
-        var historyItemList = exerciseSetDao.getExerciseSetHistoryFromDates(
-            exerciseId = 1,
-            actualDate = LocalDate.now(),
-            finalDate = LocalDate.now().minusMonths(8)
-        ).first()
-
-        assertEquals(filteredListOfHistoryItems, historyItemList)
-
-        historyItemList = exerciseSetDao.getExerciseSetHistoryFromDates(
-            exerciseId = 1,
-            actualDate = LocalDate.now(),
-            finalDate = LocalDate.now().minusMonths(3)
-        ).first()
-
-        assertEquals(filteredListOfHistoryItemsLessThan6Month, historyItemList)
     }
 
     private val testExerciseEntity = ExerciseEntity(
@@ -242,24 +198,6 @@ class ExerciseSetDaoTest {
         isCompleted = false
     )
 
-    private val testExerciseSet4 = ExerciseSetEntity(
-        id = 6,
-        exerciseId = 1,
-        reps = 12,
-        weight = 120f,
-        date = LocalDate.now().minusMonths(2),
-        isCompleted = false
-    )
-
-    private val testExerciseSet5 = ExerciseSetEntity(
-        id = 7,
-        exerciseId = 1,
-        reps = 12,
-        weight = 120f,
-        date = LocalDate.now().minusMonths(7),
-        isCompleted = false
-    )
-
     private val listOfHistoryItems = listOf<ExerciseSetHistoryItem>(
         ExerciseSetHistoryItem(
             workoutName = "Push",
@@ -282,47 +220,5 @@ class ExerciseSetDaoTest {
             exerciseSetWeight = 100f,
             exerciseSetDate = LocalDate.now().plusDays(1)
         )
-    )
-
-    private val filteredListOfHistoryItems = listOf(
-        ExerciseSetHistoryItem(
-            workoutName = "Push",
-            exerciseName = "Deadlift",
-            exerciseSetReps = 12,
-            exerciseSetWeight = 100f,
-            exerciseSetDate = LocalDate.now()
-        ),
-        ExerciseSetHistoryItem(
-            workoutName = "Push",
-            exerciseName = "Deadlift",
-            exerciseSetReps = 12,
-            exerciseSetWeight = 120f,
-            exerciseSetDate = LocalDate.now().minusMonths(2),
-        ),
-        ExerciseSetHistoryItem(
-            workoutName = "Push",
-            exerciseName = "Deadlift",
-            exerciseSetReps = 12,
-            exerciseSetWeight = 120f,
-            exerciseSetDate = LocalDate.now().minusMonths(7),
-        )
-
-    )
-    private val filteredListOfHistoryItemsLessThan6Month = listOf(
-        ExerciseSetHistoryItem(
-            workoutName = "Push",
-            exerciseName = "Deadlift",
-            exerciseSetReps = 12,
-            exerciseSetWeight = 100f,
-            exerciseSetDate = LocalDate.now()
-        ),
-        ExerciseSetHistoryItem(
-            workoutName = "Push",
-            exerciseName = "Deadlift",
-            exerciseSetReps = 12,
-            exerciseSetWeight = 120f,
-            exerciseSetDate = LocalDate.now().minusMonths(2),
-        )
-
     )
 }
