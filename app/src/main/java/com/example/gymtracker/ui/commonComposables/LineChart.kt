@@ -129,20 +129,8 @@ fun LineChart(
 
             val xAxisMaxAmplitude = size.width.minus(padding.times(2))
             val yAxisMaxAmplitude = size.height.minus(padding.times(2))
-
-            /* In order to avoid NaN error calculating the interval if the size of the data is
-            one just pass the data itself as interval */
-
-            val xAxisInterval = if (data.size == 1) {
-                data.keys.toList()
-            } else {
-                calculateAxisInterval(data.keys.max(), data.keys.min(), numIntervals)
-            }
-            val yAxisInterval = if (data.size == 1) {
-                data.values.toList()
-            } else {
-                calculateAxisInterval(data.values.max(), data.values.min(), numIntervals)
-            }
+            val xAxisInterval = calculateAxisInterval(data.keys.max(), data.keys.min(), numIntervals)
+            val yAxisInterval = calculateAxisInterval(data.values.max(), data.values.min(), numIntervals)
 
             // Create the path and move it to the origin of coordinates
             val dotsPath = Path()
@@ -483,7 +471,7 @@ fun LineChartPreview() {
     GymTrackerTheme {
 
         val data = mutableMapOf(
-            LocalDate.now().toEpochDay().toFloat() to 55f,
+            LocalDate.now().toEpochDay().toFloat() to 0f,
             LocalDate.now().plusDays(1).toEpochDay().toFloat() to 72.5f,
             LocalDate.now().plusDays(2).toEpochDay().toFloat() to 88.5f,
             LocalDate.now().plusDays(3).toEpochDay().toFloat() to 99.8f,
@@ -523,9 +511,9 @@ fun DataSizeSmallerThanIntervalSizeLineChartPreview() {
     GymTrackerTheme {
 
         val data = mutableMapOf(
-            LocalDate.now().toEpochDay().toFloat() to 0.1f,
-            LocalDate.now().plusDays(1).toEpochDay().toFloat() to 33.45f,
-            LocalDate.now().plusDays(30).toEpochDay().toFloat() to 129.78f,
+            LocalDate.now().toEpochDay().toFloat() to 60f,
+            LocalDate.now().plusDays(1).toEpochDay().toFloat() to 60f,
+            LocalDate.now().plusDays(30).toEpochDay().toFloat() to 60.2f,
 
         )
         LineChart(
@@ -546,7 +534,7 @@ fun OnlyOneValueLineChartPreview() {
     GymTrackerTheme {
 
         val data = mutableMapOf(
-            0f to 0f,
+            0f to 0f
         )
         LineChart(
             modifier = Modifier
