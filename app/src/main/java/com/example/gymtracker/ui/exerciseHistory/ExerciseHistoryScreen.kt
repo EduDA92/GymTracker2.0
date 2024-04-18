@@ -71,6 +71,7 @@ fun ExerciseHistoryRoute(
     ExerciseHistoryScreen(
         modifier = modifier,
         exerciseHistoryUiState = exerciseHistoryUiState,
+        updateFilterDateState = viewModel::updateTimeFilterState,
         onBackClick = onBackClick
     )
 }
@@ -82,6 +83,7 @@ fun ExerciseHistoryRoute(
 fun ExerciseHistoryScreen(
     modifier: Modifier = Modifier,
     exerciseHistoryUiState: ExerciseHistoryUiState,
+    updateFilterDateState: (FilterDates) -> Unit = { },
     onBackClick: () -> Unit = {}
 ) {
 
@@ -168,7 +170,8 @@ fun ExerciseHistoryScreen(
 
                         1 -> {
                             ChartsComposable(
-                                state = exerciseHistoryUiState.state
+                                state = exerciseHistoryUiState.state,
+                                updateFilterDateState = updateFilterDateState
                             )
                         }
                     }
@@ -186,7 +189,8 @@ fun ExerciseHistoryScreen(
 @Composable
 fun ChartsComposable(
     modifier: Modifier = Modifier,
-    state: HistoryState
+    state: HistoryState,
+    updateFilterDateState: (FilterDates) -> Unit = { }
 ) {
 
     val segmentedButtonOptions = FilterDates.entries
@@ -209,12 +213,31 @@ fun ChartsComposable(
                 segmentedButtonOptions.forEach {
 
                     FilterChip(
-                        selected = false,
-                        onClick = { /*TODO*/ },
+                        selected = it == state.timeFilterState,
+                        onClick = { updateFilterDateState(it) },
                         label = { Text(it.text) })
 
                 }
             }
+
+        }
+
+        // Daily one rep max chart
+        item {
+
+            LineChart(
+                data = state.oneRepMaxData,
+                chartTitle = "One Rep Max",
+                xAxisLabel = "Day",
+                yAxisLabel = "kg RM",
+                xAxisFormatter = {
+                    LocalDate.ofEpochDay(it.toLong()).format(DateTimeFormatter.ofPattern("dd/LLL"))
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+            )
+
 
         }
 
@@ -375,6 +398,7 @@ fun ChartsComposablePreview() {
 
 private val historyState = HistoryState(
     exerciseName = "Squat",
+    timeFilterState = FilterDates.OneMonth,
     setHistoryList = persistentListOf(
         SetHistoryItem(
             workoutName = "Monday Workout",
@@ -401,6 +425,11 @@ private val historyState = HistoryState(
         LocalDate.now().plusDays(4).toEpochDay().toFloat() to 30.0f
     ),
     totalRepsData = persistentMapOf(
+        LocalDate.now().toEpochDay().toFloat() to 20.0f,
+        LocalDate.now().plusDays(2).toEpochDay().toFloat() to 50.0f,
+        LocalDate.now().plusDays(4).toEpochDay().toFloat() to 60.0f
+    ),
+    oneRepMaxData = persistentMapOf(
         LocalDate.now().toEpochDay().toFloat() to 20.0f,
         LocalDate.now().plusDays(2).toEpochDay().toFloat() to 50.0f,
         LocalDate.now().plusDays(4).toEpochDay().toFloat() to 60.0f
