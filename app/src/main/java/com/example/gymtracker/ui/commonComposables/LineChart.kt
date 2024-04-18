@@ -235,7 +235,7 @@ fun LineChart(
                 xAxisValue = data.keys.elementAt(coordinatesPosition)
 
                 val selectedPointText = buildString {
-                    append(yAxisValue)
+                    append(String.format("%.2f", yAxisValue))
                     append(" ")
                     append(yAxisLabel)
                     append(" \n")
