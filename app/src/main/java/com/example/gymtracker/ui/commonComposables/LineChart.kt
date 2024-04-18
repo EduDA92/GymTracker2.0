@@ -41,7 +41,6 @@ import kotlinx.collections.immutable.ImmutableMap
 import kotlinx.collections.immutable.toPersistentMap
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import kotlin.math.roundToInt
 
 @Composable
 fun LineChart(
@@ -209,11 +208,11 @@ fun LineChart(
 
             val coordinates = data.toCoordinates(
                 xAxisMaxAmplitude = xAxisMaxAmplitude,
-                xAxisMax = xAxisInterval.max().toFloat(),
-                xAxisMin = xAxisInterval.min().toFloat(),
+                xAxisMax = xAxisInterval.max(),
+                xAxisMin = xAxisInterval.min(),
                 yAxisMaxAmplitude = yAxisMaxAmplitude,
-                yAxisMax = yAxisInterval.max().toFloat(),
-                yAxisMin = yAxisInterval.min().toFloat(),
+                yAxisMax = yAxisInterval.max(),
+                yAxisMin = yAxisInterval.min(),
                 padding = padding
             )
 
