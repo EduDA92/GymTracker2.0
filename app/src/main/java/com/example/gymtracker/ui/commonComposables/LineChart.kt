@@ -135,12 +135,12 @@ fun LineChart(
             one just pass the data itself as interval */
 
             val xAxisInterval = if (data.size == 1) {
-                data.keys.map { it.roundToInt() }
+                data.keys.toList()
             } else {
                 calculateAxisInterval(data.keys.max(), data.keys.min(), numIntervals)
             }
             val yAxisInterval = if (data.size == 1) {
-                data.values.map { it.roundToInt() }
+                data.values.toList()
             } else {
                 calculateAxisInterval(data.values.max(), data.values.min(), numIntervals)
             }
@@ -353,7 +353,7 @@ fun DrawScope.drawAxis(padding: Float) {
 
 fun DrawScope.drawXAxisGrid(
     xAxisMaxAmplitude: Float,
-    xAxisIntervals: List<Int>,
+    xAxisIntervals: List<Float>,
     padding: Float,
     textMeasurer: TextMeasurer,
     textStyle: TextStyle,
@@ -363,7 +363,7 @@ fun DrawScope.drawXAxisGrid(
 
     xAxisIntervals.forEach { value ->
 
-        val formattedValue = xAxisFormatter(value)
+        val formattedValue = xAxisFormatter(value.toInt())
         val textSize = textMeasurer.measure(formattedValue, textStyle)
 
         drawText(
@@ -373,9 +373,9 @@ fun DrawScope.drawXAxisGrid(
             topLeft = Offset(
                 x = xAxisMaxAmplitude.times(
                     normalizeValue(
-                        value.toFloat(),
-                        xAxisIntervals.max().toFloat(),
-                        xAxisIntervals.min().toFloat()
+                        value,
+                        xAxisIntervals.max(),
+                        xAxisIntervals.min()
                     )
                 ).plus(padding).minus(textSize.size.width.times(0.5f)),
                 y = size.height.minus(padding).plus(textSize.size.height.times(0.3f))
@@ -387,9 +387,9 @@ fun DrawScope.drawXAxisGrid(
             start = Offset(
                 x = xAxisMaxAmplitude.times(
                     normalizeValue(
-                        value.toFloat(),
-                        xAxisIntervals.max().toFloat(),
-                        xAxisIntervals.min().toFloat()
+                        value,
+                        xAxisIntervals.max(),
+                        xAxisIntervals.min()
                     )
                 ).plus(padding),
                 y = size.height.minus(padding)
@@ -397,9 +397,9 @@ fun DrawScope.drawXAxisGrid(
             end = Offset(
                 x = xAxisMaxAmplitude.times(
                     normalizeValue(
-                        value.toFloat(),
-                        xAxisIntervals.max().toFloat(),
-                        xAxisIntervals.min().toFloat()
+                        value,
+                        xAxisIntervals.max(),
+                        xAxisIntervals.min()
                     )
                 ).plus(padding),
                 y = padding
@@ -414,7 +414,7 @@ fun DrawScope.drawXAxisGrid(
 
 fun DrawScope.drawYAxisGrid(
     yAxisMaxAmplitude: Float,
-    yAxisIntervals: List<Int>,
+    yAxisIntervals: List<Float>,
     padding: Float,
     textMeasurer: TextMeasurer,
     textStyle: TextStyle,
@@ -423,8 +423,8 @@ fun DrawScope.drawYAxisGrid(
 
     yAxisIntervals.forEach { value ->
 
-        val formattedValue = yAxisFormatter(value)
-        val textSize = textMeasurer.measure(value.toString(), textStyle)
+        val formattedValue = yAxisFormatter(value.toInt())
+        val textSize = textMeasurer.measure(formattedValue, textStyle)
 
         drawText(
             textMeasurer = textMeasurer,
@@ -435,9 +435,9 @@ fun DrawScope.drawYAxisGrid(
                 y = yAxisMaxAmplitude.minus(
                     yAxisMaxAmplitude.times(
                         normalizeValue(
-                            value.toFloat(),
-                            yAxisIntervals.max().toFloat(),
-                            yAxisIntervals.min().toFloat()
+                            value,
+                            yAxisIntervals.max(),
+                            yAxisIntervals.min()
                         )
                     )
                 ).plus(padding).minus(textSize.size.height.times(0.5f))
@@ -450,9 +450,9 @@ fun DrawScope.drawYAxisGrid(
                 y = yAxisMaxAmplitude.minus(
                     yAxisMaxAmplitude.times(
                         normalizeValue(
-                            value.toFloat(),
-                            yAxisIntervals.max().toFloat(),
-                            yAxisIntervals.min().toFloat()
+                            value,
+                            yAxisIntervals.max(),
+                            yAxisIntervals.min()
                         )
                     )
                 ).plus(padding)
@@ -462,9 +462,9 @@ fun DrawScope.drawYAxisGrid(
                 y = yAxisMaxAmplitude.minus(
                     yAxisMaxAmplitude.times(
                         normalizeValue(
-                            value.toFloat(),
-                            yAxisIntervals.max().toFloat(),
-                            yAxisIntervals.min().toFloat()
+                            value,
+                            yAxisIntervals.max(),
+                            yAxisIntervals.min()
                         )
                     )
                 ).plus(padding)
@@ -524,9 +524,10 @@ fun DataSizeSmallerThanIntervalSizeLineChartPreview() {
     GymTrackerTheme {
 
         val data = mutableMapOf(
-            LocalDate.now().toEpochDay().toFloat() to 60f,
-            LocalDate.now().plusDays(1).toEpochDay().toFloat() to 88.3f,
-            LocalDate.now().plusDays(2).toEpochDay().toFloat() to 88.5f,
+            LocalDate.now().toEpochDay().toFloat() to 0.1f,
+            LocalDate.now().plusDays(1).toEpochDay().toFloat() to 33.45f,
+            LocalDate.now().plusDays(30).toEpochDay().toFloat() to 129.78f,
+
         )
         LineChart(
             modifier = Modifier
