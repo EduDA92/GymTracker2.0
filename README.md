@@ -1,9 +1,27 @@
-# GymTracker2.0 WIP
+# GymTracker
 App to keep track of your gym progress
 
-Main technologies used:
+## Tech stack & used libraries
 
-- UI made with JetPack Compose
-- Local Storage with Room
-- Dependency Injection with Hilt
-- Flows & Coroutines
+- Kotlin based, utilizing Flows & Coroutines for asynchronous operations.
+- Jetpack Libraries:
+  - Jetpack Compose
+  - Viewmodel
+  - Room
+  - Preferences Datastore
+  - Hilt
+  - Navigation
+  - Lifecycle
+- Architecture:
+  - MVVM
+  - Repository Pattern
+
+## Screenshots
+
+| Main Screen  | Workout Diary | Rest Timer |
+| ------------- | ------------- | ------------- |
+| ![](./screenshots/mainScreen.png)  | ![](./screenshots/workoutDiary.png)  | ![](./screenshots/restTimer.png)  |
+
+| Plate Calculator  | History Screen | History Charts |
+| ------------- | ------------- | ------------- |
+| ![](./screenshots/plateCalculator.png)  | ![](./screenshots/historyScreen.png)  | ![](./screenshots/chartsScreen.png)  |
